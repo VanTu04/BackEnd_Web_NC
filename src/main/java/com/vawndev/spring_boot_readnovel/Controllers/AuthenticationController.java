@@ -3,6 +3,7 @@ package com.vawndev.spring_boot_readnovel.Controllers;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.AuthenticationResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
 import com.vawndev.spring_boot_readnovel.Services.AuthenticationService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -44,14 +45,14 @@ public class AuthenticationController {
     }
 
     @GetMapping("/account")
-    public ResponseEntity<ApiResponse<AuthenticationResponse>> getAccount() {
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        return null;
+    public ApiResponse<UserResponse> getAccountLogin() {
+        var result = authenticationService.getAccount();
+        return ApiResponse.<UserResponse>builder().result(result).build();
     }
 
 
     @PostMapping("/refresh")
-    ApiResponse<AuthenticationResponse> refreshToken(@CookieValue(name = "refresh_token") String refreshToken) {
+    public ApiResponse<AuthenticationResponse> refreshToken(@CookieValue(name = "refresh_token") String refreshToken) {
 return null;
 //        var result = authenticationService.refreshToken(request);
 //        return ApiResponse.<AuthenticationResponse>builder().result(result).build();

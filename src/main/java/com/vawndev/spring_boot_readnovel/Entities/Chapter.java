@@ -19,6 +19,7 @@ public class Chapter extends BaseEntity {
     @ManyToOne
     private Story story;
 
+    @Column(columnDefinition = "TEXT")
     private String content;
 
     private BigDecimal price;

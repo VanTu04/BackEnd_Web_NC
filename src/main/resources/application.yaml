@@ -2,7 +2,7 @@ spring:
   application:
     name: spring-boot-readnovel
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/ReadNovel}
+    url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/Read}
     username: ${DBMS_USERNAME:postgres}
     password: ${DBMS_PASSWORD:123456}
   jpa:
@@ -10,7 +10,11 @@ spring:
     hibernate:
       ddl-auto: update
     properties:
-      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        jdbc:
+          lob:
+            non_contextual_creation: true
 
   security:
     oauth2:
@@ -30,3 +34,4 @@ jwt:
   signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
   valid-duration: 3600 # in second
   refreshable-duration: 36000 # in seconds
+

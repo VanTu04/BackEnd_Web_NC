@@ -32,8 +32,7 @@ public class User extends BaseEntity{
     @Column(name = "is_request")
     private boolean isRequest;
 
-    @Column(name = "refresh_token")
-    @Lob
+    @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
     @ManyToMany

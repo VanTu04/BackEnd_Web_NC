@@ -2,13 +2,16 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Dto.Requests.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.AuthenticationResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
@@ -36,6 +39,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserRepository userRepository;
     private final JwtEncoder jwtEncoder;
+    private final UserMapper userMapper;
 
     @Value("${jwt.valid-duration}")
     private long VALID_DURATION;
@@ -76,6 +80,14 @@ public class AuthenticationServiceImpl implements AuthenticationService {
                 .accessToken(token)
                 .refreshToken(refreshToken)
                 .build();
+    }
+
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public UserResponse getAccount() {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userMapper.toUserResponse(user);
     }
 
     private String generateRefreshToken(User user) {
