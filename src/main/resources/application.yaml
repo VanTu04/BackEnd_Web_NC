@@ -1,0 +1,32 @@
+spring:
+  application:
+    name: spring-boot-readnovel
+  datasource:
+    url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/ReadNovel}
+    username: ${DBMS_USERNAME:postgres}
+    password: ${DBMS_PASSWORD:123456}
+  jpa:
+    show-sql: true
+    hibernate:
+      ddl-auto: update
+    properties:
+      hibernate.dialect: org.hibernate.dialect.PostgreSQLDialect
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: bgf
+            client-secret: vfz
+          facebook:
+            client-id: 1120903846076823
+            client-secret: 6b2f8e3ed19f8eb3c385684bbc7e21ab
+server:
+  port: 8081
+  servlet:
+    context-path: /api
+jwt:
+  signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
+  valid-duration: 3600 # in second
+  refreshable-duration: 36000 # in seconds
