@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -20,20 +19,13 @@ import org.springframework.web.bind.annotation.*;
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
-
     @Value("${jwt.refreshable-duration}")
-    private long refreshableDuration;
+    private long REFRESHABLE_DURATION;
 
     @PostMapping("/token")
     public ResponseEntity<ApiResponse<AuthenticationResponse>> authenticate(@Valid @RequestBody AuthenticationRequest request) {
         var result = authenticationService.authenticate(request);
-        ResponseCookie responseCookie = ResponseCookie
-                .from("refresh_token", result.getRefreshToken())
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(refreshableDuration)
-                .path("/")
-                .build();
+        ResponseCookie responseCookie = authenticationService.createRefreshTokenCookie(result.getRefreshToken(), REFRESHABLE_DURATION);
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(ApiResponse.<AuthenticationResponse>builder().result(
@@ -52,15 +44,24 @@ public class AuthenticationController {
 
 
     @PostMapping("/refresh")
-    public ApiResponse<AuthenticationResponse> refreshToken(@CookieValue(name = "refresh_token") String refreshToken) {
-return null;
-//        var result = authenticationService.refreshToken(request);
-//        return ApiResponse.<AuthenticationResponse>builder().result(result).build();
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> refreshToken(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+        var result = authenticationService.generateTokenByRefreshToken(refreshToken);
+        ResponseCookie responseCookie = authenticationService.createRefreshTokenCookie(result.getRefreshToken(), REFRESHABLE_DURATION);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(ApiResponse.<AuthenticationResponse>builder().result(
+                                AuthenticationResponse.builder()
+                                        .accessToken(result.getAccessToken())
+                                        .build())
+                        .build()
+                );
     }
-//
-//    @PostMapping("/logout")
-//    ApiResponse<Void> logout(@RequestBody LogoutRequest request) throws ParseException, JOSEException {
-//        authenticationService.logout(request);
-//        return ApiResponse.<Void>builder().build();
-//    }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(@CookieValue(name = "refresh_token", required = false) String refreshToken) {
+        ResponseCookie deleteCookie = authenticationService.logout(refreshToken);
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
+                .body(ApiResponse.<String>builder().result("Success Logout").build());
+    }
 }

@@ -2,6 +2,8 @@ package com.vawndev.spring_boot_readnovel.Configurations;
 
 import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
+import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
+import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.Impl.AuthenticationServiceImpl;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -79,7 +81,7 @@ public class SecurityConfig {
           try {
               return jwtDecoder.decode(token);
           } catch (Exception e){
-              throw new RuntimeException(e);
+              throw new AppException(ErrorCode.INVALID_TOKEN);
           }
         };
     }

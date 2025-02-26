@@ -1,8 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.nimbusds.jose.util.Base64;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.AuthenticationResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
+import com.vawndev.spring_boot_readnovel.Entities.Role;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
@@ -11,25 +13,22 @@ import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.AuthenticationService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.JwsHeader;
-import org.springframework.security.oauth2.jwt.JwtClaimsSet;
-import org.springframework.security.oauth2.jwt.JwtEncoder;
-import org.springframework.security.oauth2.jwt.JwtEncoderParameters;
+import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
 
+import javax.crypto.SecretKey;
+import javax.crypto.spec.SecretKeySpec;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
-import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
@@ -39,6 +38,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final UserRepository userRepository;
     private final JwtEncoder jwtEncoder;
+    private final JwtDecoder jwtDecoder;
     private final UserMapper userMapper;
 
     @Value("${jwt.valid-duration}")
@@ -46,6 +46,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
     @Value("${jwt.refreshable-duration}")
     private long REFRESHABLE_DURATION;
+
+    @Value("${jwt.signer-key}")
+    private String SIGNER_KEY;
 
     @Override
     public AuthenticationResponse authenticate(AuthenticationRequest request) {
@@ -61,20 +64,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
-        // nạp username và password vào security
+        // nạp username và password vào security để tạo một authentication object
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(request.getEmail(), request.getPassword());
 
         // xác thực người dùng
         Authentication authentication = authenticationManagerBuilder.getObject().authenticate(authenticationToken);
 
-        var token =generateToken(authentication);
+        // đưa thông tin xác thực người dùng đã đăng nhập vào Spring Security Context
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        var token = generateToken(user);
         var refreshToken = generateRefreshToken(user);
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
 
-        // nạp user vào security context holder để sau gọi data của ng dùng đăng nhập
-        SecurityContextHolder.getContext().setAuthentication(authentication);
+
 
         return AuthenticationResponse.builder()
                 .accessToken(token)
@@ -83,11 +88,75 @@ public class AuthenticationServiceImpl implements AuthenticationService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getAccount() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public ResponseCookie createRefreshTokenCookie(String refreshToken, long seconds) {
+        return ResponseCookie
+                .from("refresh_token", refreshToken)
+                .httpOnly(true)
+                .secure(true)
+                .maxAge(seconds)
+                .path("/")
+                .build();
+    }
+
+    private SecretKey getSecretAccessKey() {
+        byte[] keyBytes = Base64.from(SIGNER_KEY).decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, MacAlgorithm.HS512.getName());
+    }
+
+    private User validToken(String token) {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder
+                .withSecretKey(getSecretAccessKey())
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
+        try {
+            Jwt decode = jwtDecoder.decode(token);
+            String email = decode.getSubject();
+            return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.INVALID_TOKEN));
+        } catch (Exception e){
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+    }
+    @Override
+    public AuthenticationResponse generateTokenByRefreshToken(String refreshToken) {
+        if(refreshToken == null || refreshToken.isEmpty()) {
+            throw new AppException(ErrorCode.MISS_TOKEN);
+        }
+        User user = validToken(refreshToken);
+        if(!user.getRefreshToken().equals(refreshToken)) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+        String refreshNewToken = generateRefreshToken(user);
+        user.setRefreshToken(refreshNewToken);
+        userRepository.save(user);
+
+        return AuthenticationResponse.builder()
+                .accessToken(generateToken(user))
+                .refreshToken(refreshNewToken)
+                .build();
+    }
+
+    @Override
+    public ResponseCookie logout(String refreshToken) {
+        if(refreshToken == null || refreshToken.isEmpty()) {
+            throw new AppException(ErrorCode.MISS_TOKEN);
+        }
+        User user = validToken(refreshToken);
+        if(!user.getRefreshToken().equals(refreshToken)) {
+            throw new AppException(ErrorCode.INVALID_TOKEN);
+        }
+        user.setRefreshToken(null);
+        userRepository.save(user);
+
+        SecurityContextHolder.clearContext();
+        return createRefreshTokenCookie("", 0);
     }
 
     private String generateRefreshToken(User user) {
@@ -106,20 +175,22 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, jwtClaimsSet)).getTokenValue();
     }
 
-    private String generateToken(Authentication authentication) {
+    private String generateToken(User user) {
         // header jwt
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS512).build();
 
-        List<String> authorities = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority).toList();
+        String authorities = user.getRoles().stream()
+                .map(Role::getName)
+                .collect(Collectors.joining(" "));
 
         // payload jwt
         JwtClaimsSet jwtClaimsSet = JwtClaimsSet.builder()
-                .subject(authentication.getName())
+                .subject(user.getEmail())
                 .issuer("vawndev.com")
                 .expiresAt(new Date(
                         Instant.now().plus(VALID_DURATION, ChronoUnit.SECONDS).toEpochMilli()
                 ).toInstant())
-                .claim("scope", authorities.stream().collect(Collectors.joining(" ")))
+                .claim("scope", authorities)
                 .build();
 
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, jwtClaimsSet)).getTokenValue();
