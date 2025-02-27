@@ -48,4 +48,7 @@ public class Story extends BaseEntity{
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private List<Category> categories;
+
+    @Column(name = "cover_image")
+    private String coverImage;
 }
