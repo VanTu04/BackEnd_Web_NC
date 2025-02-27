@@ -55,12 +55,15 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         // kiem tra user co trong db khong
-        var user = userRepository
-                .findByEmail(request.getEmail())
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         // kiem tra mat khau
         boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
         if(!valid) {
+            throw new AppException(ErrorCode.UNAUTHENTICATED);
+        }
+
+        // kiem tra tinh trang tai khoan
+        if(user.isActive() == false) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
@@ -78,8 +81,6 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         user.setRefreshToken(refreshToken);
         userRepository.save(user);
-
-
 
         return AuthenticationResponse.builder()
                 .accessToken(token)
