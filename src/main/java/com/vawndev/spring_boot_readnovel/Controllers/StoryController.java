@@ -1,13 +1,15 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Page.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
+import jakarta.validation.constraints.Future;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,8 +20,9 @@ public class StoryController {
     private final StoryService storyService;
 
     @GetMapping("/")
-    public ApiResponse<PageResponse<StoriesResponse>> getStory(@RequestParam int page, @RequestParam int limit ) {
-        PageResponse<StoriesResponse> result=storyService.getStories(page,limit );
+    public ApiResponse<PageResponse<StoriesResponse>> getStory(
+            @RequestParam PageRequest req) {
+        PageResponse<StoriesResponse> result=storyService.getStories(req);
         return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
     }
     @GetMapping("/detail")
@@ -34,7 +37,7 @@ public class StoryController {
     }
     @PutMapping("/update")
     public ApiResponse<String> updateStory(@RequestBody StoryRequests req) {
-        storyService.updateStoryByVendor(req);
+        storyService.updateStoryByAuthor(req);
         return ApiResponse.<String>builder().result("Success!").build();
     }
     @PutMapping("/remove")

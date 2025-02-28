@@ -1,8 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Mappers;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserCreationRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserUpdateRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import org.mapstruct.Mapper;
 import org.mapstruct.Mapping;
@@ -15,5 +15,8 @@ public interface UserMapper {
     UserResponse toUserResponse(User user);
 
     @Mapping(target = "roles", ignore = true)
+
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
+
+
 }

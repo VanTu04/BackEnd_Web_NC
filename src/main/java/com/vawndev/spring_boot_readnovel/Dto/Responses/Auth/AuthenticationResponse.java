@@ -1,4 +1,4 @@
-package com.vawndev.spring_boot_readnovel.Dto.Responses;
+package com.vawndev.spring_boot_readnovel.Dto.Responses.Auth;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;

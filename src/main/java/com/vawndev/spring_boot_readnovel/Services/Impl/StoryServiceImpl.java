@@ -1,10 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Page.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryResponse;
@@ -15,7 +15,7 @@ import com.vawndev.spring_boot_readnovel.Enum.ROLE;
 import com.vawndev.spring_boot_readnovel.Enum.StoryState;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Repositories.ChapterReponsitory;
+import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
@@ -26,6 +26,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.beans.FeatureDescriptor;
@@ -40,7 +41,7 @@ public class StoryServiceImpl implements StoryService {
 
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
-    private final ChapterReponsitory chapterReponsitory;
+    private final ChapterRepository chapterRepository;
 
     private String[] getNullPropertyNames(Object source) {
         final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
@@ -56,9 +57,9 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-    public PageResponse<StoriesResponse> getStories(int page, int limit) {
+    public PageResponse<StoriesResponse> getStories(PageRequest req) {
         try {
-            Pageable pageable = PaginationUtil.createPageable(page, limit);
+            Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
 
             Page<Story> storyPage = storyRepository.findAllByStateAndIsApprovedAndIsAvailableAndDeleteAtIsNull(
                     StoryState.PUBLISHED,
@@ -78,19 +79,31 @@ public class StoryServiceImpl implements StoryService {
 
             return PageResponse.<StoriesResponse>builder()
                     .data(stories)
-                    .page(page)
-                    .limit(limit)
-                    .total((int) storyPage.getTotalElements())  // Đổi getTotalPages() -> getTotalElements()
+                    .page(req.getPage())
+                    .limit(req.getLimit())
+                    .total(storyPage.getTotalPages())
                     .build();
         } catch (Exception e) {
             throw new AppException(ErrorCode.SERVER_ERROR);
         }
     }
 
+    @Override
+    @PreAuthorize("hasRole('ADMIN')")
+    public PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req) {
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<Story> storyPage = storyRepository.findAll(pageable);
+        List<StoriesResponse> stories =
+        return
+
+    }
+
 
     @Override
     public void addStory(StoryRequests req) {
         User author = author(req.getEmailAuthor());
+
+
         try{
             Story story = Story
                     .builder()
@@ -114,7 +127,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public void updateStoryByVendor(StoryRequests req) {
+    public void updateStoryByAuthor(StoryRequests req) {
         User author = author(req.getEmailAuthor());
         if(author.getRoles().contains(ROLE.AUTHOR)){
             Story story=storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
@@ -165,7 +178,7 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public StoryDetailResponses getStoryById(String id) {
         Story story=storyRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
-        List<Chapter> chapters =chapterReponsitory.findAllByStoryId(story.getId());
+        List<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId());
 
         try{
             StoryResponse storyRes= StoryResponse

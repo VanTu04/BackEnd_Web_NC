@@ -1,8 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserCreationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
