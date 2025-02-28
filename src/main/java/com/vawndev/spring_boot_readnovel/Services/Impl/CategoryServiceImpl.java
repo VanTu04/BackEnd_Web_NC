@@ -1,6 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Mappers.CategoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.CategoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.CategoryService;
@@ -18,9 +19,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     public List<CategoriesResponse> getCategories() {
-        return categoryRepository.findAll().stream().map(
-                categoryMapper::toCategoriesResponse
-        ).toList();
+        List<Category> category = categoryRepository.findAll();
+        return categoryMapper.toCategoriesResponse(category);
     }
 
 }

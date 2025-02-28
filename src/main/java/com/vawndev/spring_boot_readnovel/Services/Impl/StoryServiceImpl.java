@@ -15,6 +15,7 @@ import com.vawndev.spring_boot_readnovel.Enum.ROLE;
 import com.vawndev.spring_boot_readnovel.Enum.StoryState;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
@@ -33,6 +34,7 @@ import java.beans.FeatureDescriptor;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -42,6 +44,7 @@ public class StoryServiceImpl implements StoryService {
     private final StoryRepository storyRepository;
     private final UserRepository userRepository;
     private final ChapterRepository chapterRepository;
+    private final StoryMapper storyMapper;
 
     private String[] getNullPropertyNames(Object source) {
         final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
@@ -93,16 +96,19 @@ public class StoryServiceImpl implements StoryService {
     public PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req) {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Story> storyPage = storyRepository.findAll(pageable);
-        List<StoriesResponse> stories =
-        return
-
+        List<StoriesResponse> stories = storyPage.getContent().stream().map(storyMapper::toStoriesResponse).toList();
+        return PageResponse.<StoriesResponse>builder()
+                .data(stories)
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .total(storyPage.getTotalPages())
+                .build();
     }
 
 
     @Override
     public void addStory(StoryRequests req) {
         User author = author(req.getEmailAuthor());
-
 
         try{
             Story story = Story
@@ -127,9 +133,9 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
+    @PreAuthorize("hasRole('AUTHOR')")
     public void updateStoryByAuthor(StoryRequests req) {
         User author = author(req.getEmailAuthor());
-        if(author.getRoles().contains(ROLE.AUTHOR)){
             Story story=storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
             try{
                 BeanUtils.copyProperties(req, story,getNullPropertyNames(req));
@@ -137,14 +143,13 @@ public class StoryServiceImpl implements StoryService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
 
 
     }
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public void ModeratedByAdmin(ModeratedByAdmin req) {
         User user = author(req.getEmail());
-        if (user.getRoles().contains(ROLE.ADMIN)){
             Story story=storyRepository.findById(req.getStory_id()).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
             try {
                 if (req.getIsAvailable()!=null){
@@ -154,13 +159,11 @@ public class StoryServiceImpl implements StoryService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
     }
 
     @Override
+    @PreAuthorize("hasRole('AUTHOR')")
     public void deleteSoftStory(String email , String id) {
-        User user = author(email);
-        if (user.getRoles().contains(ROLE.AUTHOR)){
             Story story=storyRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
             try {
                     story.setDeleteAt(LocalDateTime.now());
@@ -168,11 +171,14 @@ public class StoryServiceImpl implements StoryService {
             } catch (Exception e) {
                 throw new RuntimeException(e);
             }
-        }
+
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteStory(ModeratedByAdmin req) {
+        Story story =storyRepository.findById(req.getStory_id()).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
+        storyRepository.delete(story);
     }
 
     @Override
