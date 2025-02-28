@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Util;
 
+import com.vawndev.spring_boot_readnovel.Enum.RESOURCE_TYPE;
 import lombok.experimental.UtilityClass;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.FilenameUtils;
@@ -14,13 +15,6 @@ import java.util.regex.Pattern;
 public class FileUpload {
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 
-    private static final String FILE_NAME_FORMAT = "%s_%s";  // Updated to match usage
-
-    public static boolean isAllowedExtension(final String fileName, final String pattern) {
-        final Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(fileName);
-        return matcher.matches();
-    }
-
     public static void assertAllowed(MultipartFile file, String pattern) {
         final long size = file.getSize();
         if (size > MAX_FILE_SIZE) {
@@ -32,16 +26,27 @@ public class FileUpload {
             throw new RuntimeException("File name is null");
         }
 
-        // Optionally, you can check the file extension if needed.
         final String extension = FilenameUtils.getExtension(fileName);
-        if (!isAllowedExtension(fileName, pattern)) {
+        if (!isAllowedExtension(extension, pattern)) {
             throw new RuntimeException("Only jpg, jpeg, png, gif, bmp files are allowed");
         }
     }
 
-    public static String getFileName(final String name) {
-        final DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss");
-        final String date = LocalDateTime.now().format(formatter);
-        return String.format(FILE_NAME_FORMAT, name, date);
+    private static boolean isAllowedExtension(final String extension, final String pattern) {
+        final Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(extension);
+        return matcher.matches();
     }
+
+
+    public static String getType(final RESOURCE_TYPE type) {
+        if (!isValidType(type)) {
+            throw new IllegalArgumentException("Invalid type. Only 'image' are allowed.");
+        }
+        return type.name().toLowerCase();
+    }
+
+    private static boolean isValidType(RESOURCE_TYPE type) {
+        return type == RESOURCE_TYPE.IMAGE ;
+    }
+
 }
