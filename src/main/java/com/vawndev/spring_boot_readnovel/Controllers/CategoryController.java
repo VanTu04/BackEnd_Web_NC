@@ -26,8 +26,13 @@ public class CategoryController {
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 
-    @PostMapping("/add")
+    @PostMapping("/remove")
     public ApiResponse<String> removeCategory(@RequestBody String id){
+        categoryService.RemoveCategory(id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+    @PostMapping("/delete")
+    public ApiResponse<String> deleteCategory(@RequestBody String id){
         categoryService.DeleteCategory(id);
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
