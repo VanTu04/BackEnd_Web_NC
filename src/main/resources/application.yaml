@@ -21,8 +21,8 @@ spring:
       client:
         registration:
           google:
-            client-id: bgf
-            client-secret: vfz
+            client-id: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
+            client-secret: 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
           facebook:
             client-id: 1120903846076823
             client-secret: 6b2f8e3ed19f8eb3c385684bbc7e21ab
