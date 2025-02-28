@@ -12,7 +12,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.StoryRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.StoryResponse;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 
 @RestController
@@ -22,12 +23,12 @@ public class StoryController {
     private StoryService storyService;
 
     @PostMapping
-    public Story addStory(@RequestBody Story story) {
+    public StoryResponse addStory(@RequestBody StoryRequest story) {
         return storyService.addStory(story);
     }
 
     @PutMapping("/{id}")
-    public Story updateStory(@PathVariable String id, @RequestBody Story storyDetails) {
+    public StoryResponse updateStory(@PathVariable String id, @RequestBody StoryRequest storyDetails) {
         return storyService.updateStory(id, storyDetails);
     }
 
@@ -37,7 +38,7 @@ public class StoryController {
     }
 
     @GetMapping
-    public List<Story> getAllStories() {
+    public List<StoryResponse> getAllStories() {
         return storyService.getAllStories();
     }
 }
