@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Category.CategoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Mappers.CategoryMapper;
@@ -18,9 +19,20 @@ public class CategoryServiceImpl implements CategoryService {
     private final CategoryMapper categoryMapper;
 
     @Override
-    public List<CategoriesResponse> getCategories() {
+    public CategoriesResponse getCategories() {
         List<Category> category = categoryRepository.findAll();
-        return categoryMapper.toCategoriesResponse(category);
+        CategoriesResponse categoriesResponse = CategoriesResponse.builder().categories(category).build();
+        return categoriesResponse;
+    }
+
+    @Override
+    public void addCategory(String name) {
+        Category exstingCategory = categoryRepository.findByName(name).get();
+        if (exstingCategory != null) {
+            throw new RuntimeException("Category already exists");
+        }
+        Category category=Category.builder().name(name).build();
+        categoryRepository.save(category);
     }
 
 }
