@@ -21,8 +21,14 @@ public class CategoryController {
     }
 
     @PostMapping("/add")
-    public ApiResponse<CategoriesResponse> addCategory(@RequestBody String name){
-        categoryService.addCategory(name);
-        return ApiResponse.<CategoriesResponse>builder().message("Successfully!").build();
+    public ApiResponse<String> addCategory(@RequestBody String id){
+        categoryService.RemoveCategory(id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+
+    @PostMapping("/add")
+    public ApiResponse<String> removeCategory(@RequestBody String id){
+        categoryService.DeleteCategory(id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
     }
 }

@@ -9,6 +9,7 @@ import com.vawndev.spring_boot_readnovel.Services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Service
@@ -33,6 +34,25 @@ public class CategoryServiceImpl implements CategoryService {
         }
         Category category=Category.builder().name(name).build();
         categoryRepository.save(category);
+    }
+
+    @Override
+    public void RemoveCategory(String id) {
+        Category exstingCategory = categoryRepository.findById(id).get();
+        if (exstingCategory == null) {
+            throw new RuntimeException("Category is not exists");
+        }
+        exstingCategory.setDeleteAt(LocalDateTime.now());
+        categoryRepository.save(exstingCategory);
+    }
+
+    @Override
+    public void DeleteCategory(String id) {
+        Category exstingCategory = categoryRepository.findById(id).get();
+        if (exstingCategory == null) {
+            throw new RuntimeException("Category is not exists");
+        }
+        categoryRepository.delete(exstingCategory);
     }
 
 }
