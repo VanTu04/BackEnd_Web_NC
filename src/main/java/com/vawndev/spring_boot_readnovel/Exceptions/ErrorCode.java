@@ -19,6 +19,9 @@ public enum ErrorCode {
     BLANK_PASSWORD(1010, "Please enter a valid password", HttpStatus.BAD_REQUEST),
     MISS_TOKEN(1011, "Missing token", HttpStatus.UNAUTHORIZED),
     INVALID_TOKEN(1012, "Invalid token", HttpStatus.UNAUTHORIZED),
+    INVALID_STORY(1013, "Invalid story", HttpStatus.NOT_FOUND),
+    SERVER_ERROR(1014, "server error", HttpStatus.INTERNAL_SERVER_ERROR),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

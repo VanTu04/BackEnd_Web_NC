@@ -13,6 +13,6 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-class Category extends BaseEntity {
+public class Category extends BaseEntity {
     private String name;
 }
