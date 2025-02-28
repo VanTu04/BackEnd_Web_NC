@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.oauth2.core.OAuth2AccessToken;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -63,5 +64,11 @@ public class AuthenticationController {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, deleteCookie.toString())
                 .body(ApiResponse.<String>builder().result("Success Logout").build());
+    }
+
+    @GetMapping("/google/success")
+    public ResponseEntity<ApiResponse<AuthenticationResponse>> googleLogin(OAuth2AccessToken token) {
+
+        return null;
     }
 }

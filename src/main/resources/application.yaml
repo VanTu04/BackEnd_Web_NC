@@ -26,6 +26,9 @@ spring:
           facebook:
             client-id: 1120903846076823
             client-secret: 6b2f8e3ed19f8eb3c385684bbc7e21ab
+            scope:
+              - profile
+              - email
 server:
   port: 8081
   servlet:

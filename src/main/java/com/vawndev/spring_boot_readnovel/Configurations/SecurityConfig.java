@@ -59,6 +59,7 @@ public class SecurityConfig {
                             .anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2Login(oAuth2Login -> oAuth2Login.defaultSuccessUrl(""))
                 .exceptionHandling(
                         exception -> exception
                                         .authenticationEntryPoint(new CustomAuthenticationEntrypoint()) //401
@@ -66,8 +67,8 @@ public class SecurityConfig {
                 );
         httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .formLogin(AbstractHttpConfigurer::disable);
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+                .formLogin(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
 

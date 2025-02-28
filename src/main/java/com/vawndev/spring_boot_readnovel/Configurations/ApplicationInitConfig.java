@@ -20,8 +20,8 @@ import java.util.HashSet;
 public class ApplicationInitConfig {
 
     private final PasswordEncoder passwordEncoder;
-    private static String ADMIN_EMAIL = "admin123@gmail.com";
-    private static String ADMIN_PASSWORD = "123456";
+    private static final String ADMIN_EMAIL = "admin123@gmail.com";
+    private static final String ADMIN_PASSWORD = "123456";
 
     @Bean
     public ApplicationRunner applicationRunner(UserRepository userRepository, RoleRepository roleRepository) {
