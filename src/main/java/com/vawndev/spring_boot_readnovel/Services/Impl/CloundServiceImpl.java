@@ -41,7 +41,18 @@ public class CloundServiceImpl implements CloundService {
         return fileUrls;
     }
 
+    @Override
+    public String getUrlCover(MultipartFile file) throws IOException {
+        FileUpload.assertAllowed(file, ".*\\.(jpg|jpeg|png)$");
+        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
+                ObjectUtils.asMap(
+                        "resource_type","image",
+                        "folder", "image"
+                ));
 
+        String fileUrl = uploadResult.get("url").toString();
+        return fileUrl;
+    }
 
 
 }

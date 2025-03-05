@@ -35,6 +35,7 @@ public class StoryController {
          storyService.addStory(req);
          return ApiResponse.<String>builder().result("Success!").build();
     }
+
     @PutMapping("/update")
     public ApiResponse<String> updateStory(@RequestBody StoryRequests req) {
         storyService.updateStoryByAuthor(req);

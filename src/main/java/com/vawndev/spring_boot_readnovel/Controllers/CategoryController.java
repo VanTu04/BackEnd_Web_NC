@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Category.CategoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
 import com.vawndev.spring_boot_readnovel.Services.CategoryService;
@@ -22,7 +23,13 @@ public class CategoryController {
 
     @PostMapping("/add")
     public ApiResponse<String> addCategory(@RequestBody String id){
-        categoryService.RemoveCategory(id);
+        categoryService.addCategory(id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+
+    @PutMapping("/update")
+    public ApiResponse<String> updateCategory(@RequestBody CategoryRequests req){
+        categoryService.UpdateCategory(req);
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 

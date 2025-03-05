@@ -8,4 +8,6 @@ import java.util.List;
 
 public interface CloundService {
     List<String> getUrlAfterUpload(FileRequest file) throws IOException;
+    String getUrlCover(MultipartFile file) throws IOException;
+
 }

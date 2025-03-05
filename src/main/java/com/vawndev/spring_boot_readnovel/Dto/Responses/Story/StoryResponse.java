@@ -42,4 +42,6 @@ public class StoryResponse {
 
     private LocalDateTime updatedAt;
 
+    private String coverImage;
+
 }

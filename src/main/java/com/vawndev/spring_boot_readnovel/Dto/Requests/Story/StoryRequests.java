@@ -4,6 +4,7 @@ import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Enum.StoryState;
 import lombok.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -40,5 +41,5 @@ public class StoryRequests {
 
     private LocalDateTime deletedAt;
 
-
+    private MultipartFile coverImage;
 }

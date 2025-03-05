@@ -15,10 +15,12 @@ import com.vawndev.spring_boot_readnovel.Enum.ROLE;
 import com.vawndev.spring_boot_readnovel.Enum.StoryState;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Mappers.ChapterMapper;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Util.PaginationUtil;
 import lombok.RequiredArgsConstructor;
@@ -31,6 +33,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.beans.FeatureDescriptor;
+import java.lang.reflect.Field;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.List;
@@ -45,6 +48,9 @@ public class StoryServiceImpl implements StoryService {
     private final UserRepository userRepository;
     private final ChapterRepository chapterRepository;
     private final StoryMapper storyMapper;
+    private final ChapterMapper chapterMapper;
+    private final CloundService cloundService;
+
 
     private String[] getNullPropertyNames(Object source) {
         final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
@@ -111,6 +117,7 @@ public class StoryServiceImpl implements StoryService {
         User author = author(req.getEmailAuthor());
 
         try{
+            String CoverImage=cloundService.getUrlCover(req.getCoverImage());
             Story story = Story
                     .builder()
                     .author(author)
@@ -121,6 +128,7 @@ public class StoryServiceImpl implements StoryService {
                     .rate(0)
                     .view(0L)
                     .views(0)
+                    .coverImage(CoverImage)
                     .price(req.getPrice())
                     .state(req.getState())
                     .title(req.getTitle())
@@ -132,20 +140,27 @@ public class StoryServiceImpl implements StoryService {
         }
     }
 
+
     @Override
     @PreAuthorize("hasRole('AUTHOR')")
     public void updateStoryByAuthor(StoryRequests req) {
         User author = author(req.getEmailAuthor());
-            Story story=storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
-            try{
-                BeanUtils.copyProperties(req, story,getNullPropertyNames(req));
-                storyRepository.save(story);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        Story story = storyRepository.findByIdAndAuthor(req.getId(), author)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        try {
+            if (req.getCoverImage() != null) {
+                String imageCoverUrl = cloundService.getUrlCover(req.getCoverImage());
+                story.setCoverImage(imageCoverUrl);
             }
-
-
+            BeanUtils.copyProperties(req, story, getNullPropertyNames(req));
+            storyRepository.save(story);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.INVALID_STORY);
+        }
     }
+
+
+
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public void ModeratedByAdmin(ModeratedByAdmin req) {
@@ -187,29 +202,8 @@ public class StoryServiceImpl implements StoryService {
         List<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId());
 
         try{
-            StoryResponse storyRes= StoryResponse
-                    .builder()
-                    .author(story.getAuthor())
-                    .createdAt(story.getCreatedAt())
-                    .updatedAt(story.getUpdatedAt())
-                    .price(story.getPrice())
-                    .type(story.getType())
-                    .views(story.getViews())
-                    .view(story.getView())
-                    .categories(story.getCategories())
-                    .description(story.getDescription())
-                    .title(story.getTitle())
-                    .build();
-
-            List<ChapterResponses> chaptersRes=chapters.stream().map(chapter->ChapterResponses
-                    .builder()
-                    .content(chapter.getContent())
-                    .images(chapter.getImages())
-                    .price(chapter.getPrice())
-                    .title(chapter.getTitle())
-                    .build()
-            ).toList();
-
+            StoryResponse storyRes= storyMapper.toStoryResponse(story);
+            List<ChapterResponses> chaptersRes=chapters.stream().map(chapter->chapterMapper.toChapterResponses(chapter)).collect(Collectors.toList());
             return StoryDetailResponses
                     .builder()
                     .chapter(chaptersRes)
