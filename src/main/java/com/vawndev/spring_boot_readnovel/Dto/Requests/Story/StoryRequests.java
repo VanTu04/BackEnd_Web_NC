@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Story;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Enum.StoryState;
@@ -41,5 +42,5 @@ public class StoryRequests {
 
     private LocalDateTime deletedAt;
 
-    private MultipartFile coverImage;
+    private ImageFileRequest coverImage;
 }

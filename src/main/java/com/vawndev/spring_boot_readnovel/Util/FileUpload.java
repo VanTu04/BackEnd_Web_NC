@@ -40,13 +40,13 @@ public class FileUpload {
 
     public static String getType(final RESOURCE_TYPE type) {
         if (!isValidType(type)) {
-            throw new IllegalArgumentException("Invalid type. Only 'image' are allowed.");
+            throw new IllegalArgumentException("Invalid type. Only 'image' or 'raw are allowed.");
         }
         return type.name().toLowerCase();
     }
 
     private static boolean isValidType(RESOURCE_TYPE type) {
-        return type == RESOURCE_TYPE.IMAGE ;
+        return type == RESOURCE_TYPE.IMAGE || type == RESOURCE_TYPE.RAW ;
     }
 
 }

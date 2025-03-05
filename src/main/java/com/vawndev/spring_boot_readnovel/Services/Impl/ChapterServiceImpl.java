@@ -2,7 +2,7 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.FileRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.Image;
 import com.vawndev.spring_boot_readnovel.Entities.Story;

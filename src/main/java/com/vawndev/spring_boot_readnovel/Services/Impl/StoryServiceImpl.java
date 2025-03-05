@@ -117,7 +117,7 @@ public class StoryServiceImpl implements StoryService {
         User author = author(req.getEmailAuthor());
 
         try{
-            String CoverImage=cloundService.getUrlCover(req.getCoverImage());
+            String CoverImage=cloundService.getUrlAfterUpload(req.getCoverImage()).get(0);
             Story story = Story
                     .builder()
                     .author(author)
@@ -149,8 +149,8 @@ public class StoryServiceImpl implements StoryService {
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         try {
             if (req.getCoverImage() != null) {
-                String imageCoverUrl = cloundService.getUrlCover(req.getCoverImage());
-                story.setCoverImage(imageCoverUrl);
+                String CoverImage=cloundService.getUrlAfterUpload(req.getCoverImage()).get(0);
+                story.setCoverImage(CoverImage);
             }
             BeanUtils.copyProperties(req, story, getNullPropertyNames(req));
             storyRepository.save(story);

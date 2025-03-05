@@ -2,7 +2,7 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.FileRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Util.FileUpload;
 import org.springframework.stereotype.Service;
@@ -26,9 +26,9 @@ public class CloundServiceImpl implements CloundService {
         List<String> fileUrls = new ArrayList<>();
 
         for (MultipartFile file : req.getFile()) {
-            String type=req.getType().toString().toLowerCase();
             FileUpload.assertAllowed(file, ".*\\.(jpg|jpeg|png)$");
-            FileUpload.getType(req.getType());
+            String type= FileUpload.getType(req.Type());
+
             Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
                     ObjectUtils.asMap(
                             "resource_type",type,
@@ -41,18 +41,7 @@ public class CloundServiceImpl implements CloundService {
         return fileUrls;
     }
 
-    @Override
-    public String getUrlCover(MultipartFile file) throws IOException {
-        FileUpload.assertAllowed(file, ".*\\.(jpg|jpeg|png)$");
-        Map<String, Object> uploadResult = cloudinary.uploader().upload(file.getBytes(),
-                ObjectUtils.asMap(
-                        "resource_type","image",
-                        "folder", "image"
-                ));
 
-        String fileUrl = uploadResult.get("url").toString();
-        return fileUrl;
-    }
 
 
 }
