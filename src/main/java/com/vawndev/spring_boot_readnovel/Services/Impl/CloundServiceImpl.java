@@ -3,10 +3,8 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FileRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.CloudinaryResponse;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Util.FileUpload;
-import jakarta.transaction.Transactional;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
