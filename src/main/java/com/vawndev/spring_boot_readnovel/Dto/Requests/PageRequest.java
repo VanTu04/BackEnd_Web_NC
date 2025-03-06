@@ -6,9 +6,10 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
+@Builder
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
-public class IntrospectRequest {
-    private String token;
+public class PageRequest {
+    private int page=0;
+    private int limit=10;
 }

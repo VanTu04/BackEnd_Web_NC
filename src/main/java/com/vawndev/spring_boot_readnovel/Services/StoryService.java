@@ -1,17 +1,21 @@
 package com.vawndev.spring_boot_readnovel.Services;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.StoryRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.StoryResponse;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
 
-import java.util.List;
 
 public interface StoryService {
-    StoryResponse addStory(StoryRequest story);
+    PageResponse<StoriesResponse> getStories(PageRequest req);
+    PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req);
+    void addStory(StoryRequests req);
+    void updateStoryByAuthor(StoryRequests req);
+    void ModeratedByAdmin(ModeratedByAdmin moderatedByAdmin);
+    void deleteSoftStory(String email , String id);
+    void deleteStory(ModeratedByAdmin req);
+    StoryDetailResponses getStoryById(String storyId);
 
-    StoryResponse updateStory(String id, StoryRequest storyDetails);
-
-    void deleteStory(String id);
-
-    List<StoryResponse> getAllStories();
 }

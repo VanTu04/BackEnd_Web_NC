@@ -2,10 +2,7 @@ package com.vawndev.spring_boot_readnovel.Entities;
 
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 @Entity
 @Table(name = "categories")
@@ -13,6 +10,7 @@ import lombok.Setter;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-class Category extends BaseEntity {
+@Builder
+public class Category extends BaseEntity {
     private String name;
 }

@@ -1,4 +1,4 @@
-package com.vawndev.spring_boot_readnovel.Dto.Requests;
+package com.vawndev.spring_boot_readnovel.Dto.Requests.User;
 
 import lombok.*;
 

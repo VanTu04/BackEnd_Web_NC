@@ -6,9 +6,11 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 
 @Data
-@NoArgsConstructor
 @AllArgsConstructor
+@NoArgsConstructor
 @Builder
-public class IntrospectResponse {
-    private boolean valid;
+public class CloudinaryResponse {
+    private String publicId;
+
+    private String url;
 }

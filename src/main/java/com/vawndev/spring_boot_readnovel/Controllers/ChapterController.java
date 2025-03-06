@@ -1,43 +1,27 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
-import java.util.List;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import com.vawndev.spring_boot_readnovel.Entities.Chapter;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/api/chapters")
+@RequestMapping("/Chapter")
+@RequiredArgsConstructor
 public class ChapterController {
-    @Autowired
-    private ChapterService chapterService;
+    private final ChapterService chapterService;
 
-    @PostMapping("/{storyId}")
-    public Chapter addChapter(@PathVariable String storyId, @RequestBody Chapter chapter) {
-        return chapterService.addChapter(storyId, chapter);
+    @PostMapping("/add")
+    public ApiResponse<String> addChapter(@RequestBody ChapterUploadRequest chapterUploadRequest) {
+        chapterService.addChapter(chapterUploadRequest);
+        return ApiResponse.<String>builder().message("Successfully!").build();
     }
 
-    @PutMapping("/{id}")
-    public Chapter updateChapter(@PathVariable String id, @RequestBody Chapter chapterDetails) {
-        return chapterService.updateChapter(id, chapterDetails);
-    }
-/* 
-    @DeleteMapping("/{id}")
-    public void deleteChapter(@PathVariable String id) {
+    @DeleteMapping("/delete")
+    public ApiResponse<String> deleteChapter(@RequestBody String id) {
         chapterService.deleteChapter(id);
-    }
-*/
-    @GetMapping
-    public List<Chapter> getAllChapters() {
-        return chapterService.getAllChapters();
+        return ApiResponse.<String>builder().message("Successfully!").build();
     }
 }

@@ -1,4 +1,4 @@
-package com.vawndev.spring_boot_readnovel.Dto.Requests;
+package com.vawndev.spring_boot_readnovel.Dto.Responses.Auth;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class RefreshRequest {
-    private String token;
+public class IntrospectResponse {
+    private boolean valid;
 }

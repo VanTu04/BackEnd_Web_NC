@@ -1,8 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Services;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserCreationRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserUpdateRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 
 import java.util.List;

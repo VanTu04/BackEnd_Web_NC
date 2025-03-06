@@ -6,12 +6,16 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
-public class AuthenticationResponse {
-    private String accessToken;
-    private String refreshToken;
+public class PageResponse <T> {
+    private List<T> data;
+    private int page;
+    private int limit;
+    private int total;
 }
