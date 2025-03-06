@@ -1,8 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Services;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.AuthenticationRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.AuthenticationResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Auth.AuthenticationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Auth.AuthenticationResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 

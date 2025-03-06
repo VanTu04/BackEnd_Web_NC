@@ -3,6 +3,7 @@ package com.vawndev.spring_boot_readnovel.Entities;
 import com.vawndev.spring_boot_readnovel.Enum.StoryState;
 import jakarta.persistence.*;
 import lombok.*;
+import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -14,6 +15,7 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 @Table(name = "stories")
+@DynamicUpdate
 public class Story extends BaseEntity{
     private String title;
 
@@ -48,4 +50,6 @@ public class Story extends BaseEntity{
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private List<Category> categories;
+    @Column(name = "cover_image")
+    private String coverImage;
 }

@@ -1,9 +1,9 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserCreationRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.UserUpdateRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Role;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
