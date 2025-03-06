@@ -1,7 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Services;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.AuthenticationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Auth.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;

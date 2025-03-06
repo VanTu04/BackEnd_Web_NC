@@ -1,15 +1,12 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.RawFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
-import com.vawndev.spring_boot_readnovel.Enum.RESOURCE_TYPE;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
-import com.vawndev.spring_boot_readnovel.Util.Help.JsonHelper;
+import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;

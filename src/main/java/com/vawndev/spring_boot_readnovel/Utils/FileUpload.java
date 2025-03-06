@@ -1,15 +1,9 @@
-package com.vawndev.spring_boot_readnovel.Util;
+package com.vawndev.spring_boot_readnovel.Utils;
 
 import com.vawndev.spring_boot_readnovel.Enum.RESOURCE_TYPE;
 import lombok.experimental.UtilityClass;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.FilenameUtils;
-
-
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 @UtilityClass
 public class FileUpload {

@@ -4,12 +4,9 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Category.CategoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
 import com.vawndev.spring_boot_readnovel.Services.CategoryService;
-import com.vawndev.spring_boot_readnovel.Util.Help.JsonHelper;
+import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.List;
 
 @RestController
 @RequestMapping("/Category")

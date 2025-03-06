@@ -5,7 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageCoverRequest;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
-import com.vawndev.spring_boot_readnovel.Util.FileUpload;
+import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
