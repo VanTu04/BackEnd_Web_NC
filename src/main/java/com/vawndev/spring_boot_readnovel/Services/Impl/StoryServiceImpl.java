@@ -1,5 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageCoverRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
@@ -31,6 +33,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.beans.FeatureDescriptor;
 import java.lang.reflect.Field;
@@ -70,12 +73,7 @@ public class StoryServiceImpl implements StoryService {
         try {
             Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
 
-            Page<Story> storyPage = storyRepository.findAllByStateAndIsApprovedAndIsAvailableAndDeleteAtIsNull(
-                    StoryState.PUBLISHED,
-                    true,
-                    true,
-                    pageable
-            );
+            Page<Story> storyPage = storyRepository.findAll(pageable);
             List<StoriesResponse> stories = storyPage.getContent()
                     .stream()
                     .map(story -> StoriesResponse.builder()
@@ -83,6 +81,8 @@ public class StoryServiceImpl implements StoryService {
                             .rate(story.getRate())
                             .views(story.getViews())
                             .view(story.getView())
+                            .coverImage(story.getCoverImage())
+                            .id(story.getId())
                             .build())
                     .collect(Collectors.toList());
 
@@ -93,12 +93,12 @@ public class StoryServiceImpl implements StoryService {
                     .total(storyPage.getTotalPages())
                     .build();
         } catch (Exception e) {
-            throw new AppException(ErrorCode.SERVER_ERROR);
+            throw new RuntimeException(e);
         }
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req) {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Story> storyPage = storyRepository.findAll(pageable);
@@ -113,11 +113,13 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-    public void addStory(StoryRequests req) {
+    public void addStory(StoryRequests req, MultipartFile image_cover) {
         User author = author(req.getEmailAuthor());
 
         try{
-            String CoverImage=cloundService.getUrlAfterUpload(req.getCoverImage()).get(0);
+            ImageCoverRequest imageCoverRequest=new ImageCoverRequest();
+            imageCoverRequest.setImage_cover(image_cover);
+            String CoverImage=cloundService.getUrlCoverAfterUpload(imageCoverRequest);
             Story story = Story
                     .builder()
                     .author(author)
@@ -136,20 +138,22 @@ public class StoryServiceImpl implements StoryService {
                     .build();
             storyRepository.save(story);
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            throw new RuntimeException("Error while processing file: " + image_cover.getOriginalFilename() + " - " + e.getMessage(), e);
         }
     }
 
 
     @Override
-    @PreAuthorize("hasRole('AUTHOR')")
-    public void updateStoryByAuthor(StoryRequests req) {
+//    @PreAuthorize("hasRole('AUTHOR')")
+    public void updateStoryByAuthor(StoryRequests req,String id,MultipartFile image) {
         User author = author(req.getEmailAuthor());
-        Story story = storyRepository.findByIdAndAuthor(req.getId(), author)
+        Story story = storyRepository.findByIdAndAuthor(id ,author)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         try {
-            if (req.getCoverImage() != null) {
-                String CoverImage=cloundService.getUrlAfterUpload(req.getCoverImage()).get(0);
+            if (image != null) {
+                ImageFileRequest imagereq=new ImageFileRequest();
+                imagereq.setFile((List<MultipartFile>) image);
+                String CoverImage=cloundService.getUrlAfterUpload(imagereq).get(0);
                 story.setCoverImage(CoverImage);
             }
             BeanUtils.copyProperties(req, story, getNullPropertyNames(req));
@@ -162,7 +166,7 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public void ModeratedByAdmin(ModeratedByAdmin req) {
         User user = author(req.getEmail());
             Story story=storyRepository.findById(req.getStory_id()).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
@@ -177,7 +181,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('AUTHOR')")
+//    @PreAuthorize("hasRole('AUTHOR')")
     public void deleteSoftStory(String email , String id) {
             Story story=storyRepository.findById(id).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
             try {
@@ -190,7 +194,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+//    @PreAuthorize("hasRole('ADMIN')")
     public void deleteStory(ModeratedByAdmin req) {
         Story story =storyRepository.findById(req.getStory_id()).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
         storyRepository.delete(story);

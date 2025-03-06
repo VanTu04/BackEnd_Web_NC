@@ -17,25 +17,46 @@ public class FileUpload {
 
     public static void assertAllowed(MultipartFile file, String pattern) {
         final long size = file.getSize();
+        final String fileName = file.getOriginalFilename();
+        final String extension = FilenameUtils.getExtension(fileName);
+        final String contentType = file.getContentType();
+
+        // Log thông tin file
+        System.out.println("Checking file: " + fileName +
+                ", size: " + size + " bytes, extension: " + extension +
+                ", content type: " + contentType);
+
+        // Kiểm tra dung lượng file
         if (size > MAX_FILE_SIZE) {
             throw new RuntimeException("Max file size is 10MB");
         }
 
-        final String fileName = file.getOriginalFilename();
+        // Kiểm tra tên file không null
         if (fileName == null) {
             throw new RuntimeException("File name is null");
         }
 
-        final String extension = FilenameUtils.getExtension(fileName);
+        // Kiểm tra phần mở rộng hợp lệ
         if (!isAllowedExtension(extension, pattern)) {
             throw new RuntimeException("Only jpg, jpeg, png, gif, bmp files are allowed");
         }
+
+        // Kiểm tra MIME Type
+        if (contentType == null || !contentType.matches("image/(jpg|jpeg|png|gif|bmp)")) {
+            throw new RuntimeException("Invalid file type: " + contentType);
+        }
     }
 
-    private static boolean isAllowedExtension(final String extension, final String pattern) {
-        final Matcher matcher = Pattern.compile(pattern, Pattern.CASE_INSENSITIVE).matcher(extension);
-        return matcher.matches();
+    // Hàm kiểm tra phần mở rộng file
+    private static boolean isAllowedExtension(String extension, String pattern) {
+        if (extension == null || extension.isEmpty()) {
+            return false;
+        }
+        return extension.matches("(?i)jpg|jpeg|png|gif|bmp");
     }
+
+
+
 
 
     public static String getType(final RESOURCE_TYPE type) {

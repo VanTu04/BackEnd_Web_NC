@@ -13,7 +13,6 @@ import java.util.List;
 @AllArgsConstructor
 @Getter @Setter
 public class ChapterRequest {
-    private String id;
 
     private String title;
 
@@ -23,5 +22,4 @@ public class ChapterRequest {
 
     private BigDecimal price;
 
-    private List<Image> images;
 }

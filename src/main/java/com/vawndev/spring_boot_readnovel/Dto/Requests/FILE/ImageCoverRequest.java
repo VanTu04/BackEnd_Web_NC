@@ -1,14 +1,15 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.FILE;
 
 import com.vawndev.spring_boot_readnovel.Enum.RESOURCE_TYPE;
-import lombok.*;
+import lombok.Getter;
+import lombok.Setter;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.List;
 
 @Getter
 @Setter
-public abstract class FileRequest {
-    private List<MultipartFile> file;
-    public abstract RESOURCE_TYPE Type();
+public class ImageCoverRequest {
+    private MultipartFile image_cover;
+    public RESOURCE_TYPE Type(){
+        return RESOURCE_TYPE.IMAGE;
+    }
 }

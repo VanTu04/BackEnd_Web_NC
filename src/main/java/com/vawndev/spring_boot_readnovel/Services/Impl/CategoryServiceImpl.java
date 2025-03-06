@@ -28,18 +28,17 @@ public class CategoryServiceImpl implements CategoryService {
         CategoriesResponse categoriesResponse = CategoriesResponse.builder().categories(category).build();
         return categoriesResponse;
     }
-
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    //    @PreAuthorize("hasRole('ADMIN')")
     public void addCategory(String name) {
-        Category exstingCategory = categoryRepository.findByName(name).get();
-        if (exstingCategory != null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        categoryRepository.findByName(name).ifPresent(category -> {
+            throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
+        });
 
-        }
-        Category category=Category.builder().name(name).build();
+        Category category = Category.builder().name(name).build();
         categoryRepository.save(category);
     }
+
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
@@ -67,8 +66,8 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @PreAuthorize("hasRole('ADMIN')")
-    public void UpdateCategory(CategoryRequests req) {
-        Category exstingCategory = categoryRepository.findById(req.getId()).get();
+    public void UpdateCategory(CategoryRequests req,String id) {
+        Category exstingCategory = categoryRepository.findById(id).get();
         if (exstingCategory == null ) {
             throw new AppException(ErrorCode.INVALID_DOB);
         }

@@ -18,7 +18,6 @@ import java.util.List;
 @Setter
 @Builder
 public class StoryRequests {
-    private String id;
 
     private String title;
 
@@ -34,13 +33,6 @@ public class StoryRequests {
 
     private StoryState state;
 
-    private boolean isApproved;
-
     private List<Category> categories;
 
-    private LocalDateTime updatedAt;
-
-    private LocalDateTime deletedAt;
-
-    private ImageFileRequest coverImage;
 }
