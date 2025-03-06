@@ -20,6 +20,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
@@ -57,13 +58,13 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         // kiem tra user co trong db khong
         var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
         // kiem tra mat khau
-        boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
-        if(!valid) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
-        }
+            boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
+            if(!valid) {
+                throw new AppException(ErrorCode.UNAUTHENTICATED);
+            }
 
         // kiem tra tinh trang tai khoan
-        if(user.isActive() == false) {
+        if(!user.isActive()) {
             throw new AppException(ErrorCode.UNAUTHENTICATED);
         }
 
@@ -160,7 +161,8 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return createRefreshTokenCookie("", 0);
     }
 
-    private String generateRefreshToken(User user) {
+
+    public String generateRefreshToken(User user) {
         // header jwt
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS512).build();
 
@@ -176,7 +178,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return this.jwtEncoder.encode(JwtEncoderParameters.from(jwsHeader, jwtClaimsSet)).getTokenValue();
     }
 
-    private String generateToken(User user) {
+    public String generateToken(User user) {
         // header jwt
         JwsHeader jwsHeader = JwsHeader.with(MacAlgorithm.HS512).build();
 

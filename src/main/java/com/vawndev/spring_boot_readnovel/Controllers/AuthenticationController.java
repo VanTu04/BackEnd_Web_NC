@@ -5,18 +5,27 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.AuthenticationResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
 import com.vawndev.spring_boot_readnovel.Services.AuthenticationService;
+import jakarta.servlet.http.HttpSession;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.annotation.CurrentSecurityContext;
+import org.springframework.security.oauth2.client.authentication.OAuth2AuthenticationToken;
 import org.springframework.security.oauth2.core.OAuth2AccessToken;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/auth")
 @RequiredArgsConstructor
+@Slf4j
 public class AuthenticationController {
 
     private final AuthenticationService authenticationService;
@@ -66,9 +75,19 @@ public class AuthenticationController {
                 .body(ApiResponse.<String>builder().result("Success Logout").build());
     }
 
-    @GetMapping("/google/success")
-    public ResponseEntity<ApiResponse<AuthenticationResponse>> googleLogin(OAuth2AccessToken token) {
+    @GetMapping("/google")
+    public String googleLogin(@AuthenticationPrincipal OAuth2User principal) {
+        // Lấy thông tin người dùng từ Google
+        String email = principal.getAttribute("email");
+        String name = principal.getAttribute("name");
+        String picture = principal.getAttribute("picture");
 
-        return null;
+        // In thông tin người dùng (hoặc lưu vào database)
+        System.out.println("Email: " + email);
+        System.out.println("Name: " + name);
+        System.out.println("Picture: " + picture);
+
+        return "Login successful! Welcome, " + name;
     }
+
 }

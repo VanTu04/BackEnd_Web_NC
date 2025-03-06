@@ -4,6 +4,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.AuthenticationResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.UserResponse;
 import org.springframework.http.ResponseCookie;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 public interface AuthenticationService {
     AuthenticationResponse authenticate(AuthenticationRequest request);
@@ -15,4 +16,5 @@ public interface AuthenticationService {
     AuthenticationResponse generateTokenByRefreshToken(String refreshToken);
 
     ResponseCookie logout(String accessToken);
+
 }

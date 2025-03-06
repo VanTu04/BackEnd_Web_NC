@@ -15,7 +15,6 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
-
   security:
     oauth2:
       client:
@@ -23,18 +22,22 @@ spring:
           google:
             client-id: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
             client-secret: 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
-          facebook:
-            client-id: 1120903846076823
-            client-secret: 6b2f8e3ed19f8eb3c385684bbc7e21ab
+            redirect-uri: ${REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
             scope:
-              - profile
               - email
+              - profile
+
 server:
-  port: 8081
-  servlet:
-    context-path: /api
+  port: 8080
+
 jwt:
   signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
   valid-duration: 3600 # in second
   refreshable-duration: 36000 # in seconds
+logging:
+  level:
+    org:
+      springframework:
+        security: DEBUG
+        web: DEBUG
 
