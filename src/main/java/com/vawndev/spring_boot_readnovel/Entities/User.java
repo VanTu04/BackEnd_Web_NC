@@ -20,7 +20,6 @@ public class User extends BaseEntity{
     @Column(unique = true, nullable = false)
     private String email;
 
-    @Column(nullable = false)
     private String password;
 
     @Column(name = "date_of_birth")
@@ -35,6 +34,6 @@ public class User extends BaseEntity{
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
-    @ManyToMany
+    @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
 }

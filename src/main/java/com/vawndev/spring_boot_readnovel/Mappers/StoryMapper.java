@@ -14,7 +14,6 @@ import java.util.List;
 public interface StoryMapper {
     StoryResponse toStoryResponse(Story story);
     StoriesResponse toStoriesResponse(Story story);
-    Story toStory(StoryRequests requests);
     StoryDetailResponses toStoryDetailResponses(StoryResponse story, List<ChapterResponses> chapter);
 
 

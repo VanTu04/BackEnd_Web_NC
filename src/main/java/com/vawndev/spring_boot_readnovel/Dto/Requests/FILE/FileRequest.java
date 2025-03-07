@@ -1,15 +1,14 @@
-package com.vawndev.spring_boot_readnovel.Dto.Requests;
+package com.vawndev.spring_boot_readnovel.Dto.Requests.FILE;
 
 import com.vawndev.spring_boot_readnovel.Enum.RESOURCE_TYPE;
 import lombok.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
-@Builder
-@NoArgsConstructor
-@AllArgsConstructor
-@Getter @Setter
-public class FileRequest {
+
+@Getter
+@Setter
+public abstract class FileRequest {
     private List<MultipartFile> file;
-    private RESOURCE_TYPE type;
+    public abstract RESOURCE_TYPE Type();
 }

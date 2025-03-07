@@ -1,12 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Story;
 
 import com.vawndev.spring_boot_readnovel.Entities.Category;
-import com.vawndev.spring_boot_readnovel.Entities.User;
-import com.vawndev.spring_boot_readnovel.Enum.StoryState;
+import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import lombok.*;
 
 import java.math.BigDecimal;
-import java.time.LocalDateTime;
 import java.util.List;
 
 @Data
@@ -16,13 +14,12 @@ import java.util.List;
 @Setter
 @Builder
 public class StoryRequests {
-    private String id;
 
     private String title;
 
     private String description;
 
-    private String type;
+    private StoryType type;
 
     private String emailAuthor;
 
@@ -30,15 +27,6 @@ public class StoryRequests {
 
     private boolean isAvailable;
 
-    private StoryState state;
-
-    private boolean isApproved;
-
     private List<Category> categories;
-
-    private LocalDateTime updatedAt;
-
-    private LocalDateTime deletedAt;
-
 
 }

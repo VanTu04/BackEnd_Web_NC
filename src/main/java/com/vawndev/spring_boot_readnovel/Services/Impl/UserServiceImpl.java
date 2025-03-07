@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashSet;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -49,6 +50,10 @@ public class UserServiceImpl implements UserService {
         return userMapper.toUserResponse(user);
     }
 
+    private User findUserById(String id) {
+        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
     @Override
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
         return null;
@@ -56,17 +61,20 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public void deleteUser(String userId) {
-
+        var user = this.findUserById(userId);
+        user.setActive(false);
+        userRepository.save(user);
     }
 
     @Override
     public List<UserResponse> getAllUsers() {
-        return List.of();
+        return userRepository.findAll().stream().map(userMapper::toUserResponse).collect(Collectors.toList());
     }
 
     @Override
     public UserResponse getUser(String userId) {
-        return null;
+        var user = this.findUserById(userId);
+        return userMapper.toUserResponse(user);
     }
 
     @Override

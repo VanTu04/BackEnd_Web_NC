@@ -20,4 +20,6 @@ public class StoriesResponse {
 
     private int views;
 
+    private String coverImage;
+
 }

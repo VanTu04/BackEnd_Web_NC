@@ -4,7 +4,10 @@ import com.nimbusds.jose.jwk.source.ImmutableSecret;
 import com.nimbusds.jose.util.Base64;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Services.CustomOAuth2UserService;
 import com.vawndev.spring_boot_readnovel.Services.Impl.AuthenticationServiceImpl;
+import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginSuccessHandler;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -46,6 +49,12 @@ public class SecurityConfig {
     @Value("${jwt.signer-key}")
     private String SIGNER_KEY;
 
+    @Autowired
+    private CustomOAuth2UserService customOAuth2UserService;
+
+    @Autowired
+    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
@@ -55,10 +64,16 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .authorizeHttpRequests(request -> {
-                    request.requestMatchers(HttpMethod.POST, PUBLIC_ENDPOINTS).permitAll()
+                    request.requestMatchers( PUBLIC_ENDPOINTS).permitAll()
                             .anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+                .oauth2Login(oauth2 -> oauth2
+                        .userInfoEndpoint(userInfo -> userInfo
+                                .userService(customOAuth2UserService)
+                        )
+                        .successHandler(oAuth2LoginSuccessHandler)
+                )
                 .exceptionHandling(
                         exception -> exception
                                         .authenticationEntryPoint(new CustomAuthenticationEntrypoint()) //401
@@ -66,8 +81,8 @@ public class SecurityConfig {
                 );
         httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-                .formLogin(AbstractHttpConfigurer::disable);
-        httpSecurity.csrf(AbstractHttpConfigurer::disable);
+                .formLogin(AbstractHttpConfigurer::disable)
+                .csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
 

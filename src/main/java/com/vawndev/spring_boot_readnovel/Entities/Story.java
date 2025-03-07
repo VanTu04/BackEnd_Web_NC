@@ -1,6 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
-import com.vawndev.spring_boot_readnovel.Enum.StoryState;
+import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.DynamicUpdate;
@@ -21,9 +21,10 @@ public class Story extends BaseEntity{
 
     private String description;
 
-    private Long view;
+    private Long views;
 
-    private String type;
+    @Enumerated(EnumType.STRING)
+    private StoryType type;
 
     @ManyToOne
     private User author;
@@ -33,15 +34,10 @@ public class Story extends BaseEntity{
     @Column(name = "is_available")
     private boolean isAvailable;
 
-    @Enumerated(EnumType.STRING)
-    private StoryState state;
-
     @Column(name = "is_approved")
     private boolean isApproved;
 
     private double rate;
-
-    private int views;
 
     @ManyToMany
     @JoinTable(

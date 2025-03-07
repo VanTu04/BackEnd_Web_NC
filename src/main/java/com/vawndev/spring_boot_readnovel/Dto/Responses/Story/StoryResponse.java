@@ -2,8 +2,6 @@ package com.vawndev.spring_boot_readnovel.Dto.Responses.Story;
 
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Entities.User;
-import com.vawndev.spring_boot_readnovel.Enum.StoryState;
-import jakarta.persistence.*;
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -41,5 +39,7 @@ public class StoryResponse {
     private LocalDateTime createdAt;
 
     private LocalDateTime updatedAt;
+
+    private String coverImage;
 
 }

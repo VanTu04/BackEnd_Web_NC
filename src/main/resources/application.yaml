@@ -4,7 +4,7 @@ spring:
   datasource:
     url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/Read}
     username: ${DBMS_USERNAME:postgres}
-    password: ${DBMS_PASSWORD:123456}
+    password: ${DBMS_PASSWORD:020604}
   jpa:
     show-sql: true
     hibernate:
@@ -34,4 +34,8 @@ jwt:
   signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
   valid-duration: 3600 # in second
   refreshable-duration: 36000 # in seconds
+cloudinary:
+  cloud_name: ddwnxdhdp
+  api_key: 629552276132893
+  api_secret: e0SPR4CmjsqWLMw4QE5bJFXSnRE
 

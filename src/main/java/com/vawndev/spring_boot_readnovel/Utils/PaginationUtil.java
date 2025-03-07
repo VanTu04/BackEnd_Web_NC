@@ -1,4 +1,4 @@
-package com.vawndev.spring_boot_readnovel.Util;
+package com.vawndev.spring_boot_readnovel.Utils;
 
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
