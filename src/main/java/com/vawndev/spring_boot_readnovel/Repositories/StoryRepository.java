@@ -2,7 +2,6 @@ package com.vawndev.spring_boot_readnovel.Repositories;
 
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
-import com.vawndev.spring_boot_readnovel.Enum.StoryState;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

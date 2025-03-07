@@ -74,8 +74,7 @@ public class StoryServiceImpl implements StoryService {
                     .map(story -> StoriesResponse.builder()
                             .title(story.getTitle())
                             .rate(story.getRate())
-                            .views(story.getViews())
-                            .view(story.getView())
+                            .view(story.getViews())
                             .coverImage(story.getCoverImage())
                             .id(story.getId())
                             .build())
@@ -121,13 +120,11 @@ public class StoryServiceImpl implements StoryService {
                     .categories(req.getCategories())
                     .description(req.getDescription())
                     .isApproved(false)
-                    .state(req.getState())
                     .rate(0)
-                    .view(0L)
-                    .views(0)
+                    .views(0L)
+                    .type(req.getType())
                     .coverImage(CoverImage)
                     .price(req.getPrice())
-                    .state(req.getState())
                     .title(req.getTitle())
                     .price(req.getPrice())
                     .build();
@@ -148,7 +145,7 @@ public class StoryServiceImpl implements StoryService {
             if (image != null) {
                 ImageFileRequest imagereq=new ImageFileRequest();
                 imagereq.setFile((List<MultipartFile>) image);
-                String CoverImage=cloundService.getUrlAfterUpload(imagereq).get(0);
+                String CoverImage=cloundService.getUrlChapterAfterUpload(imagereq).get(0);
                 story.setCoverImage(CoverImage);
             }
             BeanUtils.copyProperties(req, story, getNullPropertyNames(req));

@@ -51,9 +51,11 @@ public class StoryController {
         storyService.deleteSoftStory(req.getEmailAuthor(),id);
         return ApiResponse.<String>builder().result("success").build();
     }
+
     @DeleteMapping("/delete")
     public ApiResponse<String> deleteStory(@RequestBody ModeratedByAdmin req) {
         storyService.deleteStory(req);
         return ApiResponse.<String>builder().result("Sucess").build();
     }
+    
 }

@@ -40,7 +40,7 @@ public class ChapterServiceImpl implements ChapterService {
 
            List<String> listUrl;
            try {
-               listUrl = cloundServiceImpl.getUrlAfterUpload(freq);
+               listUrl = cloundServiceImpl.getUrlChapterAfterUpload(freq);
            } catch (IOException e) {
                throw new RuntimeException("Error upload to Cloudinary", e);
            }

@@ -23,7 +23,7 @@ public class CloundServiceImpl implements CloundService {
     private final Cloudinary cloudinary;
 
     @Override
-    public List<String> getUrlAfterUpload(FileRequest req) throws IOException {
+    public List<String> getUrlChapterAfterUpload(FileRequest req) throws IOException {
         List<String> fileUrls = new ArrayList<>();
 
         for (MultipartFile file : req.getFile()) {

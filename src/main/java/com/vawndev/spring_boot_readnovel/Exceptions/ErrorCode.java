@@ -22,6 +22,8 @@ public enum ErrorCode {
     INVALID_STORY(1013, "Invalid story", HttpStatus.NOT_FOUND),
     SERVER_ERROR(1014, "server error", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_SAVE_DATA(1015, "Error saving data", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
