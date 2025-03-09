@@ -19,17 +19,6 @@ public interface UserMapper {
 
     void updateUser(@MappingTarget User user, UserUpdateRequest request);
 
-    public UserResponse toResponse(User user) {
-        return UserResponse.builder()
-                .id(user.getId())
-                .fullName(user.getFullName())
-                .email(user.getEmail())
-                .build();
-    }
+    UserResponse toResponse(User user);
 
-    public void updateUserFromRequest(UserUpdateRequest request, User user) {
-        user.setFullName(request.getFullName());
-        user.setEmail(request.getEmail());
-        user.setPassword(request.getPassword());
-    }    
 }

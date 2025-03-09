@@ -1,11 +1,11 @@
 package com.vawndev.spring_boot_readnovel.Services;
 
+import java.util.List;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
-
-import java.util.List;
 
 public interface UserService {
     UserResponse createUser(UserCreationRequest userRequest);
