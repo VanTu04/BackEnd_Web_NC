@@ -199,7 +199,9 @@ public class StoryServiceImpl implements StoryService {
 
         try{
             StoryResponse storyRes= storyMapper.toStoryResponse(story);
-            List<ChapterResponses> chaptersRes=chapters.stream().map(chapter->chapterMapper.toChapterResponses(chapter)).collect(Collectors.toList());
+            List<ChapterResponses> chaptersRes=chapters.stream().map(
+                    chapter->ChapterResponses.builder().content(chapter.getContent()).price(chapter.getPrice()).title(chapter.getTitle()).build()
+            ).collect(Collectors.toList());
             return StoryDetailResponses
                     .builder()
                     .chapter(chaptersRes)

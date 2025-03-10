@@ -1,11 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter;
 
-import com.vawndev.spring_boot_readnovel.Entities.Image;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
-import jakarta.persistence.CascadeType;
-import jakarta.persistence.Column;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToMany;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.ImageResponse;
+
 import lombok.*;
 
 import java.math.BigDecimal;
@@ -23,5 +19,11 @@ public class ChapterResponses {
 
     private BigDecimal price;
 
-    private List<Image> images;
+    private String signature;
+
+    private String image_proxy;
+
+    private String timeStamp;
+
+    private long expiredAt;
 }

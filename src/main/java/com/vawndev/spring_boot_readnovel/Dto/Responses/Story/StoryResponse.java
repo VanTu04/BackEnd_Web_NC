@@ -28,7 +28,6 @@ public class StoryResponse {
 
     private boolean isAvailable;
 
-    private StoryState state;
 
     private double rate;
 

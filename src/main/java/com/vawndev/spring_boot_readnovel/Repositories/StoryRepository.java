@@ -11,8 +11,8 @@ import java.util.Optional;
 
 @Repository
 public interface StoryRepository extends JpaRepository<Story, String> {
-    Page<Story> findAllByStateAndIsApprovedAndIsAvailableAndDeleteAtIsNull(StoryState state,boolean isApproved, boolean isAvailable ,Pageable pageable);
+    Page<Story> findAllByIsApprovedAndIsAvailableAndDeleteAtIsNull(boolean isApproved, boolean isAvailable , Pageable pageable);
     Optional<Story> findByIdAndAuthor(String id, User author);
     Page<Story> findAll(Pageable pageable);
-    Page<Story> findAllByStateAndIsApprovedAndIsAvailableAndDeleteAtIsNotNull(StoryState state,boolean isApproved, boolean isAvailable,Pageable pageable);
+    Page<Story> findAllByIsApprovedAndIsAvailableAndDeleteAtIsNotNull(boolean isApproved, boolean isAvailable,Pageable pageable);
 }

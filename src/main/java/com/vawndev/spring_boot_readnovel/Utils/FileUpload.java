@@ -1,13 +1,24 @@
 package com.vawndev.spring_boot_readnovel.Utils;
 
 import com.vawndev.spring_boot_readnovel.Enum.RESOURCE_TYPE;
+import io.github.cdimascio.dotenv.Dotenv;
 import lombok.experimental.UtilityClass;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.FilenameUtils;
 
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
+import java.nio.charset.StandardCharsets;
+import java.security.InvalidKeyException;
+import java.security.NoSuchAlgorithmException;
+import java.util.*;
+import java.util.stream.Collectors;
+
 @UtilityClass
 public class FileUpload {
     private static final long MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
+
+    private static final String API_SECRET = Dotenv.configure().ignoreIfMissing().load().get("API_SECRET");
 
     public static void assertAllowed(MultipartFile file, String pattern) {
         final long size = file.getSize();
@@ -48,8 +59,6 @@ public class FileUpload {
         }
         return extension.matches("(?i)jpg|jpeg|png|gif|bmp");
     }
-
-
 
 
 
