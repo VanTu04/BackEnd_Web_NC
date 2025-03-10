@@ -26,6 +26,18 @@ spring:
           facebook:
             client-id: 1120903846076823
             client-secret: 6b2f8e3ed19f8eb3c385684bbc7e21ab
+  
+  mail:
+    host: smtp.gmail.com
+    port: 587
+    username: mlanhem28@gmail.com
+    password: Anmisoi112!
+    properties:
+      mail:
+        smtp:
+          auth: true
+          starttls:
+            enable: true
 server:
   port: 8081
   servlet:
@@ -38,4 +50,5 @@ cloudinary:
   cloud_name: ddwnxdhdp
   api_key: 629552276132893
   api_secret: e0SPR4CmjsqWLMw4QE5bJFXSnRE
+
 
