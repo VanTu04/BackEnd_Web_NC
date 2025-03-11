@@ -19,11 +19,6 @@ public class ChapterResponses {
 
     private BigDecimal price;
 
-    private String signature;
+    private List<ImageResponse> images;
 
-    private String image_proxy;
-
-    private String timeStamp;
-
-    private long expiredAt;
 }

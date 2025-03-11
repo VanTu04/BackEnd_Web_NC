@@ -1,9 +1,13 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.fasterxml.jackson.core.type.TypeReference;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.ImageResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.Image;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
@@ -16,7 +20,13 @@ import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Utils.SecurityUtils;
 import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
+import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -36,6 +46,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
     private final ImageRepository imageRepository;
     private final SecurityUtils securityUtils;
+
 
     @Override
     public void addChapter(ChapterUploadRequest chapterUploadRequest) {
@@ -74,39 +85,24 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public void deleteChapter(String id) {
-        Chapter chapter=chapterRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        Chapter chapter=chapterRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
         chapterRepository.delete(chapter);
     }
 
     @Override
     public ChapterResponses getChapterDetail(String id) {
         Chapter chapter = chapterRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
-
-        long currentTimestamp = (System.currentTimeMillis() / 1000) + 60;
-
-        Map<String, String> params = new HashMap<>();
-        params.put("public_id", id);
-        params.put("timestamp", String.valueOf(currentTimestamp - 300));
-        params.put("expired_at", String.valueOf(currentTimestamp));
-
-        // Tạo chữ ký đồng nhất
-        String signature = securityUtils.GenerateSignature(params);
-
-        // URL bảo mật
-        String secureUrl = "http://localhost:8080/Chapter/proxy?sig=" + signature + "&id=" + id +"&currentTimestamp=" + currentTimestamp;
-
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_DOB));
+        List<ImageResponse> images =  imageRepository.findByChapterId(id).stream()
+                .map(img -> ImageResponse.builder().id(img.getId()).build())
+                .collect(Collectors.toList());
         return ChapterResponses.builder()
                 .title(chapter.getTitle())
                 .content(chapter.getContent())
                 .price(chapter.getPrice())
-                .image_proxy(secureUrl)
-                .signature(signature)
-                .expiredAt(300)
+                .images(images)
                 .build();
     }
-
-
 
 
 }

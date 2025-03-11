@@ -25,6 +25,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 
 @RestController
@@ -75,14 +77,24 @@ public class ChapterController {
 
     @GetMapping("/{chapter_id}")
     public ApiResponse<ChapterResponses> getChapter(@PathVariable String chapter_id) {
-        ChapterResponses result=chapterService.getChapterDetail(chapter_id);
-        return ApiResponse.<ChapterResponses>builder().message("successfully").result(result).build();
+        ChapterResponses result = chapterService.getChapterDetail(chapter_id);
+        return ApiResponse.<ChapterResponses>builder()
+                .message("Successfully")
+                .result(result)
+                .build();
     }
 
-    @GetMapping("/proxy")
-    public ApiResponse<List<ImageResponse>> getChapterProxy(@RequestParam String sig, @RequestParam String id,@RequestParam long currentTimestamp) {
-        List<ImageResponse> result=imageService.getImages(id,sig,currentTimestamp);
-        return ApiResponse.<List<ImageResponse>>builder().result(result).message("Successfully!!").build();
-
+    @GetMapping("/{chapter_id}/proxy")
+    public ApiResponse<Map<String, byte[]>> getChapterProxy(@RequestParam List<String> ids) {
+        System.out.println("Received Images: " + ids);
+        Map<String, byte[]> result = imageService.getImages(ids);
+        return ApiResponse.<Map<String, byte[]>>builder()
+                .result(result)
+                .message("Successfully!!")
+                .build();
     }
+
+
+
+
 }

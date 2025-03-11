@@ -1,6 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ImageResponse;
+import com.vawndev.spring_boot_readnovel.Entities.Image;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.ImageRepository;
@@ -9,9 +10,13 @@ import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 
@@ -22,24 +27,32 @@ public class ImageService {
     private final ImageRepository imageRepository;
     private final SecurityUtils securityUtils;
 
-    public List<ImageResponse> getImages(String id, String sig,long currentTimestamp) {
+    public Map<String, byte[]> getImages(List<String> ids) {
+        Map<String, byte[]> images = new HashMap<>();
 
-        Map<String, String> params = new HashMap<>();
-        params.put("public_id", id);
-        params.put("timestamp", String.valueOf(currentTimestamp - 300));
-        params.put("expired_at", String.valueOf(currentTimestamp));
+        for (String id : ids) {
+            Optional<Image> imageOpt = imageRepository.findById(id);
 
-        String expectedSignature = securityUtils.GenerateSignature(params);
+            if (imageOpt.isPresent()) {
+                Image image = imageOpt.get();
+                System.out.println("Found Image ID: " + id + " - URL: " + image.getUrl());
 
-        if (!expectedSignature.equals(sig)) {
-            throw new RuntimeException(sig + "===" +expectedSignature);
+                try {
+                    URL url = new URL(image.getUrl());
+                    InputStream inputStream = url.openStream();
+                    byte[] imageBytes = inputStream.readAllBytes();
+                    inputStream.close();
+                    images.put(id, imageBytes);
+                } catch (IOException e) {
+                    System.err.println("Lỗi tải ảnh từ URL: " + image.getUrl());
+                    e.printStackTrace();
+                }
+            } else {
+                System.err.println("❌ Không tìm thấy ảnh với ID: " + id);
+            }
         }
-
-        // Lấy danh sách ảnh từ cơ sở dữ liệu
-        List<ImageResponse> result = imageRepository.findByChapterId(id).stream()
-                .map(img -> ImageResponse.builder().url(img.getUrl()).build())
-                .collect(Collectors.toList());
-        return result;
+        return images;
     }
+
 }
 
