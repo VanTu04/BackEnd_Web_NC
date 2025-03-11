@@ -52,3 +52,12 @@ cloudinary:
   api_secret: e0SPR4CmjsqWLMw4QE5bJFXSnRE
 
 
+payment:
+  vnPay:
+    url: ${PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+    tmnCode: ${TMN_CODE:WXBCTBAJ}
+    secretKey: ${SECRET_KEY:OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO}
+    returnUrl: ${RETURN_URL:http://localhost:8080/payment/vn-pay-callback}
+    version: ${VERSION:2.1.0}
+    command: ${COMMAND:pay}
+    orderType: ${ORDER_TYPE:other}

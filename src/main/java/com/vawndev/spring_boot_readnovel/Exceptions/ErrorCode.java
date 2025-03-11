@@ -23,7 +23,11 @@ public enum ErrorCode {
     SERVER_ERROR(1014, "server error", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_SAVE_DATA(1015, "Error saving data", HttpStatus.INTERNAL_SERVER_ERROR),
 
+    ERROR_CREATE_HMACSHA512(1017, "Error creating HMACSHA512", HttpStatus.INTERNAL_SERVER_ERROR),
+    ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
+
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
+    NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

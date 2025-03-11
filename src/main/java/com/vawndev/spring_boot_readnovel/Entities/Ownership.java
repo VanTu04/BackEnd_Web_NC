@@ -16,8 +16,10 @@ public class Ownership {
     private Long id;
 
     @ManyToOne
+    @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
     @ManyToOne
+    @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
 }
