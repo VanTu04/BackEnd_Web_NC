@@ -1,7 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -20,10 +19,7 @@ public class OtpController {
     @Autowired
     private OtpService otpService;
 
-    @GetMapping("/test")
-    public String testEndpoint() {
-        return "Test endpoint is working!";
-    }
+
 
     @PostMapping("/send")
     public String sendOtp(@RequestParam String email) {

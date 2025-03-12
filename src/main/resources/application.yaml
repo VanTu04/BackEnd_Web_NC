@@ -31,7 +31,7 @@ spring:
     host: smtp.gmail.com
     port: 587
     username: mlanhem28@gmail.com
-    password: Anmisoi112!
+    password: tdxdniynteyvvojr
     properties:
       mail:
         smtp:
@@ -62,3 +62,5 @@ payment:
 logging:
   level:
     root: DEBUG
+    org.springframework.mail: DEBUG
+    org.eclipse.angus.mail.smtp: DEBUG
