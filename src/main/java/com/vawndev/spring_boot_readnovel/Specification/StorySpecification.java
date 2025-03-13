@@ -17,21 +17,21 @@ public class StorySpecification {
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String pattern = "%" + keyword.trim().toLowerCase() + "%";
 
-                // Tìm theo title
+                // Search by title
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern));
 
-                // Tìm theo description
+                // Search by description
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern));
 
-                // Tìm theo category name (dùng LEFT JOIN)
+                // Search by category name (use LEFT JOIN)
                 Join<Object, Object> categoryJoin = root.join("categories", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(categoryJoin.get("name")), pattern));
 
-                // Tìm theo author name (dùng JOIN)
+                // Search by author name (use JOIN)
                 Join<Object, Object> authorJoin = root.join("author", JoinType.LEFT);
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(authorJoin.get("fullName")), pattern));
 
-                // Tìm theo type (vì type là Enum nên convert thành String)
+                // Search by type (because type is Enum so need convert to String)
                 predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("type").as(String.class)), pattern));
             }
 
