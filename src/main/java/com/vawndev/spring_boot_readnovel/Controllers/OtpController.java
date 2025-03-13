@@ -19,8 +19,6 @@ public class OtpController {
     @Autowired
     private OtpService otpService;
 
-
-
     @PostMapping("/send")
     public String sendOtp(@RequestParam String email) {
         String otp = otpService.generateOtp(email);
@@ -34,6 +32,19 @@ public class OtpController {
             return "OTP is valid!";
         } else {
             return "Invalid OTP!";
+        }
+    }
+
+    @PostMapping("/refresh")
+    public String refreshOtp(@RequestParam String email) {
+        try {
+            String newOtp = otpService.refreshOtp(email);
+            emailService.sendOtpEmail(email, "Your OTP Code", "Your OTP is: " + newOtp);
+            return "New OTP sent to " + email;
+        } catch (IllegalStateException e) {
+            return e.getMessage();
+        } catch (IllegalArgumentException e) {
+            return e.getMessage();
         }
     }
 }

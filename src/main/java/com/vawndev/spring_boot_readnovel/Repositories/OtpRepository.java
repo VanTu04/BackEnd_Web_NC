@@ -1,10 +1,11 @@
 package com.vawndev.spring_boot_readnovel.Repositories;
 
-import com.vawndev.spring_boot_readnovel.Entities.Otp;
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
-import java.util.Optional;
+import com.vawndev.spring_boot_readnovel.Entities.Otp;
 
 @Repository
 public interface OtpRepository extends JpaRepository<Otp, String> {
