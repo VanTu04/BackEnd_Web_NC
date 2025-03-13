@@ -1,6 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Story;
 
 
+import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import lombok.*;
 
 @Getter
@@ -14,6 +15,8 @@ public class StoriesResponse {
 
     private String title;
 
+    private StoryType type;
+
     private Long view;
 
     private double rate;
@@ -21,7 +24,5 @@ public class StoriesResponse {
     private int views;
 
     private String coverImage;
-
-    private Double price;
 
 }

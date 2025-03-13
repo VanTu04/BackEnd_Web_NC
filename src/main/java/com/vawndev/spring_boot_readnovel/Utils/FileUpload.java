@@ -52,7 +52,6 @@ public class FileUpload {
         }
     }
 
-    // Hàm kiểm tra phần mở rộng file
     private static boolean isAllowedExtension(String extension, String pattern) {
         if (extension == null || extension.isEmpty()) {
             return false;
@@ -60,19 +59,16 @@ public class FileUpload {
         return extension.matches("(?i)jpg|jpeg|png");
     }
 
-    public static String getFileExtension(String fileName) {
-        if (fileName == null || fileName.lastIndexOf(".") == -1) {
-            return ""; // Không có đuôi file
+    private static String getFileExtension(String fileName) {
+        if (fileName == null || fileName.isEmpty()) {
+            return ""; // Avoid NullPointerException error
         }
-        return fileName.substring(fileName.lastIndexOf(".") + 1);
-    }
 
-    public static void validFormatFile(String fileName) {
-        Set<String> validExtensions = Set.of("jpg", "png", "jpeg", "docx");
-        if (!validExtensions.contains(getFileExtension(fileName)))
-        {
-            throw new IllegalArgumentException("Invalid type \"jpg\", \"png\", \"jpeg\", \"docx\" Only  are allowed.");
+        int lastDotIndex = fileName.lastIndexOf(".");
+        if (lastDotIndex == -1 || lastDotIndex == fileName.length() - 1) {
+            return ""; // no extension
         }
+        return fileName.substring(lastDotIndex + 1).toLowerCase();
     }
 
     public static String getType(final RESOURCE_TYPE type) {
@@ -80,6 +76,24 @@ public class FileUpload {
             throw new IllegalArgumentException("Invalid type. Only 'image' or 'document' are allowed.");
         }
         return type.name().toLowerCase();
+    }
+
+    public static void validFormatFile(String fileName) {
+        Set<String> validExtensions = Set.of("jpg", "png", "jpeg", "docx");
+        String extension = getFileExtension(fileName);
+        if (!validExtensions.contains(extension)) {
+            throw new IllegalArgumentException("Invalid file type: " + extension +
+                    ". Only jpg, png, jpeg, docx are allowed.");
+        }
+    }
+
+    public static void validFormatImageCover(String fileName) {
+        Set<String> validExtensions = Set.of("jpg", "png", "jpeg" );
+        String extension = getFileExtension(fileName);
+        if (!validExtensions.contains(extension)) {
+            throw new IllegalArgumentException("Invalid file type: " + extension +
+                    ". Only jpg, png, jpeg are allowed.");
+        }
     }
 
     private static boolean isValidType(RESOURCE_TYPE type) {

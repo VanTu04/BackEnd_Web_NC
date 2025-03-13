@@ -34,12 +34,13 @@ public class ChapterController {
 
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> addChapter(
+            @RequestHeader("Authorization") String tokenBearer,
             @RequestPart("chapterJson") String chapterJson,
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart(value = "file", required = false) List<MultipartFile> files
     ) throws JsonProcessingException {
 
-            ChapterRequest chapterRequest = JsonHelper. parseJson(chapterJson, ChapterRequest.class);
+            ChapterRequest chapterRequest = JsonHelper.parseJson(chapterJson, ChapterRequest.class);
 
             ChapterUploadRequest uploadRequest = new ChapterUploadRequest();
             uploadRequest.setChapter(chapterRequest);
@@ -56,15 +57,18 @@ public class ChapterController {
                 uploadRequest.setFile(imageUpload);
             }
 
-            String result= chapterService.addChapter(uploadRequest);
+            String result= chapterService.addChapter(uploadRequest,tokenBearer);
 
         return ApiResponse.<String>builder().message("Successfully!").result(result).build();
     }
 
 
     @DeleteMapping("/delete")
-    public ApiResponse<String> deleteChapter(@RequestParam String id) {
-        chapterService.deleteChapter(id);
+    public ApiResponse<String> deleteChapter(
+            @RequestHeader("Authorization") String tokenBearer,
+            @RequestParam String id,
+            @RequestParam String email) {
+        chapterService.deleteChapter(id,email,tokenBearer);
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 

@@ -8,6 +8,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
@@ -16,6 +17,7 @@ import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
+import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 
@@ -35,14 +37,16 @@ public class ChapterServiceImpl implements ChapterService {
     private final StoryRepository storyRepository;
     private final ChapterRepository chapterRepository;
     private final FileRepository fileRepository;
+    private final TokenHelper tokenHelper;
 
 
     @Override
-    public String addChapter(ChapterUploadRequest chapterUploadRequest) {
+    public String addChapter(ChapterUploadRequest chapterUploadRequest,String tokenBearer) {
         FileRequest freq = chapterUploadRequest.getFile();
         ChapterRequest creq = chapterUploadRequest.getChapter();
+        User Auth=tokenHelper.getRealAuthorizedUser(chapterUploadRequest.getChapter().getAuthorEmail(),tokenBearer);
         try {
-            Story story = storyRepository.findById(creq.getStory_id())
+            Story story = storyRepository.findByIdAndAuthor(creq.getStory_id(),Auth)
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
 
             List<String> listUrl;
@@ -75,8 +79,9 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public void deleteChapter(String id) {
-        Chapter chapter = chapterRepository.findById(id)
+    public void deleteChapter(String id,String email,String tokenBearer) {
+        User auth=tokenHelper.getRealAuthorizedUser(email,tokenBearer);
+        Chapter chapter = chapterRepository.findByIdAndAuthorId(id,auth.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
         List<File> files = fileRepository.findByChapterId(chapter.getId());
 

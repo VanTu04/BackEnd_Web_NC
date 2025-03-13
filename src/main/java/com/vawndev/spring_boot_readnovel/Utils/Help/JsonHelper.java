@@ -22,13 +22,17 @@ public class JsonHelper {
         if (json.startsWith("\"") && json.endsWith("\"")) {
             json = json.substring(1, json.length() - 1);
         }
-        return json.replace("\\n", "").replace("\\", "").trim();
+        return json.replace("\\n", "").replace("\\", "").trim() ;
     }
 
     // Hàm parse JSON thành object
-    public static <T> T parseJson(String json, Class<T> clazz) throws JsonProcessingException {
-            json = sanitizeJsonString(json);
-            return objectMapper.readValue(json, clazz);
+    public static <T> T parseJson(String json, Class<T> clazz)  {
+            try {
+                json = sanitizeJsonString(json);
+                return objectMapper.readValue(json, clazz);
+            }catch (JsonProcessingException e) {
+                throw new RuntimeException("Invalid JSON format : ", e);
+            }
 
     }
 }

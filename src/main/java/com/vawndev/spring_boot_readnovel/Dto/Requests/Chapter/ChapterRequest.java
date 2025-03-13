@@ -13,6 +13,8 @@ public class ChapterRequest {
 
     private String title;
 
+    private String authorEmail;
+
     private String story_id;
 
     private String content;

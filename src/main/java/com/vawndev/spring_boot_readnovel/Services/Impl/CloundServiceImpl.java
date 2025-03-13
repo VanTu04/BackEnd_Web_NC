@@ -28,8 +28,7 @@ public class CloundServiceImpl implements CloundService {
 
         List<String> fileUrls = new ArrayList<>();
 
-        Set<String> allowedImageTypes = Set.of("image/jpeg", "image/png", "image/jpg");
-        Set<String> allowedDocTypes = Set.of("application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+
 
         Map<String, String> resourceMap = Map.of(
                 "image/jpeg", "image",
@@ -91,6 +90,8 @@ public class CloundServiceImpl implements CloundService {
             throw new IllegalArgumentException("Không có ảnh để upload");
         }
 
+        FileUpload.validFormatImageCover(cover.getImage_cover().getOriginalFilename());
+
         FileUpload.assertAllowed(cover.getImage_cover(), ".*\\.(jpg|jpeg|png)$");
 
         String resourceType = cover.Type().toString().toLowerCase();
@@ -109,27 +110,24 @@ public class CloundServiceImpl implements CloundService {
     @Override
     public Map<String, String> removeUrlOnChapterDelete(List<String> privateIDs) {
         Map<String, String> deleteResults = new HashMap<>();
-        System.out.println("Private IDs to delete: " + privateIDs);
 
         for (String id : privateIDs) {
             try {
-                // Xác định loại resource (hình ảnh hoặc file raw)
+                // Dentermind resource (image or file raw)
                 String[] parts = id.split("/");
                 String resourceType = parts.length > 0 && "images".equals(parts[0]) ? "image" : "raw";
 
-                // Xóa phần mở rộng (nếu có)
+                // Remove the extension (if any)
                 String idWithoutExt = id.contains(".") ? id.substring(0, id.lastIndexOf(".")) : id;
 
-                System.out.println("Trying to delete: " + idWithoutExt + " (Type: " + resourceType + ")");
 
-                // Gọi API Cloudinary để xóa file
+                // call API Cloudinary to remove file
                 Map<String, Object> result = cloudinary.uploader().destroy(
                         idWithoutExt, // Giữ nguyên ID
                         ObjectUtils.asMap("invalidate", true, "resource_type", resourceType, "type", "private")
                 );
 
                 String status = result.get("result").toString();
-                System.out.println("Delete result for " + idWithoutExt + ": " + status);
 
                 if ("not found".equals(status)) {
                     throw new RuntimeException("Cloudinary: ID not found - " + id);
@@ -141,6 +139,34 @@ public class CloundServiceImpl implements CloundService {
                 throw new RuntimeException("Error while deleting " + id, e);
             }
         }
+        return deleteResults;
+    }
+
+    @Override
+    public Map<String, String> removeUrlOnStory(String publicId) {
+        Map<String, String> deleteResults = new HashMap<>();
+            try {
+                // Dentermind resource (image or file raw)
+                String[] parts = publicId.split("/");
+                String resourceType = parts.length > 0 && "images".equals(parts[0]) ? "image" : "raw";
+                // Remove the extension (if any)
+                String idWithoutExt = publicId.contains(".") ? publicId.substring(0, publicId.lastIndexOf(".")) : publicId;
+                // call API Cloudinary to remove file
+                Map<String, Object> result = cloudinary.uploader().destroy(
+                        idWithoutExt, // Giữ nguyên ID
+                        ObjectUtils.asMap("invalidate", true, "resource_type", resourceType, "type", "private")
+                );
+
+                String status = result.get("result").toString();
+                if ("not found".equals(status)) {
+                    throw new RuntimeException("Cloudinary: ID not found - " + publicId);
+                }
+                deleteResults.put(publicId, status);
+            } catch (Exception e) {
+                deleteResults.put(publicId, "error");
+                throw new RuntimeException("Error while deleting " + publicId, e);
+            }
+
         return deleteResults;
     }
 

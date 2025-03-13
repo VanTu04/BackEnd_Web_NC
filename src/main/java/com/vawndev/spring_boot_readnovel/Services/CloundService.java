@@ -11,4 +11,5 @@ public interface CloundService {
     List<String> getUrlChapterAfterUpload(FileRequest file) throws IOException;
     String getUrlCoverAfterUpload(ImageCoverRequest cover) throws IOException;
     Map<String, String> removeUrlOnChapterDelete(List<String> privateIDs);
+    Map<String, String> removeUrlOnStory(String publicId);
 }
