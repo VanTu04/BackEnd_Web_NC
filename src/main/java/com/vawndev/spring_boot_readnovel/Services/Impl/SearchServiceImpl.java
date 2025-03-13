@@ -26,14 +26,18 @@ public class SearchServiceImpl implements SearchService {
     private final SearchRepository searchRepository;
     private final StoryMapper storyMapper;
     @Override
-    public PageResponse<StoriesResponse> searchStory(String keyword, PageRequest req) {
-        if (keyword == null || keyword.isEmpty()) {
-            throw new AppException(ErrorCode.INVALID_STORY);
-        }
-        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        Specification<Story> spec=searchByKeyword(keyword);
-        Page<Story> storyPage=searchRepository.findAll(spec,pageable);
-        List<StoriesResponse> storiesList = storyPage.getContent().stream().map(stry->storyMapper.toStoriesResponse(stry)).collect(Collectors.toList());
-        return PageResponse.<StoriesResponse>builder().data(storiesList).page(req.getPage()).limit(req.getLimit()).limit(req.getLimit()).build();
+    public PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit) {
+       try{
+           if (keyword == null || keyword.isEmpty()) {
+               throw new AppException(ErrorCode.INVALID_STORY);
+           }
+           Pageable pageable = PaginationUtil.createPageable(page, limit);
+           Specification<Story> spec=searchByKeyword(keyword);
+           Page<Story> storyPage=searchRepository.findAll(spec,pageable);
+           List<StoriesResponse> storiesList = storyPage.getContent().stream().map(stry->storyMapper.toStoriesResponse(stry)).collect(Collectors.toList());
+           return PageResponse.<StoriesResponse>builder().data(storiesList).page(page).limit(limit).build();
+       } catch (Exception e) {
+           throw new RuntimeException(e);
+       }
     }
 }

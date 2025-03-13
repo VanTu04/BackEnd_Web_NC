@@ -17,8 +17,9 @@ import org.springframework.web.bind.annotation.RestController;
 public class SearchController {
     private final SearchService searchService;
     @GetMapping("/search")
-    public ApiResponse<PageResponse<StoriesResponse>> searchChapters(@RequestParam String keyword, PageRequest req) {
-        PageResponse<StoriesResponse> result = searchService.searchStory(keyword, req);
+    public ApiResponse<PageResponse<StoriesResponse>> searchChapters(@RequestParam String keyword,@RequestParam int page,
+                                                                     @RequestParam int limit) {
+        PageResponse<StoriesResponse> result = searchService.searchStory(keyword, page,limit);
         return ApiResponse.<PageResponse<StoriesResponse>>builder()
                 .message("Successfully")
                 .result(result)

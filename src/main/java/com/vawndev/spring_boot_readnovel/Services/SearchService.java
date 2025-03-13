@@ -6,5 +6,5 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 
 
 public interface SearchService {
-    PageResponse<StoriesResponse> searchStory(String keyword, PageRequest pageRequest) ;
+    PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit) ;
 }
