@@ -36,4 +36,6 @@ public class User extends BaseEntity{
 
     @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
+
+
 }

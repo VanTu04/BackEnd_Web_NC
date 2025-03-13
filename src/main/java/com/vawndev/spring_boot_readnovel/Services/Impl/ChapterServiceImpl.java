@@ -14,17 +14,21 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.FileRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
+import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
 
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -38,9 +42,12 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
     private final FileRepository fileRepository;
     private final TokenHelper tokenHelper;
+    private final JwtUtils jwtUtil;
+    private final UserRepository userRepository;
 
 
     @Override
+    @PreAuthorize("hasRole('AUTHOR')")
     public String addChapter(ChapterUploadRequest chapterUploadRequest,String tokenBearer) {
         FileRequest freq = chapterUploadRequest.getFile();
         ChapterRequest creq = chapterUploadRequest.getChapter();
@@ -79,30 +86,44 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
-    public void deleteChapter(String id,String email,String tokenBearer) {
-        User auth=tokenHelper.getRealAuthorizedUser(email,tokenBearer);
-        Chapter chapter = chapterRepository.findByIdAndAuthorId(id,auth.getId())
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
-        List<File> files = fileRepository.findByChapterId(chapter.getId());
-
-        // get list private IDs from URLs
-        List<String> publicId = files.stream()
-                .map(file -> FileUpload.extractPublicId(file.getUrl()))
-                .collect(Collectors.toList());
-
-        // delete file from Cloudinary
+    @PreAuthorize("hasAnyRole('AUTHOR','ADMIN')")
+    public void deleteChapter(String id, String email, String tokenBearer) {
         try {
-            cloundService.removeUrlOnChapterDelete(publicId);
+            User user = jwtUtil.validToken(tokenHelper.getTokenInfo(tokenBearer));
+            User auth;
+            boolean isAuthor = user.getRoles().stream().anyMatch(role -> "AUTHOR".equals(role.getName()));
+            boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ADMIN".equals(role.getName()));
+
+            if (isAuthor) {
+                auth = tokenHelper.getRealAuthorizedUser(email, tokenBearer);
+            } else if (isAdmin) {
+                auth = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+            } else {
+                throw new AppException(ErrorCode.UNAUTHORIZED);
+            }
+
+            Chapter chapter = chapterRepository.findByIdAndAuthorId(id, auth.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+
+            List<File> files = fileRepository.findByChapterId(chapter.getId());
+
+            List<String> publicId = files.stream()
+                    .map(file -> FileUpload.extractPublicId(file.getUrl()))
+                    .collect(Collectors.toList());
+
+            try {
+                cloundService.removeUrlOnChapterDelete(publicId);
+            } catch (Exception e) {
+                throw new RuntimeException("Lỗi khi xóa file trên Cloudinary: " + e.getMessage());
+            }
+
+            fileRepository.deleteAll(files);
+            chapterRepository.delete(chapter);
         } catch (Exception e) {
-            throw new RuntimeException("Error delete file from Cloudinary: " + e.getMessage());
+            throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
-
-        // Xóa file trong database
-        fileRepository.deleteAll(files);
-
-        // Xóa chapter
-        chapterRepository.delete(chapter);
     }
+
 
 
     @Override
