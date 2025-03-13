@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Utils.Help;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
@@ -16,7 +17,7 @@ public class JsonHelper {
     }
 
     public static String sanitizeJsonString(String json) {
-        if (json == null || json.isEmpty()) return json;
+        if (json == null || json.isEmpty()) return json ;
 
         if (json.startsWith("\"") && json.endsWith("\"")) {
             json = json.substring(1, json.length() - 1);
@@ -25,12 +26,9 @@ public class JsonHelper {
     }
 
     // Hàm parse JSON thành object
-    public static <T> T parseJson(String json, Class<T> clazz) {
-        try {
-            json = sanitizeJsonString(json); // Chuẩn hóa JSON trước khi parse
+    public static <T> T parseJson(String json, Class<T> clazz) throws JsonProcessingException {
+            json = sanitizeJsonString(json);
             return objectMapper.readValue(json, clazz);
-        } catch (Exception e) {
-            throw new RuntimeException("Invalid JSON format", e);
-        }
+
     }
 }

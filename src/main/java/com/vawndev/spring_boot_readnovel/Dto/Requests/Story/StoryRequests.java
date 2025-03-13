@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Story;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Category.CategoryRequests;
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import lombok.*;
@@ -23,10 +24,8 @@ public class StoryRequests {
 
     private String emailAuthor;
 
-    private BigDecimal price;
+    private BigDecimal price=BigDecimal.ZERO;
 
-    private boolean isAvailable;
-
-    private List<Category> categories;
+    private List<CategoryRequests> categories;
 
 }

@@ -57,14 +57,27 @@ public class FileUpload {
         if (extension == null || extension.isEmpty()) {
             return false;
         }
-        return extension.matches("(?i)jpg|jpeg|png|gif|bmp");
+        return extension.matches("(?i)jpg|jpeg|png");
     }
 
+    public static String getFileExtension(String fileName) {
+        if (fileName == null || fileName.lastIndexOf(".") == -1) {
+            return ""; // Không có đuôi file
+        }
+        return fileName.substring(fileName.lastIndexOf(".") + 1);
+    }
 
+    public static void validFormatFile(String fileName) {
+        Set<String> validExtensions = Set.of("jpg", "png", "jpeg", "docx");
+        if (!validExtensions.contains(getFileExtension(fileName)))
+        {
+            throw new IllegalArgumentException("Invalid type \"jpg\", \"png\", \"jpeg\", \"docx\" Only  are allowed.");
+        }
+    }
 
     public static String getType(final RESOURCE_TYPE type) {
         if (!isValidType(type)) {
-            throw new IllegalArgumentException("Invalid type. Only 'image' or 'raw are allowed.");
+            throw new IllegalArgumentException("Invalid type. Only 'image' or 'document' are allowed.");
         }
         return type.name().toLowerCase();
     }
@@ -72,5 +85,18 @@ public class FileUpload {
     private static boolean isValidType(RESOURCE_TYPE type) {
         return type == RESOURCE_TYPE.IMAGE || type == RESOURCE_TYPE.RAW ;
     }
+    public static String extractPublicId(String url) {
+        String regex = ".*/v\\d+/(.+)$";
+        java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
+        java.util.regex.Matcher matcher = pattern.matcher(url);
+
+        if (!matcher.find()) {
+            throw new IllegalArgumentException("Invalid URL: " + url);
+        }
+        return matcher.group(1);
+    }
+
+
+
 
 }

@@ -24,6 +24,8 @@ public enum ErrorCode {
     ERROR_SAVE_DATA(1015, "Error saving data", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_CHAPTER(1017,"Invalid chapter",HttpStatus.NOT_FOUND),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
+    INVALID_CATE(1018, "Not found category", HttpStatus.NOT_FOUND),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

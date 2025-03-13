@@ -48,10 +48,9 @@ public class CloundServiceImpl implements CloundService {
                 throw new IllegalArgumentException("File " + file.getOriginalFilename() + " bị rỗng!");
             }
 
-            // Lấy content type
             String contentType = file.getContentType();
 
-            // Xác định resource type
+            // Dentermind resource type
             String resourceType = resourceMap.get(contentType);
             if (resourceType == null) {
                 throw new IllegalArgumentException("File " + file.getOriginalFilename() + " không được phép upload.");
@@ -107,6 +106,44 @@ public class CloundServiceImpl implements CloundService {
 
         return uploadResult.get("secure_url").toString();
     }
+    @Override
+    public Map<String, String> removeUrlOnChapterDelete(List<String> privateIDs) {
+        Map<String, String> deleteResults = new HashMap<>();
+        System.out.println("Private IDs to delete: " + privateIDs);
+
+        for (String id : privateIDs) {
+            try {
+                // Xác định loại resource (hình ảnh hoặc file raw)
+                String[] parts = id.split("/");
+                String resourceType = parts.length > 0 && "images".equals(parts[0]) ? "image" : "raw";
+
+                // Xóa phần mở rộng (nếu có)
+                String idWithoutExt = id.contains(".") ? id.substring(0, id.lastIndexOf(".")) : id;
+
+                System.out.println("Trying to delete: " + idWithoutExt + " (Type: " + resourceType + ")");
+
+                // Gọi API Cloudinary để xóa file
+                Map<String, Object> result = cloudinary.uploader().destroy(
+                        idWithoutExt, // Giữ nguyên ID
+                        ObjectUtils.asMap("invalidate", true, "resource_type", resourceType, "type", "private")
+                );
+
+                String status = result.get("result").toString();
+                System.out.println("Delete result for " + idWithoutExt + ": " + status);
+
+                if ("not found".equals(status)) {
+                    throw new RuntimeException("Cloudinary: ID not found - " + id);
+                }
+
+                deleteResults.put(id, status);
+            } catch (Exception e) {
+                deleteResults.put(id, "error");
+                throw new RuntimeException("Error while deleting " + id, e);
+            }
+        }
+        return deleteResults;
+    }
+
 
 
 

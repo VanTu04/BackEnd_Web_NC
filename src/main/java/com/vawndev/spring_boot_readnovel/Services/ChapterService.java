@@ -5,6 +5,6 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
 
 public interface ChapterService {
     ChapterResponses getChapterDetail(String id);
-    void addChapter(ChapterUploadRequest chapterUploadRequest ) ;
+    String addChapter(ChapterUploadRequest chapterUploadRequest ) ;
     void deleteChapter(String id);
 }

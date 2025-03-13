@@ -22,4 +22,6 @@ public class StoriesResponse {
 
     private String coverImage;
 
+    private Double price;
+
 }

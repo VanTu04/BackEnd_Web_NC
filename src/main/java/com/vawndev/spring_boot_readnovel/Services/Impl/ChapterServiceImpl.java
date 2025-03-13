@@ -1,38 +1,28 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.JsonNode;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.ImageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
-import com.vawndev.spring_boot_readnovel.Entities.Image;
+import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.ImageRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.FileRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
+import com.vawndev.spring_boot_readnovel.Services.CloundService;
+import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.SecurityUtils;
-import io.github.cdimascio.dotenv.Dotenv;
 import lombok.RequiredArgsConstructor;
-import org.springframework.core.ParameterizedTypeReference;
-import org.springframework.http.HttpEntity;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.ResponseEntity;
+
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -41,15 +31,14 @@ import java.util.stream.Collectors;
 @RequiredArgsConstructor
 public class ChapterServiceImpl implements ChapterService {
 
-    private final CloundServiceImpl cloundServiceImpl;
+    private final CloundService cloundService;
     private final StoryRepository storyRepository;
     private final ChapterRepository chapterRepository;
-    private final ImageRepository imageRepository;
-    private final SecurityUtils securityUtils;
+    private final FileRepository fileRepository;
 
 
     @Override
-    public void addChapter(ChapterUploadRequest chapterUploadRequest) {
+    public String addChapter(ChapterUploadRequest chapterUploadRequest) {
         FileRequest freq = chapterUploadRequest.getFile();
         ChapterRequest creq = chapterUploadRequest.getChapter();
         try {
@@ -58,7 +47,7 @@ public class ChapterServiceImpl implements ChapterService {
 
             List<String> listUrl;
             try {
-                listUrl = cloundServiceImpl.getUrlChapterAfterUpload(freq);
+                listUrl = cloundService.getUrlChapterAfterUpload(freq);
             } catch (IOException e) {
                 throw new RuntimeException("Error uploading to Cloudinary", e);
             }
@@ -70,14 +59,16 @@ public class ChapterServiceImpl implements ChapterService {
                     .build();
             Chapter savedChapter = chapterRepository.save(chapter);
 
-            List<Image> imageList = listUrl.stream()
-                    .map(url -> Image.builder()
+            List<File> imageList = listUrl.stream()
+                    .map(url -> File.builder()
                             .url(url)
                             .chapter(savedChapter)
                             .build())
                     .collect(Collectors.toList());
 
-            imageRepository.saveAll(imageList);
+            fileRepository.saveAll(imageList);
+            return chapter.getId();
+
         }catch (Exception e) {
             throw new RuntimeException(e);
         }
@@ -85,22 +76,40 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     public void deleteChapter(String id) {
-        Chapter chapter=chapterRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+        Chapter chapter = chapterRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+        List<File> files = fileRepository.findByChapterId(chapter.getId());
+
+        // get list private IDs from URLs
+        List<String> publicId = files.stream()
+                .map(file -> FileUpload.extractPublicId(file.getUrl()))
+                .collect(Collectors.toList());
+
+        // delete file from Cloudinary
+        try {
+            cloundService.removeUrlOnChapterDelete(publicId);
+        } catch (Exception e) {
+            throw new RuntimeException("Error delete file from Cloudinary: " + e.getMessage());
+        }
+
+        // Xóa file trong database
+        fileRepository.deleteAll(files);
+
+        // Xóa chapter
         chapterRepository.delete(chapter);
     }
+
 
     @Override
     public ChapterResponses getChapterDetail(String id) {
         Chapter chapter = chapterRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_DOB));
-        List<ImageResponse> images =  imageRepository.findByChapterId(id).stream()
-                .map(img -> ImageResponse.builder().id(img.getId()).build())
-                .collect(Collectors.toList());
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
         return ChapterResponses.builder()
+                .id(chapter.getId())
                 .title(chapter.getTitle())
                 .content(chapter.getContent())
                 .price(chapter.getPrice())
-                .images(images)
+                .files(chapter.getFiles().stream().map(file->FileResponse.builder().id(file.getId()).build()).collect(Collectors.toList()))
                 .build();
     }
 

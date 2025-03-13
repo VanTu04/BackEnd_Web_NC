@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/Category")
+@RequestMapping("/category")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;

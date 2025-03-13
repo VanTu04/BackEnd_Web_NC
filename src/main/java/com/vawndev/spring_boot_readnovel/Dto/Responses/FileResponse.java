@@ -9,6 +9,6 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Data
 @Builder
-public class ImageResponse {
+public class FileResponse {
     private String id;
 }

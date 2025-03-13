@@ -1,12 +1,9 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter;
 
-import com.vawndev.spring_boot_readnovel.Entities.Image;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
 import lombok.*;
 
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Builder
 @NoArgsConstructor
