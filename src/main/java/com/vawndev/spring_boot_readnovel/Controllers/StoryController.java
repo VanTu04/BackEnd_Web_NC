@@ -1,8 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
@@ -25,37 +27,47 @@ public class StoryController {
 
     @GetMapping("")
     public ApiResponse<PageResponse<StoriesResponse>> getStory(
-            @ModelAttribute PageRequest req) {
+            @RequestParam PageRequest req) {
         PageResponse<StoriesResponse> result=storyService.getStories(req);
         return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
     }
-    @GetMapping("/detail")
+    @GetMapping("/detail/{id}")
     public ApiResponse<StoryDetailResponses> getStoryDetail(@PathVariable String id) {
-        StoryDetailResponses  result=storyService.getStoryById(id);
+        StoryDetailResponses result=storyService.getStoryById(id);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ApiResponse<String> createStory(@RequestPart String storyJson,@RequestPart MultipartFile image_cover) {
+    public ApiResponse<String> createStory(@RequestHeader("Authorization") String authHeader,@RequestPart String storyJson, @RequestPart MultipartFile image_cover)  {
             StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
-            storyService.addStory(storyRequests,image_cover);
+            storyService.addStory(storyRequests,image_cover,authHeader);
             return ApiResponse.<String>builder().result("Success!").build();
     }
 
-    @PutMapping("/update")
-    public ApiResponse<String> updateStory(@RequestBody StoryRequests req,@RequestParam String id,@RequestPart MultipartFile images) {
-        storyService.updateStoryByAuthor(req,id,images);
+    @PatchMapping("/update")
+    public ApiResponse<String> updateStory(@RequestHeader("Authorization") String authHeader,@RequestParam StoryRequests req,@RequestParam String id) {
+        storyService.updateStoryByAuthor(req,id,authHeader);
         return ApiResponse.<String>builder().result("Success!").build();
     }
+    @PutMapping(value = "/update/cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ApiResponse<String> updateStoryCover(
+            @RequestParam StoryCondition req,
+            @RequestPart MultipartFile image_cover,
+            @RequestHeader("Authorization") String authHeader) {
+
+        storyService.updateCoverImage(req, image_cover,authHeader);
+        return ApiResponse.<String>builder().result("success").build();
+    }
+
     @PutMapping("/remove")
-    public ApiResponse<String> removeStory(@RequestBody StoryRequests req,@RequestParam String id) {
-        storyService.deleteSoftStory(req.getEmailAuthor(),id);
+    public ApiResponse<String> removeStory(@RequestBody StoryCondition req ,@RequestHeader("Authorization") String authHeader) {
+        storyService.deleteSoftStory(req,authHeader);
         return ApiResponse.<String>builder().result("success").build();
     }
 
     @DeleteMapping("/delete")
-    public ApiResponse<String> deleteStory(@RequestBody ModeratedByAdmin req) {
-        storyService.deleteStory(req);
-        return ApiResponse.<String>builder().result("Sucess").build();
+    public ApiResponse<String> deleteStory(@RequestBody StoryCondition req,@RequestHeader("Authorization") String authHeader) {
+        storyService.deleteStory(req,authHeader);
+        return ApiResponse.<String>builder().result("Success").build();
     }
     
 }

@@ -8,6 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class StoryCondition {
-    private boolean isApproved;
-    private boolean isArchived;
+    private String id;
+    private String email;
 }
