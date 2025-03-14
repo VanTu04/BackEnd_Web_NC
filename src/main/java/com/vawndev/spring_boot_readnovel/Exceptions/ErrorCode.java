@@ -1,8 +1,9 @@
 package com.vawndev.spring_boot_readnovel.Exceptions;
 
-import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
+
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -28,6 +29,8 @@ public enum ErrorCode {
 
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
     NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
+
+    INVALID(1018, "Invalid: {name}", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
@@ -35,8 +38,13 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
-
+    
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;
+
+    public String getFormattedMessage(String name) {
+        return this.message.replace("{name}", name);
+    }
+
 }

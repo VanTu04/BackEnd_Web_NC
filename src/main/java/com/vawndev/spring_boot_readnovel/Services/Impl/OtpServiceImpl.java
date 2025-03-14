@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.vawndev.spring_boot_readnovel.Entities.Otp;
 import com.vawndev.spring_boot_readnovel.Repositories.OtpRepository;
+import com.vawndev.spring_boot_readnovel.Services.EmailService;
 import com.vawndev.spring_boot_readnovel.Services.OtpService;
 
 @Service
@@ -17,6 +18,9 @@ public class OtpServiceImpl implements OtpService {
 
     @Autowired
     private OtpRepository otpRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     private final SecureRandom random = new SecureRandom();
 
@@ -34,6 +38,13 @@ public class OtpServiceImpl implements OtpService {
                 .build();
         otpRepository.save(otpEntity);
         return otp;
+    }
+
+    @Override
+    @Transactional
+    public void sendOtp(String email) {
+        String otp = generateOtp(email);
+        emailService.sendOtpEmail(email, "Your OTP Code", "Your OTP is: " + otp);
     }
 
     @Override

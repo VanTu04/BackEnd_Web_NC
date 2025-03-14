@@ -15,6 +15,9 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
+import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
+import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Services.OtpService;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
 
 import jakarta.validation.Valid;
@@ -25,20 +28,24 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
-    private final OtpController otpController;
+    private final OtpService otpService;
 
     @PostMapping("/request-otp")
     public ApiResponse<Void> requestOtp(@RequestParam String email) {
-        otpController.sendOtp(email);
+        otpService.sendOtp(email);
         return ApiResponse.<Void>builder().build();
     }
 
     @PostMapping("/create")
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest, @RequestParam String otp) {
-        if (otpController.validateOtp(userCreationRequest.getEmail(), otp).equals("OTP is valid!")) {
+        if (!userCreationRequest.isPasswordMatching()) {
+            throw new AppException(ErrorCode.INVALID, ErrorCode.INVALID.getFormattedMessage("Password must match"));           
+        }
+
+        if (otpService.validateOtp(userCreationRequest.getEmail(), otp)) {
             return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
         } else {
-            throw new IllegalArgumentException("Invalid OTP");
+            throw new AppException(ErrorCode.INVALID, ErrorCode.INVALID.getFormattedMessage("OTP is invalid"));
         }
     }
 
@@ -48,13 +55,13 @@ public class UserController {
         return ResponseEntity.ok(ApiResponse.<UserResponse>builder().result(userResponse).build());
     }
 
-    @PutMapping("/update/{id}")
+    @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
         userService.updateUser(id, request);
         return ResponseEntity.ok(ApiResponse.<Void>builder().build());
     }
 
-    @DeleteMapping("/delete/{id}")
+    @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.<Void>builder().build());
