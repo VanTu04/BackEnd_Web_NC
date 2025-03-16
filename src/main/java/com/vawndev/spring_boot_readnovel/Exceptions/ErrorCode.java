@@ -25,7 +25,7 @@ public enum ErrorCode {
     INVALID_CHAPTER(1017,"Invalid chapter",HttpStatus.NOT_FOUND),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
     INVALID_CATE(1018, "Not found category", HttpStatus.NOT_FOUND),
-
+    FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

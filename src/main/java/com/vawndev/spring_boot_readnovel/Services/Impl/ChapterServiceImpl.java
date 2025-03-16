@@ -20,15 +20,11 @@ import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
-import com.vawndev.spring_boot_readnovel.Utils.SecurityUtils;
 import lombok.RequiredArgsConstructor;
-
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
-
 import java.io.IOException;
 import java.util.List;
-import java.util.Set;
 import java.util.stream.Collectors;
 
 
@@ -47,7 +43,7 @@ public class ChapterServiceImpl implements ChapterService {
 
 
     @Override
-    @PreAuthorize("hasRole('AUTHOR')")
+//    @PreAuthorize("hasRole('AUTHOR')")
     public String addChapter(ChapterUploadRequest chapterUploadRequest,String tokenBearer) {
         FileRequest freq = chapterUploadRequest.getFile();
         ChapterRequest creq = chapterUploadRequest.getChapter();

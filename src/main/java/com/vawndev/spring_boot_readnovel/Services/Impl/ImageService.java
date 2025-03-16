@@ -2,6 +2,7 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
+import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
@@ -13,11 +14,7 @@ import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
-
+import java.util.*;
 
 
 @Service
@@ -26,28 +23,41 @@ public class ImageService {
     private final FileRepository fileRepository;
     private final ChapterRepository chapterRepository;
 
-        public Map<String, byte[]> getFile(List<String> ids,String chapter_id) {
-            Chapter chapter = chapterRepository.findById(chapter_id).orElseThrow(()->new AppException(ErrorCode.INVALID_CHAPTER));
-            Map<String, byte[]> file = new HashMap<>();
-                for (String id : ids) {
-                    Optional<File> imageOpt = fileRepository.findById(id);
-                    if (imageOpt.isPresent()) {
-                        File image = imageOpt.get();
-                        try {
-                            URL url = new URL(image.getUrl());
-                            InputStream inputStream = url.openStream();
-                            byte[] imageBytes = inputStream.readAllBytes();
-                            inputStream.close();
-                            file.put(id, imageBytes);
-                        } catch (IOException e) {
-                            e.printStackTrace();
-                        }
-                    } else {
-                        System.err.println("❌ Không tìm thấy ảnh với ID: " + id);
-                    }
-            }
-            return file;
+    public Map<String, String> getFile(List<String> ids, String chapterId) {
+        Chapter chapter = chapterRepository.findById(chapterId)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+        StoryType getTypeStory = chapter.getStory().getType();
+
+        Map<String, String> fileMap = new HashMap<>();
+
+        // Map file extension to MINE type
+        Map<String, String> mimeTypes = Map.of(
+                "png", "image/png",
+                "jpg", "image/jpeg",
+                "jpeg", "image/jpeg",
+                "docx", "application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        );
+
+        for (String id : ids) {
+            fileRepository.findById(id).ifPresentOrElse(image -> {
+                try (InputStream inputStream = new URL(image.getUrl()).openStream()) {
+                    byte[] bytes = inputStream.readAllBytes();
+                    String base64 = Base64.getEncoder().encodeToString(bytes);
+
+                    String fileUrl = image.getUrl().toLowerCase();
+                    String fileExtension = fileUrl.substring(fileUrl.lastIndexOf('.') + 1);
+
+                    String mimeType = mimeTypes.getOrDefault(fileExtension, "application/octet-stream");
+
+                    fileMap.put(id, "data:" + mimeType + ";base64," + base64);
+                } catch (IOException e) {
+                    throw new AppException(ErrorCode.FILE_NOT_FOUND);
+                }
+            }, () -> System.err.println("❌ Không tìm thấy file với ID: " + id));
         }
+
+        return fileMap;
+    }
 
 }
 

@@ -14,6 +14,9 @@ import java.util.List;
 
 public interface StoryService {
     PageResponse<StoriesResponse> getStories(PageRequest req);
+    PageResponse<StoriesResponse> getStoriesComingSoon(PageRequest req);
+    PageResponse<StoriesResponse> getStoriesUpdating(PageRequest req);
+    List<StoriesResponse> getStoriesRank();
     PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req);
     void addStory(StoryRequests req, MultipartFile image, String bearerToken);
     void updateStoryByAuthor(StoryRequests req,String id,String authHeader);

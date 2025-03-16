@@ -1,11 +1,16 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Category.CategoryRequests;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Services.CategoryService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
+import com.vawndev.spring_boot_readnovel.Services.UserService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 public class AdminController {
     private final StoryService storyService;
     private final CategoryService categoryService;
+    private final UserService userService;
 
     @GetMapping("/category")
     public ApiResponse<CategoriesResponse> getCategories(){
@@ -50,5 +56,11 @@ public class AdminController {
     public ApiResponse<String> deleteCategory(@RequestParam String id){
         categoryService.DeleteCategory(id);
         return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+
+    @GetMapping("/user")
+    public ApiResponse<PageResponse<UserDetailReponse>> getUser(@ModelAttribute PageRequest req){
+        PageResponse<UserDetailReponse> users=userService.getAllUser(req);
+        return ApiResponse.<PageResponse<UserDetailReponse>>builder().result(users).build();
     }
 }

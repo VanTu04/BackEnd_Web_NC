@@ -38,7 +38,7 @@ public class ChapterController {
             @RequestPart("chapterJson") String chapterJson,
             @RequestPart(value = "image", required = false) List<MultipartFile> images,
             @RequestPart(value = "file", required = false) List<MultipartFile> files
-    ) throws JsonProcessingException {
+    )  {
 
             ChapterRequest chapterRequest = JsonHelper.parseJson(chapterJson, ChapterRequest.class);
 
@@ -82,9 +82,9 @@ public class ChapterController {
     }
 
     @GetMapping("/{chapter_id}/proxy")
-    public ApiResponse<Map<String, byte[]>> getChapterProxy(@PathVariable String chapter_id,@RequestParam List<String> ids) {
-        Map<String, byte[]> result = imageService.getFile(ids,chapter_id);
-        return ApiResponse.<Map<String, byte[]>>builder()
+    public ApiResponse<Map<String, String>>getChapterProxy(@PathVariable String chapter_id,@RequestParam List<String> ids) {
+        Map<String,String> result = imageService.getFile(ids,chapter_id);
+        return ApiResponse.<Map<String, String>>builder()
                 .result(result)
                 .message("Successfully!!")
                 .build();

@@ -1,8 +1,11 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Role;
 import com.vawndev.spring_boot_readnovel.Entities.User;
@@ -12,8 +15,12 @@ import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.RoleRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
+import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
+import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
 import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -29,6 +36,24 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+
+    @Override
+    public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
+        Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<User> users=userRepository.findAll(pageable);
+        List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user->
+                UserDetailReponse
+                        .builder()
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
+                        .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
+                        .deleteAt(!user.getDeleteAt().equals(null) ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt()) : null )
+                        .build()
+                ).collect(Collectors.toList());
+        PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit()).data(userDetailReponseList).total(users.getTotalPages()).build();
+        return null;
+    }
 
     @Override
     public UserResponse createUser(UserCreationRequest userRequest) {

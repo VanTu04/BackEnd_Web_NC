@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -48,7 +49,7 @@ public class CategoryServiceImpl implements CategoryService {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
         }
-        exstingCategory.setDeleteAt(LocalDateTime.now());
+        exstingCategory.setDeleteAt(Instant.now());
         categoryRepository.save(exstingCategory);
     }
 

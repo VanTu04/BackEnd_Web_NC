@@ -8,15 +8,19 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesHomeResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
+import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.List;
 
 @Slf4j
 @RestController
@@ -27,10 +31,30 @@ public class StoryController {
 
     @GetMapping("")
     public ApiResponse<PageResponse<StoriesResponse>> getStory(
-            @RequestParam PageRequest req) {
+            @ModelAttribute  PageRequest req) {
         PageResponse<StoriesResponse> result=storyService.getStories(req);
         return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
     }
+
+    @GetMapping("/homepage")
+    public ApiResponse<StoriesHomeResponse> getStoriesHomepage() {
+        PageRequest page1= new PageRequest(0,20);
+        PageRequest page2 = new PageRequest(0,10);
+
+        PageResponse<StoriesResponse> STRS=storyService.getStories(page1);
+        PageResponse<StoriesResponse> CMS=storyService.getStoriesComingSoon(page2);
+        PageResponse<StoriesResponse> UDT=storyService.getStoriesUpdating(page2);
+        List<StoriesResponse> RSTR=storyService.getStoriesRank();
+        StoriesHomeResponse storiesHomeResponse=StoriesHomeResponse
+                .builder()
+                .stories(STRS)
+                .getStoriesUpdating(UDT)
+                .getStoriesComingSoon(CMS)
+                .getStoriesRank(RSTR)
+                .build();
+        return ApiResponse.<StoriesHomeResponse>builder().result(storiesHomeResponse).message("Successfully🎈").build();
+    }
+
     @GetMapping("/detail/{id}")
     public ApiResponse<StoryDetailResponses> getStoryDetail(@PathVariable String id) {
         StoryDetailResponses result=storyService.getStoryById(id);
