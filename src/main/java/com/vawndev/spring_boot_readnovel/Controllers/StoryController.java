@@ -36,25 +36,6 @@ public class StoryController {
         return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
     }
 
-    @GetMapping("/homepage")
-    public ApiResponse<StoriesHomeResponse> getStoriesHomepage() {
-        PageRequest page1= new PageRequest(0,20);
-        PageRequest page2 = new PageRequest(0,10);
-
-        PageResponse<StoriesResponse> STRS=storyService.getStories(page1);
-        PageResponse<StoriesResponse> CMS=storyService.getStoriesComingSoon(page2);
-        PageResponse<StoriesResponse> UDT=storyService.getStoriesUpdating(page2);
-        List<StoriesResponse> RSTR=storyService.getStoriesRank();
-        StoriesHomeResponse storiesHomeResponse=StoriesHomeResponse
-                .builder()
-                .stories(STRS)
-                .getStoriesUpdating(UDT)
-                .getStoriesComingSoon(CMS)
-                .getStoriesRank(RSTR)
-                .build();
-        return ApiResponse.<StoriesHomeResponse>builder().result(storiesHomeResponse).message("Successfully🎈").build();
-    }
-
     @GetMapping("/detail/{id}")
     public ApiResponse<StoryDetailResponses> getStoryDetail(@PathVariable String id) {
         StoryDetailResponses result=storyService.getStoryById(id);

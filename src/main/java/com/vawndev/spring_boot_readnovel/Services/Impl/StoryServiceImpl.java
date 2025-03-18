@@ -5,6 +5,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
@@ -42,8 +44,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.beans.FeatureDescriptor;
 import java.math.BigDecimal;
 import java.time.Instant;
-import java.util.Arrays;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -97,6 +98,11 @@ public class StoryServiceImpl implements StoryService {
                 .id(story.getId())
                 .title(story.getTitle())
                 .type(story.getType())
+                .categories(story.getCategories() != null ? story.getCategories().stream().map(cate-> CategoryResponse
+                        .builder()
+                        .name(cate.getName())
+                        .id(cate.getId())
+                        .build()).collect(Collectors.toList()) : null)
                 .status(story.getStatus())
                 .view(story.getViews())
                 .coverImage(story.getCoverImage())
@@ -172,19 +178,24 @@ public class StoryServiceImpl implements StoryService {
         try{
             ImageCoverRequest imageCoverRequest=new ImageCoverRequest();
             imageCoverRequest.setImage_cover(image_cover);
-            List<Category> categories = req.getCategories().stream()
-                    .map(categoryId -> categoryRepository.findById(categoryId.getId())
-                            .orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE)))
+            Set<String> seenIds = new HashSet<>();
+            List<Category> uniqueCategories = req.getCategories().stream()
+                    .map(categoryId -> categoryRepository.findById(categoryId.getId()).orElse(null))
+                    .filter(Objects::nonNull) // remove element null
+                    .filter(category -> seenIds.add(category.getId())) // get only the first element with the previous id
                     .collect(Collectors.toList());
+
+
 
             String CoverImage=cloundService.getUrlCoverAfterUpload(imageCoverRequest);
             Story story = Story
                     .builder()
                     .author(author)
-                    .categories(categories)
+                    .categories(uniqueCategories)
                     .description(req.getDescription())
                     .isVisibility(false)
                     .isAvailable(IS_AVAILBLE.PENDING)
+                    .status(STORY_STATUS.COMING_SOON)
                     .rate(0)
                     .views(0L)
                     .type(req.getType())

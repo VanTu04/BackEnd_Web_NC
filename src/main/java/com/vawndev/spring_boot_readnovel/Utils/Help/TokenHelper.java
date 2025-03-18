@@ -14,11 +14,11 @@ public class TokenHelper {
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
 
-    public String getTokenInfo(String authHeader) {
-        if (authHeader == null || !authHeader.startsWith("Bearer ")) {
+    public String getTokenInfo(String bearerToken) {
+        if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.MISS_TOKEN);
         }
-        return authHeader.substring(7);
+        return bearerToken.substring(7);
     }
 
     public User getRealAuthorizedUser(String email, String bearerToken) {

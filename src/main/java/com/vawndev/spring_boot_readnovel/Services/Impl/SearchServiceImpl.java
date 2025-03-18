@@ -11,11 +11,14 @@ import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.SearchRepository;
 import com.vawndev.spring_boot_readnovel.Services.SearchService;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+
+import static com.vawndev.spring_boot_readnovel.Specification.StorySpecification.searchByFilter;
 import static com.vawndev.spring_boot_readnovel.Specification.StorySpecification.searchByKeyword;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -27,17 +30,29 @@ public class SearchServiceImpl implements SearchService {
     private final StoryMapper storyMapper;
     @Override
     public PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit) {
-       try{
-           if (keyword == null || keyword.isEmpty()) {
-               throw new AppException(ErrorCode.INVALID_STORY);
-           }
-           Pageable pageable = PaginationUtil.createPageable(page, limit);
-           Specification<Story> spec=searchByKeyword(keyword);
-           Page<Story> storyPage=searchRepository.findAll(spec,pageable);
-           List<StoriesResponse> storiesList = storyPage.getContent().stream().map(stry->storyMapper.toStoriesResponse(stry)).collect(Collectors.toList());
-           return PageResponse.<StoriesResponse>builder().data(storiesList).page(page).limit(limit).build();
-       } catch (Exception e) {
-           throw new RuntimeException(e);
-       }
+        try {
+
+            Pageable pageable = PaginationUtil.createPageable(page, limit);
+            Specification<Story> spec = searchByFilter(keyword).or(searchByKeyword(keyword));
+
+            Page<Story> storyPage = searchRepository.findAll(spec, pageable);
+
+            List<StoriesResponse> storiesList = storyPage.getContent().stream()
+                    .map(storyMapper::toStoriesResponse)
+                    .collect(Collectors.toList());
+
+            // Trả về kết quả phân trang
+            return PageResponse.<StoriesResponse>builder()
+                    .data(storiesList)
+                    .page(page)
+                    .limit(limit)
+                    .total(storyPage.getSize())
+                    .build();
+
+        } catch (AppException e) {
+            throw e; // Nếu là AppException, ném lại để giữ nguyên mã lỗi
+        } catch (Exception e) {
+            throw new RuntimeException("Lỗi khi tìm kiếm truyện: " + e.getMessage(), e);
+        }
     }
-}
+    }

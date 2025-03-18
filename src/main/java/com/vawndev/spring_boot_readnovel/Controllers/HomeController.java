@@ -23,8 +23,7 @@ public class HomeController {
     @GetMapping("/homepage")
     public ApiResponse<StoriesHomeResponse> getStoriesHomepage() {
         PageRequest page1= new PageRequest(0,20);
-        PageRequest page2 = new PageRequest(0,10);
-
+        PageRequest page2 = new PageRequest(0,13);
         CategoriesResponse categories = categoryService.getCategories();
         PageResponse<StoriesResponse> STRS=storyService.getStories(page1);
         PageResponse<StoriesResponse> CMS=storyService.getStoriesComingSoon(page2);

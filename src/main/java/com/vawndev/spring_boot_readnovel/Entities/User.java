@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
+import com.vawndev.spring_boot_readnovel.Enum.SUBSCRIPTION_TYPE;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -28,6 +29,7 @@ public class User extends BaseEntity{
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 
+
     @Column(name = "is_request")
     private boolean isRequest;
 
@@ -37,5 +39,7 @@ public class User extends BaseEntity{
     @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
 
+    @OneToOne(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private Subscription subscription;
 
 }

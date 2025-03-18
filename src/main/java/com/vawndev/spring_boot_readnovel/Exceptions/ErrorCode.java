@@ -26,6 +26,7 @@ public enum ErrorCode {
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
     INVALID_CATE(1018, "Not found category", HttpStatus.NOT_FOUND),
     FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
+    NOT_FOUND(1020, "{row} not found", HttpStatus.NOT_FOUND),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
