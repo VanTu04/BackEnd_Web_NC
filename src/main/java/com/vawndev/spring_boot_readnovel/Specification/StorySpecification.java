@@ -16,6 +16,7 @@ public class StorySpecification {
                 return criteriaBuilder.conjunction(); // Trả về tất cả nếu không có keyword
             }
 
+
             String[] keywords = keyword.trim().toLowerCase().split("\\s+");
             List<Predicate> predicates = new ArrayList<>();
 
@@ -27,7 +28,6 @@ public class StorySpecification {
 
                 predicates.add(criteriaBuilder.or(
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("description")), pattern),
                         criteriaBuilder.like(criteriaBuilder.lower(categoryJoin.get("name")), pattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("type").as(String.class)), pattern),
                         criteriaBuilder.like(criteriaBuilder.lower(root.get("status")), pattern)
@@ -43,7 +43,9 @@ public class StorySpecification {
     public static Specification<Story> searchByKeyword(String keyword) {
         return (root, query, criteriaBuilder) -> {
             List<Predicate> predicates = new ArrayList<>();
-
+            if (keyword == null || keyword.trim().isEmpty()) {
+                return criteriaBuilder.conjunction();
+            }
             if (keyword != null && !keyword.trim().isEmpty()) {
                 String pattern = "%" + keyword.trim().toLowerCase() + "%";
 
