@@ -1,6 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
 import com.vawndev.spring_boot_readnovel.Enum.SUBSCRIPTION_TYPE;
+import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Utils.SubscriptionUtil;
 import jakarta.persistence.*;
 import lombok.*;
@@ -20,6 +21,15 @@ public class Subscription extends BaseEntity {
 
     @Enumerated(EnumType.STRING)
     private SUBSCRIPTION_TYPE type = SUBSCRIPTION_TYPE.REGULAR;
+
+    private String accountNumber;
+
+    private String accountName;
+
+    private String bankName;
+
+    @Enumerated(EnumType.STRING)
+    private TransactionType transactionType;
 
     private Instant expiredAt;
 

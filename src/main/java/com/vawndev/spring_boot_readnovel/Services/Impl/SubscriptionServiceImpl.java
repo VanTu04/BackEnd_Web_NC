@@ -28,7 +28,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private static boolean isPayment=true;
 
-    @Scheduled(cron = "0 0 0 * * ?")
+    @Scheduled(cron = "0 0 0 * * ?") //auo run for check expired of account subscription in 12:00pm every day
     @Transactional
     public void resetExpiredSubscriptions() {
         Instant now = Instant.now();
@@ -40,11 +40,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Override
     public void upgradeSubscription(SUBSCRIPTION_TYPE type, String bearerToken) {
         User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
-        Subscription subscription = subscriptionRepository.findById(user.getId()).get();
+        Subscription subscription = subscriptionRepository.findById(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+
         if(isPayment){
             subscription.setType(type);
         }
     }
-
 
 }
