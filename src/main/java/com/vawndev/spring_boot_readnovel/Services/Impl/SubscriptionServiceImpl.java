@@ -68,7 +68,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
 
             // Tìm Subscription Plan
-            SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plans())
+            SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
                     .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
 
             // Gán gói mới và lưu
