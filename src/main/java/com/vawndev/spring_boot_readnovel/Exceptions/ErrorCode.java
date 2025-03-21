@@ -26,6 +26,9 @@ public enum ErrorCode {
     ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
     NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
+    INVALID_CHAPTER(1018, "Invalid chapter", HttpStatus.BAD_REQUEST),
+    FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
+    INVALID_CATE(2020, "Invalid category", HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
