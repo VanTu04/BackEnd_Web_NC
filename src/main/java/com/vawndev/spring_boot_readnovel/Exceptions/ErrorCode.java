@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
+import java.text.MessageFormat;
+
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -28,8 +30,9 @@ public enum ErrorCode {
 
     INVALID_CHAPTER(1017,"Invalid chapter",HttpStatus.NOT_FOUND),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
-    NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
+    NOT_FOUND(1017, "{Object} not found", HttpStatus.NOT_FOUND),
     INVALID_CATE(1018, "Not found category", HttpStatus.NOT_FOUND),
+    OBJECT_INVAILD(1018, "{Object} must be a value", HttpStatus.BAD_REQUEST),
 
     ;
 
@@ -42,4 +45,8 @@ public enum ErrorCode {
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;
+
+    public String getFormattedMessage(Object... args) {
+        return MessageFormat.format(this.message, args);
+    }
 }
