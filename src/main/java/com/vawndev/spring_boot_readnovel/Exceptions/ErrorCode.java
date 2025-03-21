@@ -29,12 +29,18 @@ public enum ErrorCode {
     INVALID_CHAPTER(1018, "Invalid chapter", HttpStatus.BAD_REQUEST),
     FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
     INVALID_CATE(2020, "Invalid category", HttpStatus.BAD_REQUEST),
+    FAILED_PAYMENT(2021, "Failed to payment", HttpStatus.BAD_REQUEST),
+    CONFLICT(2022, "CONFLICT", HttpStatus.CONFLICT),
+    CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until your subscription expires to upgrade.", HttpStatus.CONFLICT),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
         this.message = message;
         this.statusCode = statusCode;
+    }
+    public String getMessage(String customMessage) {
+        return this.message.replace("{message}", customMessage);
     }
 
     private final int code;

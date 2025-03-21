@@ -34,9 +34,7 @@ public class TokenHelper {
             }
 
             return author;
-        } catch (AppException e) {
-            throw e;
-        } catch (Exception e) {
+        }catch (Exception e) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
     }

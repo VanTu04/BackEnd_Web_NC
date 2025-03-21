@@ -19,27 +19,17 @@ public class Subscription extends BaseEntity {
     @JoinColumn(name = "user_id", unique = true)
     private User user;
 
-    @Enumerated(EnumType.STRING)
-    private SUBSCRIPTION_TYPE type = SUBSCRIPTION_TYPE.REGULAR;
+    @ManyToOne
+    @JoinColumn(name = "plan_id")
+    private SubscriptionPlans plan;
 
-    private String accountNumber;
-
-    private String accountName;
-
-    private String bankName;
-
-    @Enumerated(EnumType.STRING)
-    private TransactionType transactionType;
-
-    private Instant expiredAt;
+    private Instant expiredAt =null;
 
     @PrePersist
     @PreUpdate
     private void updateExpiredAt() {
-        if (type == SUBSCRIPTION_TYPE.REGULAR) {
-            expiredAt = null;
-        } else {
-            expiredAt = Instant.now().plus(SubscriptionUtil.EXPIRATION_DAYS.getOrDefault(type, 0L), ChronoUnit.DAYS);
+        if (plan != null) {
+            expiredAt = Instant.now().plus(plan.getExpired(), ChronoUnit.DAYS);
         }
     }
 }

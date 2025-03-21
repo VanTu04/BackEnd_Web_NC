@@ -41,6 +41,9 @@ public class User extends BaseEntity{
     @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
 
+    @OneToOne(fetch = FetchType.LAZY)
+    private Subscription subscription;
+
     @PrePersist
     public void prePersist() {
         if (balance == null) {
