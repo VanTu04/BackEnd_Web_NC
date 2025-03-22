@@ -12,10 +12,9 @@ import lombok.*;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Table(name = "images")
-public class Image extends BaseEntity{
+@Table(name = "File")
+public class File extends BaseEntity{
     private String url;
-
     @ManyToOne
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;

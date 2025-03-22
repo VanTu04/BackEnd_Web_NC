@@ -9,7 +9,7 @@ import lombok.Getter;
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
-    USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
+    USER_EXISTED(1002, "User existed", HttpStatus.NOT_FOUND),
     EMAIL_INVALID(1003, "Email invalid", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {min} characters", HttpStatus.BAD_REQUEST),
     USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
@@ -23,14 +23,12 @@ public enum ErrorCode {
     INVALID_STORY(1013, "Invalid story", HttpStatus.NOT_FOUND),
     SERVER_ERROR(1014, "server error", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_SAVE_DATA(1015, "Error saving data", HttpStatus.INTERNAL_SERVER_ERROR),
-
-    ERROR_CREATE_HMACSHA512(1017, "Error creating HMACSHA512", HttpStatus.INTERNAL_SERVER_ERROR),
-    ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
-
+    INVALID_CHAPTER(1017,"Invalid chapter",HttpStatus.NOT_FOUND),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
-    NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
+    INVALID_CATE(1018, "Not found category", HttpStatus.NOT_FOUND),
 
-    INVALID(1018, "Invalid: {name}", HttpStatus.BAD_REQUEST),
+    INVALID(1019, "Invalid {message}", HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
@@ -38,13 +36,8 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
-    
+
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;
-
-    public String getFormattedMessage(String name) {
-        return this.message.replace("{name}", name);
-    }
-
 }

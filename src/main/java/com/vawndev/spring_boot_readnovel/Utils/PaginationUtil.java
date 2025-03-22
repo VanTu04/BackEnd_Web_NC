@@ -6,7 +6,7 @@ import org.springframework.data.domain.Pageable;
 public class PaginationUtil {
     public static Pageable createPageable(Integer page, Integer size) {
         int pageNumber = (page != null && page >= 0) ? page : 0;
-        int pageSize = (size != null && size > 0) ? size : 10; // Giá trị mặc định
+        int pageSize = (size != null && size > 0) ? size : 10;
         return PageRequest.of(pageNumber, pageSize);
     }
 }

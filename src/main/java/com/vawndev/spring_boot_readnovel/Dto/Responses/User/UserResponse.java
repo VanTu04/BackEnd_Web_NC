@@ -10,12 +10,6 @@ import java.util.Set;
 @NoArgsConstructor
 @Builder
 public class UserResponse {
-    private LocalDateTime createdAt;
-
-    private LocalDateTime updatedAt;
-    private String id;
     private String fullName;
     private String email;
-    private LocalDate dateOfBirth;
-    Set<RoleResponse> roles;
 }
