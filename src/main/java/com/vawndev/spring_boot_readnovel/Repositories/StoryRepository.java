@@ -52,9 +52,9 @@ public interface StoryRepository extends JpaRepository<Story, String> {
                                Pageable pageable);
     Page<Story> findAll(Pageable pageable);
 
-    @Query("select count(*) from Story s where s.isApproved = true and month(s.updatedAt) = :month and year(s.updatedAt) = :year")
+    @Query("select count(*) from Story s where s.isAvailable = 'ACCEPTED' and month(s.updatedAt) = :month and year(s.updatedAt) = :year")
     Long countApprovedStories(@Param("month") int month, @Param("year") int year);
 
-    @Query("SELECT COUNT(s) FROM Story s WHERE s.isApproved = false AND MONTH(s.createdAt) = :month AND YEAR(s.createdAt) = :year")
+    @Query("SELECT COUNT(s) FROM Story s WHERE s.isAvailable = 'REJECTED' AND MONTH(s.createdAt) = :month AND YEAR(s.createdAt) = :year")
     Long countRejectedStories(@Param("month") int month, @Param("year") int year);
 }
