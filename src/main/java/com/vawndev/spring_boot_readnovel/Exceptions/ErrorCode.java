@@ -4,6 +4,8 @@ import lombok.Getter;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
+import java.text.MessageFormat;
+
 @Getter
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
@@ -24,14 +26,17 @@ public enum ErrorCode {
     ERROR_SAVE_DATA(1015, "Error saving data", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_CREATE_HMACSHA512(1017, "Error creating HMACSHA512", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
+
+    INVALID_CHAPTER(1017,"Invalid chapter",HttpStatus.NOT_FOUND),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
     NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
-    INVALID_CHAPTER(1018, "Invalid chapter", HttpStatus.BAD_REQUEST),
     FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
     INVALID_CATE(2020, "Invalid category", HttpStatus.BAD_REQUEST),
     FAILED_PAYMENT(2021, "Failed to payment", HttpStatus.BAD_REQUEST),
     CONFLICT(2022, "CONFLICT", HttpStatus.CONFLICT),
     CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until your subscription expires to upgrade.", HttpStatus.CONFLICT),
+    OBJECT_INVAILD(1018, "{Object} must be a value", HttpStatus.BAD_REQUEST),
+
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
@@ -39,11 +44,12 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
-    public String getMessage(String customMessage) {
-        return this.message.replace("{message}", customMessage);
-    }
 
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;
+
+    public String getFormattedMessage(Object... args) {
+        return MessageFormat.format(this.message, args);
+    }
 }
