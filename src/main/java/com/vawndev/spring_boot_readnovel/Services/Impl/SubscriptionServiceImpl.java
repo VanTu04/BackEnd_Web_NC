@@ -56,6 +56,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION);
             }
 
+            
             // Kiểm tra trạng thái thanh toán
             if (!isPayment) {
                 throw new AppException(ErrorCode.FAILED_PAYMENT);
