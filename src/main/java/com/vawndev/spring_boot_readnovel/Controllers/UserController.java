@@ -39,13 +39,13 @@ public class UserController {
     @PostMapping("/create")
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest, @RequestParam String otp) {
         if (!userCreationRequest.isPasswordMatching()) {
-            throw new AppException(ErrorCode.INVALID, ErrorCode.INVALID.getFormattedMessage("Password must match"));           
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);           
         }
 
         if (otpService.validateOtp(userCreationRequest.getEmail(), otp)) {
             return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
         } else {
-            throw new AppException(ErrorCode.INVALID, ErrorCode.INVALID.getFormattedMessage("OTP is invalid"));
+            throw new AppException(ErrorCode.INVALID,"OTP is invalid");
         }
     }
 

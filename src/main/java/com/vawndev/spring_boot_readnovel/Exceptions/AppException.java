@@ -8,6 +8,7 @@ import lombok.Setter;
 public class AppException extends RuntimeException {
 
     private ErrorCode errorCode;
+    private String messageString;
 
     public AppException(ErrorCode errorCode) {
         super(errorCode.getMessage());
@@ -15,7 +16,8 @@ public class AppException extends RuntimeException {
     }
 
     public AppException(ErrorCode errorCode, String customMessage) {
-        super(customMessage); 
+        super(errorCode.getMessage()); 
         this.errorCode = errorCode;
+        this.messageString = customMessage;
     }
 }

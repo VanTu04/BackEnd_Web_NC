@@ -28,10 +28,14 @@ public enum ErrorCode {
     ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
 
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
-    NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
+    NOT_FOUND(1017, "Object not found", HttpStatus.NOT_FOUND),
 
-    INVALID(1018, "Invalid: {name}", HttpStatus.BAD_REQUEST),
+    INVALID(1018, "Invalid: ", HttpStatus.BAD_REQUEST),
+    BLANK_NAME(1019,"Name must be fill",HttpStatus.BAD_REQUEST),
+    PASSWORD_MISMATCH(1020,"Password must match",HttpStatus.BAD_REQUEST)
     ;
+
+
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {
         this.code = code;
@@ -42,6 +46,7 @@ public enum ErrorCode {
     private final int code;
     private final String message;
     private final HttpStatusCode statusCode;
+
 
     public String getFormattedMessage(String name) {
         return this.message.replace("{name}", name);

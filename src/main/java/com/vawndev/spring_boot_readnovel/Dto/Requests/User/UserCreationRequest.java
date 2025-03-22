@@ -16,18 +16,17 @@ import java.time.LocalDate;
 @NoArgsConstructor
 @Builder
 public class UserCreationRequest {
-    @NotBlank(message = "Full name is required")
+    @NotBlank(message = "BLANK_NAME")
     private String fullName;
 
     @Email(message = "INVALID_EMAIL")
-    @NotBlank(message = "Email is required")
+    @NotBlank(message = "BLANK_EMAIL")
     private String email;
 
     @Size(min = 6, message = "INVALID_PASSWORD")
-    @NotBlank(message = "Password is required")
     private String password;
 
-    @NotBlank(message = "Retype password is required")
+    @Size(min = 6, message = "INVALID_PASSWORD")
     private String retypePassword;
 
     private LocalDate dateOfBirth;
