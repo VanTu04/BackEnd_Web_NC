@@ -22,7 +22,6 @@ import com.vawndev.spring_boot_readnovel.Services.UserService;
 
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
@@ -39,13 +38,13 @@ public class UserController {
     @PostMapping("/create")
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest, @RequestParam String otp) {
         if (!userCreationRequest.isPasswordMatching()) {
-            throw new AppException(ErrorCode.PASSWORD_MISMATCH);           
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
         }
 
         if (otpService.validateOtp(userCreationRequest.getEmail(), otp)) {
             return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
         } else {
-            throw new AppException(ErrorCode.INVALID,"OTP is invalid");
+            throw new AppException(ErrorCode.INVALID, "OTP is invalid");
         }
     }
 
@@ -65,5 +64,35 @@ public class UserController {
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
         userService.deleteUser(id);
         return ResponseEntity.ok(ApiResponse.<Void>builder().build());
+    }
+
+    // Forgot Password - Request OTP
+    @PostMapping("/forgot-password/request-otp")
+    public ApiResponse<Void> forgotPasswordRequestOtp(@RequestParam String email) {
+        // Send OTP for password reset
+        otpService.sendOtp(email);
+        return ApiResponse.<Void>builder().message("OTP sent to registered email").build();
+    }
+
+    // Forgot Password - Reset Password
+    @PostMapping("/forgot-password/reset")
+    public ApiResponse<Void> resetPassword(@RequestParam String email, 
+                                           @RequestParam String otp, 
+                                           @RequestParam String newPassword, 
+                                           @RequestParam String confirmPassword) {
+        // Check if passwords match
+        if (!newPassword.equals(confirmPassword)) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH, "Passwords do not match");
+        }
+
+        // Validate OTP
+        if (!otpService.validateOtp(email, otp)) {
+            throw new AppException(ErrorCode.INVALID, "Invalid OTP");
+        }
+
+        // Reset password
+        userService.resetPassword(email, newPassword);
+
+        return ApiResponse.<Void>builder().message("Password reset successfully").build();
     }
 }

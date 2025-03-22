@@ -84,5 +84,21 @@ public class UserServiceImpl implements UserService {
         return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
     }
 
+    @Override
+    public void resetPassword(String email, String newPassword) {
+        // Find the user by email
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+
+        // Encode the new password
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        // Save the updated user back to the repository
+        try {
+            userRepository.save(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new AppException(ErrorCode.ERROR_SAVE_DATA, "Error saving the new password");
+        }
+    }
 
 }
