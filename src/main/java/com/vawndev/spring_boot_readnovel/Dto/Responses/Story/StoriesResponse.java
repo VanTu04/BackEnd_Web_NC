@@ -1,7 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Story;
 
 
-import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import lombok.*;
 
 @Getter
@@ -14,8 +13,6 @@ public class StoriesResponse {
     private String id;
 
     private String title;
-
-    private StoryType type;
 
     private Long view;
 

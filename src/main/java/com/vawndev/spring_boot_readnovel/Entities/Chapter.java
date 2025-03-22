@@ -25,5 +25,5 @@ public class Chapter extends BaseEntity {
     private BigDecimal price;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<File> files;
+    private List<Image> images;
 }

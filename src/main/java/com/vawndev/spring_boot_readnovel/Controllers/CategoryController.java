@@ -9,7 +9,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
-@RequestMapping("/category")
+@RequestMapping("/Category")
 @RequiredArgsConstructor
 public class CategoryController {
     private final CategoryService categoryService;
@@ -20,5 +20,26 @@ public class CategoryController {
         return ApiResponse.<CategoriesResponse>builder().result(res).message("Successfully!").build();
     }
 
+    @PostMapping("/add")
+    public ApiResponse<String> addCategory(@RequestBody String name){
+        categoryService.addCategory(JsonHelper.getValueFromJson(name,"name"));
+        return ApiResponse.<String>builder().result("Successfully!").build();
+    }
 
+    @PutMapping("/update")
+    public ApiResponse<String> updateCategory(@RequestBody CategoryRequests req,@RequestParam String id){
+        categoryService.UpdateCategory(req,id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+
+    @PostMapping("/remove")
+    public ApiResponse<String> removeCategory(@RequestParam String id){
+        categoryService.RemoveCategory(id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+    @PostMapping("/delete")
+    public ApiResponse<String> deleteCategory(@RequestParam String id){
+        categoryService.DeleteCategory(id);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
 }
