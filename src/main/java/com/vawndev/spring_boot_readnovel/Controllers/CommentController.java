@@ -62,4 +62,9 @@ public class CommentController {
         commentService.deleteComment(userId, commentId);
         return ApiResponse.<String>builder().message("Success").result("Success delete comment!").build();
     }
+
+    @PostMapping("/test")
+    public String testfunc(@RequestParam String id){
+        return commentService.test(id);
+    }
 }

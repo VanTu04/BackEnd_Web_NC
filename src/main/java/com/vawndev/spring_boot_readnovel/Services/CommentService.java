@@ -16,4 +16,6 @@ public interface CommentService {
     Page<CommentResponse> getAllCommentByChapter(String chapterId, Pageable pageable);
     CommentResponse addComment(CommentRequest commentRequest);
     void deleteComment(String userId, String commentId);
+
+    String test(String id);
 }

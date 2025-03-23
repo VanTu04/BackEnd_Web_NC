@@ -29,13 +29,17 @@ public enum ErrorCode {
 
     INVALID_CHAPTER(1017,"Invalid chapter",HttpStatus.NOT_FOUND),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
-    NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
+    NOT_FOUND(1017, "Object {0} not found", HttpStatus.NOT_FOUND),
     FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
     INVALID_CATE(2020, "Invalid category", HttpStatus.BAD_REQUEST),
     FAILED_PAYMENT(2021, "Failed to payment", HttpStatus.BAD_REQUEST),
     CONFLICT(2022, "CONFLICT", HttpStatus.CONFLICT),
     CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until your subscription expires to upgrade.", HttpStatus.CONFLICT),
     OBJECT_INVAILD(1018, "{Object} must be a value", HttpStatus.BAD_REQUEST),
+
+    INVALID(1018, "Invalid: ", HttpStatus.BAD_REQUEST),
+    BLANK_NAME(1019,"Name must be fill",HttpStatus.BAD_REQUEST),
+    PASSWORD_MISMATCH(1020,"Password must match",HttpStatus.BAD_REQUEST),
 
     ;
 

@@ -115,4 +115,10 @@ public class CommentServiceImpl implements CommentService {
             commentRepository.save(comment);
         }
     }
+
+    @Override
+    public String test(String id) {
+        commentRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Comment"));
+        return "ok";
+    }
 }

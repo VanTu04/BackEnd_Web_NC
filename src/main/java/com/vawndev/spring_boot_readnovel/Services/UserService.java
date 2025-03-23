@@ -20,4 +20,5 @@ public interface UserService {
     List<UserResponse> getAllUsers();
     UserResponse getUser(String userId);
     User getUserByEmail(String email);
+    void resetPassword(String email, String newPassword);
 }
