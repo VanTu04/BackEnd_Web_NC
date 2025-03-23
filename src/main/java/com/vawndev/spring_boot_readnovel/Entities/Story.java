@@ -5,6 +5,7 @@ import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import jakarta.persistence.*;
 import lombok.*;
+import net.minidev.json.annotate.JsonIgnore;
 import org.hibernate.annotations.DynamicUpdate;
 
 import java.math.BigDecimal;
@@ -53,6 +54,10 @@ public class Story extends BaseEntity{
             inverseJoinColumns = @JoinColumn(name = "category_id")
     )
     private List<Category> categories;
+
+    @JsonIgnore
+    @OneToMany(mappedBy = "story", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<Chapter> chapters;
 
     @Column(name = "cover_image")
     private String coverImage;

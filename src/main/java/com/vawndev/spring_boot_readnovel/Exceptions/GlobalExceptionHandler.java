@@ -2,12 +2,14 @@ package com.vawndev.spring_boot_readnovel.Exceptions;
 
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import jakarta.validation.ConstraintViolation;
+import jakarta.validation.ConstraintViolationException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingPathVariableException;
 import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -19,6 +21,7 @@ import java.util.*;
 @Slf4j
 public class GlobalExceptionHandler {
 
+    // miss params
     @ExceptionHandler(MissingServletRequestParameterException.class)
     public ResponseEntity<ApiResponse> handleMissingParams(MissingServletRequestParameterException ex) {
         ApiResponse apiResponse = new ApiResponse();
@@ -28,6 +31,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.badRequest().body(apiResponse);
     }
 
+    //invalid params
     @ExceptionHandler(MethodArgumentTypeMismatchException.class)
     public ResponseEntity<ApiResponse> handleTypeMismatch(MethodArgumentTypeMismatchException ex) {
         ApiResponse apiResponse = new ApiResponse();
@@ -36,6 +40,27 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity.badRequest().body(apiResponse);
     }
+
+    // miss path variable
+    @ExceptionHandler(MissingPathVariableException.class)
+    public ResponseEntity<ApiResponse> handleMissingPathVariable(MissingPathVariableException ex) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(400);
+        apiResponse.setMessage("Missing path variable: " + ex.getVariableName());
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
+    // invaild path variable
+    @ExceptionHandler(ConstraintViolationException.class)
+    public ResponseEntity<ApiResponse> handleConstraintViolation(ConstraintViolationException ex) {
+        ApiResponse apiResponse = new ApiResponse();
+        apiResponse.setCode(400);
+        apiResponse.setMessage("Invalid path variable: " + ex.getMessage());
+
+        return ResponseEntity.badRequest().body(apiResponse);
+    }
+
 
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(RuntimeException exception) {
@@ -66,7 +91,7 @@ public class GlobalExceptionHandler {
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
-                        .message(exception.getMessage())
+                        .message(errorCode.getMessage())
                         .build());
     }
 

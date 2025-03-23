@@ -5,10 +5,9 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadReque
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
-import com.vawndev.spring_boot_readnovel.Entities.Chapter;
-import com.vawndev.spring_boot_readnovel.Entities.File;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
-import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Entities.*;
+import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
+import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.*;
@@ -17,6 +16,7 @@ import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -25,8 +25,6 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
-
-
 
 @Service
 @RequiredArgsConstructor
@@ -119,8 +117,6 @@ public class ChapterServiceImpl implements ChapterService {
             throw new AppException(ErrorCode.OBJECT_NOT_EXISTED);
         }
     }
-
-
 
     @Override
     public ChapterResponses getChapterDetail(String id) {

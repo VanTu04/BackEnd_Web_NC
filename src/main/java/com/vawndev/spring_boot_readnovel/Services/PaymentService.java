@@ -9,4 +9,8 @@ public interface PaymentService {
     PaymentResponse createVNPayPayment(HttpServletRequest request, int amount);
 
     WalletTransactionResponse createWalletTransaction(String vnp_TxnRef);
+
+    void purchaseChapter(String chapterId);
+
+    void purchaseStory(String storyId);
 }

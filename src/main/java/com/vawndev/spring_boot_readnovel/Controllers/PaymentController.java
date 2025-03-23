@@ -6,10 +6,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransaction
 import com.vawndev.spring_boot_readnovel.Services.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -42,5 +39,17 @@ public class PaymentController {
                     .message("failed")
                     .build();
         }
+    }
+
+    @PostMapping("/buy-chapter/{chapter_id}")
+    public ApiResponse<String> buyChapter(@PathVariable String chapter_id){
+        paymentService.purchaseChapter(chapter_id);
+        return ApiResponse.<String>builder().message("Success buy chapter!").build();
+    }
+
+    @PostMapping("/buy-story/{story_id}")
+    public ApiResponse<String> buyStory(@PathVariable String story_id){
+        paymentService.purchaseStory(story_id);
+        return ApiResponse.<String>builder().message("Success buy chapter!").build();
     }
 }

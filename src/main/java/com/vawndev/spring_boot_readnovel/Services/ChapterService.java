@@ -7,4 +7,5 @@ public interface ChapterService {
     ChapterResponses getChapterDetail(String id);
     String addChapter(ChapterUploadRequest chapterUploadRequest ,String tokenBearer) ;
     void deleteChapter(String id,String email,String tokenBearer );
+
 }
