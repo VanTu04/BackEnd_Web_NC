@@ -93,7 +93,7 @@ public class ChapterServiceImpl implements ChapterService {
             if (isAuthor) {
                 auth = tokenHelper.getRealAuthorizedUser(email, tokenBearer);
             } else if (isAdmin) {
-                auth = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                auth = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
             } else {
                 throw new AppException(ErrorCode.UNAUTHORIZED);
             }
@@ -116,7 +116,7 @@ public class ChapterServiceImpl implements ChapterService {
             fileRepository.deleteAll(files);
             chapterRepository.delete(chapter);
         } catch (Exception e) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.OBJECT_NOT_EXISTED);
         }
     }
 

@@ -17,9 +17,7 @@ import com.vawndev.spring_boot_readnovel.Services.CommentService;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +34,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public CommentResponse addComment(CommentRequest commentRequest) {
-        User user = userRepository.findById(commentRequest.getUserId()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        User user = userRepository.findById(commentRequest.getUserId()).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
         Story story = null;
         Chapter chapter = null;
         Comment parentComment = null;
@@ -105,11 +103,11 @@ public class CommentServiceImpl implements CommentService {
     @Override
     public void deleteComment(String userId, String commentId) {
         Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Comment"));
+                .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_FOUND, "Comment"));
 
         if (!comment.isDeleted()) {
             User adminOrAuthor = userRepository.findById(userId)
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
+                    .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_FOUND, "User"));
             comment.setDeleted(true);
             comment.setDeletedBy(adminOrAuthor);
             commentRepository.save(comment);
@@ -118,7 +116,7 @@ public class CommentServiceImpl implements CommentService {
 
     @Override
     public String test(String id) {
-        commentRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Comment"));
+        commentRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_FOUND, "Comment"));
         return "ok";
     }
 }

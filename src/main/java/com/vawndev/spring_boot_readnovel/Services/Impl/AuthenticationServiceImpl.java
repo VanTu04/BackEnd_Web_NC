@@ -1,10 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import com.nimbusds.jose.util.Base64;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Auth.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Auth.AuthenticationResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
-import com.vawndev.spring_boot_readnovel.Entities.Role;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
@@ -13,7 +11,6 @@ import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.AuthenticationService;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
@@ -21,19 +18,7 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.security.oauth2.core.user.OAuth2User;
-import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
-import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
-
-import javax.crypto.SecretKey;
-import javax.crypto.spec.SecretKeySpec;
-import java.time.Instant;
-import java.time.temporal.ChronoUnit;
-import java.util.Date;
-import java.util.stream.Collectors;
-
-import static com.vawndev.spring_boot_readnovel.Utils.JwtUtils.*;
 
 @Service
 @RequiredArgsConstructor
@@ -49,7 +34,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         // kiem tra user co trong db khong
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
         // kiem tra mat khau
             boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
             if(!valid) {
@@ -86,7 +71,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 //    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getAccount() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
         return userMapper.toUserResponse(user);
     }
 

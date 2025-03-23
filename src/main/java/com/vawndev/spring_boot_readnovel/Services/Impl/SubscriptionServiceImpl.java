@@ -5,24 +5,19 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.Subscription
 import com.vawndev.spring_boot_readnovel.Entities.Subscription;
 import com.vawndev.spring_boot_readnovel.Entities.SubscriptionPlans;
 import com.vawndev.spring_boot_readnovel.Entities.User;
-import com.vawndev.spring_boot_readnovel.Enum.SUBSCRIPTION_TYPE;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.SubscriptionPlansRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.SubscriptionRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
-import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.apache.hc.client5.http.auth.BearerToken;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.util.List;
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +31,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public void resetExpiredSubscriptions() {
         Instant now = Instant.now();
-        Subscription expiredSubscriptions = subscriptionRepository.findByExpiredAtBefore(now).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND));
+        Subscription expiredSubscriptions = subscriptionRepository.findByExpiredAtBefore(now).orElseThrow(()->new AppException(ErrorCode.OBJECT_NOT_FOUND));
         if(!expiredSubscriptions.equals(null)){
             subscriptionRepository.delete(expiredSubscriptions);
         }
@@ -70,7 +65,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
             // Tìm Subscription Plan
             SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+                    .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_FOUND));
 
             // Gán gói mới và lưu
             subscription.setPlan(subscriptionPlan);

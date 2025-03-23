@@ -69,14 +69,14 @@ public class UserServiceImpl implements UserService {
         try {
             user = userRepository.save(user);
         } catch (DataIntegrityViolationException exception) {
-            throw new AppException(ErrorCode.USER_EXISTED);
+            throw new AppException(ErrorCode.OBJECT_EXISTED, "User");
         }
 
         return userMapper.toUserResponse(user);
     }
 
     private User findUserById(String id) {
-        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
     }
 
     @Override
@@ -104,14 +104,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED, "User"));
     }
 
     @Override
     public void resetPassword(String email, String newPassword) {
         // Find the user by email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
 
         // Encode the new password
         user.setPassword(passwordEncoder.encode(newPassword));

@@ -51,7 +51,7 @@ public class ImageService {
 
                     fileMap.put(id, "data:" + mimeType + ";base64," + base64);
                 } catch (IOException e) {
-                    throw new AppException(ErrorCode.FILE_NOT_FOUND);
+                    throw new AppException(ErrorCode.OBJECT_NOT_EXISTED, "File");
                 }
             }, () -> System.err.println("❌ Không tìm thấy file với ID: " + id));
         }

@@ -69,7 +69,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     private User author(String email){
-        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_EXISTED, "User"));
     }
 
     private PageResponse<StoriesResponse> fetchStories(PageRequest req, List<STORY_STATUS> status) {
