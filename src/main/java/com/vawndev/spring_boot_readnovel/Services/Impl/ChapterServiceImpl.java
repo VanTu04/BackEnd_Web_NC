@@ -11,10 +11,7 @@ import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.FileRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.*;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
@@ -22,8 +19,10 @@ import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -40,6 +39,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final TokenHelper tokenHelper;
     private final JwtUtils jwtUtil;
     private final UserRepository userRepository;
+    private final OwnershipRepository ownershipRepository;
 
 
     @Override
@@ -126,6 +126,18 @@ public class ChapterServiceImpl implements ChapterService {
     public ChapterResponses getChapterDetail(String id) {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+
+        // Nếu chapter có giá 0 thì ai cũng có thể xem
+        if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getName();
+            User currentUser = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_FOUND, "User"));
+            // kiểm tra xem người dùng đã mua chapter này chưa
+            boolean hasOwnership = ownershipRepository.existsByUserAndChapter(currentUser, chapter);
+            if (!hasOwnership) {
+                throw new AppException(ErrorCode.UNAUTHORIZED, "You have not purchased this chapter");
+            }
+        }
+
         return ChapterResponses.builder()
                 .id(chapter.getId())
                 .title(chapter.getTitle())

@@ -10,7 +10,6 @@ import java.text.MessageFormat;
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
-    EMAIL_INVALID(1003, "Email invalid", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {0} characters", HttpStatus.BAD_REQUEST),
     OBJECT_NOT_EXISTED(1005, "{0} not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
