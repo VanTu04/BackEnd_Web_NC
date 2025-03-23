@@ -21,10 +21,10 @@ public class PaymentController {
     private final PaymentService paymentService;
 
     @GetMapping("/vn-pay")
-    public ApiResponse<PaymentResponse> pay(HttpServletRequest request) {
+    public ApiResponse<PaymentResponse> pay(HttpServletRequest request, @RequestParam int amount) {
         return ApiResponse.<PaymentResponse>builder()
                 .message("ok")
-                .result(paymentService.createVNPayPayment(request))
+                .result(paymentService.createVNPayPayment(request, amount))
                 .build();
     }
 

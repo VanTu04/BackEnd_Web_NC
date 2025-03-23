@@ -32,8 +32,8 @@ public class PaymentServiceImpl implements PaymentService {
     private final WalletTransactionRepository walletTransactionRepository;
 
     @Override
-    public PaymentResponse createVNPayPayment(HttpServletRequest request) {
-        long amount = Integer.parseInt(request.getParameter("amount")) * 100L;
+    public PaymentResponse createVNPayPayment(HttpServletRequest request, int a) {
+        long amount = a * 100L;
         String bankCode = request.getParameter("bankCode");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED, "User"));

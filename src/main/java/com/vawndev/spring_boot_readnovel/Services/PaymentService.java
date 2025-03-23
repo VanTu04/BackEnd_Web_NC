@@ -6,7 +6,7 @@ import com.vawndev.spring_boot_readnovel.Entities.WalletTransaction;
 import jakarta.servlet.http.HttpServletRequest;
 
 public interface PaymentService {
-    PaymentResponse createVNPayPayment(HttpServletRequest request);
+    PaymentResponse createVNPayPayment(HttpServletRequest request, int amount);
 
     WalletTransactionResponse createWalletTransaction(String vnp_TxnRef);
 }
