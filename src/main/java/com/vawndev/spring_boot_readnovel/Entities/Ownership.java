@@ -12,11 +12,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Builder
 @Table(name = "ownership")
-public class Ownership {
-
-    @Id
-    private UUID id;
-
+public class Ownership extends BaseEntity{
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
     private User user;

@@ -7,6 +7,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;
 
-public interface OwnershipRepository extends JpaRepository<Ownership, UUID> {
+public interface OwnershipRepository extends JpaRepository<Ownership, String> {
     boolean existsByUserAndChapter(User user, Chapter chapter);
 }
