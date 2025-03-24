@@ -35,15 +35,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionPlansRepository subscriptionPlansRepository;
     private final UserRepository userRepository;
 
-    @Scheduled(cron = "0 0 0 * * ?") //auto run to check expired of account subscription in 12:00pm every day
+    @Scheduled(cron = "0 0 0 * * ?") // Auto run to check expired of account subscription at 12:00 PM every day
     @Transactional
     public void resetExpiredSubscriptions() {
         Instant now = Instant.now();
-        Subscription expiredSubscriptions = subscriptionRepository.findByExpiredAtBefore(now).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND));
-        if(!expiredSubscriptions.equals(null)){
-            subscriptionRepository.delete(expiredSubscriptions);
+        List<Subscription> expiredSubscriptions = subscriptionRepository.findByExpiredAtBefore(now);
+        if (expiredSubscriptions.isEmpty()) {
+            return;
         }
+        subscriptionRepository.deleteAll(expiredSubscriptions);
     }
+
     @Override
     @Transactional
     public void upgradeSubscription(SubscriptionRequest req, String bearerToken) {
@@ -90,6 +92,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             }
 
             user.setBalance(newBalance);
+            user.setSubscription(subscription);
             userRepository.save(user);
             subscriptionRepository.save(subscription);
 

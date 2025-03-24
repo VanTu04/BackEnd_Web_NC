@@ -61,6 +61,7 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
+
         HashSet<Role> roles = new HashSet<>();
         roleRepository.findByName(PredefinedRole.CUSTOMER_ROLE).ifPresent(roles::add);
 
