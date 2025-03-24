@@ -21,7 +21,9 @@ public class UserCreationRequest {
 
     private String retypePassword;
 
-    private String fullname;
+    private String firstName;
+
+    private String lastName;
 
     private LocalDate dateOfBirth;
 
