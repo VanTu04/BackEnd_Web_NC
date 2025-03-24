@@ -3,7 +3,6 @@ spring:
     url: jdbc:postgresql://localhost:5432/Read
     username: postgres
     password: 020604
-
   security:
     oauth2:
       client:
