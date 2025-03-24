@@ -27,7 +27,7 @@ public class TokenHelper {
             User user = jwtUtils.validToken(token);
 
             User author = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+                    .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
 
             if (!user.getEmail().equals(author.getEmail())) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);

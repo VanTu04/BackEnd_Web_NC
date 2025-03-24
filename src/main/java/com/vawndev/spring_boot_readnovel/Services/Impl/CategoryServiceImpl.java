@@ -14,7 +14,6 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -52,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void RemoveCategory(String id) {
         Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.OBJECT_NOT_EXISTED);
 
         }
         exstingCategory.setDeleteAt(Instant.now());
@@ -65,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void DeleteCategory(String id) {
         Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+            throw new AppException(ErrorCode.OBJECT_NOT_EXISTED);
         }
         categoryRepository.delete(exstingCategory);
     }

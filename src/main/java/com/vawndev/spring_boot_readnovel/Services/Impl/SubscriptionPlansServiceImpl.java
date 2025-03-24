@@ -13,7 +13,6 @@ import com.vawndev.spring_boot_readnovel.Services.SubscriptionPlansService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
@@ -68,7 +67,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
             plan.setDeleteAt(Instant.now());
             subscriptionPlansRepository.save(plan);
         } else {
-            throw new AppException(ErrorCode.NOT_FOUND);
+            throw new AppException(ErrorCode.OBJECT_NOT_FOUND);
         }
     }
 
@@ -97,7 +96,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
             plan.setType(req.getType());
             subscriptionPlansRepository.save(plan);
         } else {
-            throw new AppException(ErrorCode.NOT_FOUND);
+            throw new AppException(ErrorCode.OBJECT_NOT_FOUND);
         }
     }
 

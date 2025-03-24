@@ -10,10 +10,8 @@ import java.text.MessageFormat;
 public enum ErrorCode {
     UNCATEGORIZED_EXCEPTION(9999, "Uncategorized error", HttpStatus.INTERNAL_SERVER_ERROR),
     INVALID_KEY(1001, "Uncategorized error", HttpStatus.BAD_REQUEST),
-    USER_EXISTED(1002, "User existed", HttpStatus.BAD_REQUEST),
-    EMAIL_INVALID(1003, "Email invalid", HttpStatus.BAD_REQUEST),
     INVALID_PASSWORD(1004, "Password must be at least {0} characters", HttpStatus.BAD_REQUEST),
-    USER_NOT_EXISTED(1005, "User not existed", HttpStatus.NOT_FOUND),
+    OBJECT_NOT_EXISTED(1005, "{0} not existed", HttpStatus.NOT_FOUND),
     UNAUTHENTICATED(1006, "Unauthenticated", HttpStatus.UNAUTHORIZED),
     UNAUTHORIZED(1007, "You do not have permission", HttpStatus.FORBIDDEN),
     INVALID_DOB(1008, "Your age must be at least {0}", HttpStatus.BAD_REQUEST),
@@ -28,8 +26,8 @@ public enum ErrorCode {
     ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
 
     INVALID_CHAPTER(1019,"Invalid chapter",HttpStatus.NOT_FOUND),
-    OBJECT_EXISTED(1020, "Object already existed", HttpStatus.CONFLICT),
-    NOT_FOUND(1021, "Object {0} not found", HttpStatus.NOT_FOUND),
+    OBJECT_EXISTED(1020, "{0} already existed", HttpStatus.CONFLICT),
+    OBJECT_NOT_FOUND(1021, "{0} not found", HttpStatus.NOT_FOUND),
     FILE_NOT_FOUND(1022, "File not found", HttpStatus.NOT_FOUND),
     INVALID_CATE(2024, "Invalid category", HttpStatus.BAD_REQUEST),
     FAILED_PAYMENT(2025, "Failed to payment", HttpStatus.BAD_REQUEST),
@@ -40,6 +38,8 @@ public enum ErrorCode {
     INVALID(1028, "Invalid: ", HttpStatus.BAD_REQUEST),
     BLANK_NAME(1029,"Name must be fill",HttpStatus.BAD_REQUEST),
     PASSWORD_MISMATCH(1030,"Password must match",HttpStatus.BAD_REQUEST),
+    NOT_ENOUGH(1031,"{0} not enough",HttpStatus.BAD_REQUEST),
+
 
     ;
 
@@ -54,7 +54,6 @@ public enum ErrorCode {
     private final HttpStatusCode statusCode;
 
     public String getFormattedMessage(Object... args) {
-        String res = MessageFormat.format(this.message, args);
-        return res;
+        return MessageFormat.format(this.message, args);
     }
 }
