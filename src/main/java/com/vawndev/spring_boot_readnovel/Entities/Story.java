@@ -44,6 +44,9 @@ public class Story extends BaseEntity{
     @Column(name = "is_visibility")
     private boolean isVisibility;
 
+    @Column(name="is_banned")
+    private boolean isBanned;
+
     private double rate;
 
     @ManyToMany

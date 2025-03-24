@@ -37,8 +37,8 @@ public class StoryController {
     }
 
     @GetMapping("/detail/{id}")
-    public ApiResponse<StoryDetailResponses> getStoryDetail(@PathVariable String id) {
-        StoryDetailResponses result=storyService.getStoryById(id);
+    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false) String authHeader,@PathVariable String id) {
+        StoryDetailResponses result=storyService.getStoryById(authHeader,id);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
@@ -74,5 +74,6 @@ public class StoryController {
         storyService.deleteStory(req,authHeader);
         return ApiResponse.<String>builder().result("Success").build();
     }
+
     
 }

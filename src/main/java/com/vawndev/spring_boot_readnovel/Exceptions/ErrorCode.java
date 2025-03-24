@@ -25,9 +25,9 @@ public enum ErrorCode {
     ERROR_CREATE_HMACSHA512(1017, "Error creating HMACSHA512", HttpStatus.INTERNAL_SERVER_ERROR),
     ERROR_ENCODE(1018, "Error encode data", HttpStatus.INTERNAL_SERVER_ERROR),
     OBJECT_EXISTED(1016, "Object already existed", HttpStatus.CONFLICT),
-    NOT_FOUND(1017, "Object tot found", HttpStatus.NOT_FOUND),
     INVALID_CHAPTER(1018, "Invalid chapter", HttpStatus.BAD_REQUEST),
     FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
+    NOT_FOUND(1021,"Object {0} not found",HttpStatus.NOT_FOUND),
     INVALID_CATE(2020, "Invalid category", HttpStatus.BAD_REQUEST),
     FAILED_PAYMENT(2021, "Failed to payment", HttpStatus.BAD_REQUEST),
     CONFLICT(2022, "CONFLICT", HttpStatus.CONFLICT),
@@ -40,7 +40,7 @@ public enum ErrorCode {
         this.statusCode = statusCode;
     }
     public String getMessage(String customMessage) {
-        return this.message.replace("{message}", customMessage);
+        return this.message.replace("{0}", customMessage);
     }
 
     private final int code;

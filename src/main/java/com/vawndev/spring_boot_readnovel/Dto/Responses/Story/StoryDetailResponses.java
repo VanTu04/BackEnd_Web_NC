@@ -1,7 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Story;
 
 
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
@@ -12,5 +12,5 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 public class StoryDetailResponses extends StoryResponse {
-    private List<ChapterResponses> chapter ;
+    private List<ChapterResponseDetail> chapter ;
 }

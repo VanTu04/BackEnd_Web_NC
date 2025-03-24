@@ -1,16 +1,17 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.RawFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Services.Impl.ImageService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 
+import com.vawndev.spring_boot_readnovel.Utils.IpUtils;
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 
 import org.springframework.http.MediaType;
@@ -46,7 +47,7 @@ public class ChapterController {
             uploadRequest.setChapter(chapterRequest);
 
             if (files != null && !files.isEmpty()) {
-                RawFileRequest rawUpload = new RawFileRequest();
+                 RawFileRequest rawUpload = new RawFileRequest();
                 rawUpload.setFile(files);
                 uploadRequest.setFile(rawUpload);
             }
@@ -73,9 +74,9 @@ public class ChapterController {
     }
 
     @GetMapping("/{chapter_id}")
-    public ApiResponse<ChapterResponses> getChapter(@PathVariable String chapter_id) {
-        ChapterResponses result = chapterService.getChapterDetail(chapter_id);
-        return ApiResponse.<ChapterResponses>builder()
+    public ApiResponse<ChapterResponseDetail> getChapter(@PathVariable String chapter_id ,@RequestHeader(value = "Authorization",required = false) String bearerToken) {
+        ChapterResponseDetail result = chapterService.getChapterDetail(chapter_id,bearerToken);
+        return ApiResponse.<ChapterResponseDetail>builder()
                 .message("Successfully")
                 .result(result)
                 .build();

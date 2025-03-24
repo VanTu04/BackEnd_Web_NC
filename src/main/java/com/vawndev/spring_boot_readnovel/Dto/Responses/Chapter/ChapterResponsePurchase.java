@@ -1,37 +1,26 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
-
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
-import lombok.*;
-import net.minidev.json.annotate.JsonIgnore;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
-import java.util.List;
 
-@Getter
-@Setter
+@Data
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class ChapterResponses {
-    private String id;
+@SuperBuilder
 
-    private String title;
+public class ChapterResponsePurchase extends ChaptersResponse {
 
-    private String content;
 
     private BigDecimal price;
 
     private TransactionType transactionType;
 
-    @JsonInclude(JsonInclude.Include.NON_NULL)
-    private List<FileResponse> files;
-
     public BigDecimal getPrice() {
         return (this.transactionType == TransactionType.PURCHASE) ? BigDecimal.ZERO : (this.price != null ? this.price : BigDecimal.ZERO);
     }
-
-
 }

@@ -21,6 +21,7 @@ public interface StoryRepository extends JpaRepository<Story, String> {
     WHERE s.isVisibility = TRUE 
     AND  s.isAvailable = :available 
     AND s.status IN :statusList
+    AND s.isBanned = FALSE    
     ORDER BY s.createdAt ASC
     """)
     Page<Story> findAccepted(
@@ -34,6 +35,7 @@ public interface StoryRepository extends JpaRepository<Story, String> {
         WHERE s.isVisibility = TRUE 
         AND  s.isAvailable = :available 
         AND s.status IN :statusList     
+        AND s.isBanned = FALSE            
         ORDER BY s.views DESC, s.rate DESC
         """)
     List<Story> findTopStories(IS_AVAILBLE available,
@@ -44,10 +46,13 @@ public interface StoryRepository extends JpaRepository<Story, String> {
     WHERE s.isVisibility = TRUE 
     AND  s.isAvailable = :available 
     AND s.status IN :statusList
+    AND s.isBanned = FALSE        
     ORDER BY s.updatedAt ASC 
     """)
     Page<Story> findUpdating(IS_AVAILBLE available,
                                List<STORY_STATUS> statusList,
                                Pageable pageable);
     Page<Story> findAll(Pageable pageable);
+
+
 }

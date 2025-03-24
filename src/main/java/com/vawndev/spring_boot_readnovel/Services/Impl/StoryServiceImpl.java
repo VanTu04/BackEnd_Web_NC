@@ -5,9 +5,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoryResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
@@ -18,6 +17,7 @@ import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
 import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
+import com.vawndev.spring_boot_readnovel.Enum.SUBSCRIPTION_TYPE;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
@@ -30,6 +30,7 @@ import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
+import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
 import lombok.RequiredArgsConstructor;
@@ -58,6 +59,7 @@ public class StoryServiceImpl implements StoryService {
     private final CloundService cloundService;
     private final CategoryRepository categoryRepository;
     private final TokenHelper tokenHelper;
+    private final JwtUtils jwtUtils;
 
 
     private String[] getNullPropertyNames(Object source) {
@@ -67,6 +69,8 @@ public class StoryServiceImpl implements StoryService {
                 .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
                 .toArray(String[]::new);
     }
+
+
 
     private User author(String email){
         return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
@@ -185,8 +189,6 @@ public class StoryServiceImpl implements StoryService {
                     .filter(category -> seenIds.add(category.getId())) // get only the first element with the previous id
                     .collect(Collectors.toList());
 
-
-
             String CoverImage=cloundService.getUrlCoverAfterUpload(imageCoverRequest);
             Story story = Story
                     .builder()
@@ -194,6 +196,7 @@ public class StoryServiceImpl implements StoryService {
                     .categories(uniqueCategories)
                     .description(req.getDescription())
                     .isVisibility(false)
+                    .isBanned(false)
                     .isAvailable(IS_AVAILBLE.PENDING)
                     .status(STORY_STATUS.COMING_SOON)
                     .rate(0)
@@ -282,54 +285,67 @@ public class StoryServiceImpl implements StoryService {
         Story story =storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
         storyRepository.delete(story);
     }
+    private BigDecimal getPriceByUser(BigDecimal price,User user){
+        BigDecimal totalPrice;
+        if(user!=null){
+            totalPrice= user.getSubscription().getPlan().getType().equals(null) ? BigDecimal.ZERO : price;
+        }else{
+            totalPrice =price;
 
+        }
+        return  totalPrice ;
+    }
 
     @Override
-    public StoryDetailResponses getStoryById(String id) {
+    public StoryDetailResponses getStoryById(String bearerToken, String id) {
         Story story = storyRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
 
         List<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId());
-
-        try {
-            StoryResponse storyRes = storyMapper.toStoryResponse(story);
-            List<ChapterResponses> chaptersRes = chapters.stream().map(
-                    chapter -> ChapterResponses.builder()
-                            .content(chapter.getContent())
-                            .id(chapter.getId())
-                            .price(chapter.getPrice() != null ? chapter.getPrice() : BigDecimal.ZERO)
-                            .title(chapter.getTitle())
-                            .transactionType(TransactionType.PURCHASE)
-                            .build()
-            ).collect(Collectors.toList());
-
-            BigDecimal big_price = chaptersRes.stream()
-                    .map(chapter -> chapter.getPrice() != null ? chapter.getPrice() : BigDecimal.ZERO)
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
-
-            return StoryDetailResponses.builder()
-                    .chapter(chaptersRes)
-                    .author(storyRes.getAuthor())
-                    .price(big_price)
-                    .title(storyRes.getTitle())
-                    .createdAt(storyRes.getCreatedAt())
-                    .categories(storyRes.getCategories())
-                    .coverImage(storyRes.getCoverImage())
-                    .isAvailable(storyRes.getIsAvailable())
-                    .rate(storyRes.getRate())
-                    .views(storyRes.getViews())
-                    .updatedAt(storyRes.getUpdatedAt())
-                    .createdAt(storyRes.getCreatedAt())
-                    .type(storyRes.getType())
-                    .view(storyRes.getView())
-                    .description(storyRes.getDescription())
-                    .build();
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.INVALID_STORY);
+        User user=null;
+        if (bearerToken != null && !bearerToken.isEmpty()) {
+            try {
+                user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+            } catch (AppException e) {
+                user = null;
+            }
         }
+        StoryResponse storyRes = storyMapper.toStoryResponse(story);
+
+        User finalUser = user;
+        List<ChapterResponseDetail> chaptersRes = chapters.stream()
+                .map(chapter -> ChapterResponseDetail.builder()
+                        .content(chapter.getContent())
+                        .id(chapter.getId())
+                        .price(getPriceByUser(chapter.getPrice(), finalUser))
+                        .title(chapter.getTitle())
+                        .transactionType(TransactionType.PURCHASE)
+                        .build()
+                ).collect(Collectors.toList());
+
+        BigDecimal bigPrice = chaptersRes.stream()
+                .map(ChapterResponseDetail::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Trả về Response
+        return StoryDetailResponses.builder()
+                .chapter(chaptersRes)
+                .author(storyRes.getAuthor())
+                .price(bigPrice)
+                .title(storyRes.getTitle())
+                .createdAt(storyRes.getCreatedAt())
+                .updatedAt(storyRes.getUpdatedAt())
+                .categories(storyRes.getCategories())
+                .coverImage(storyRes.getCoverImage())
+                .isAvailable(storyRes.getIsAvailable())
+                .rate(storyRes.getRate())
+                .views(storyRes.getViews())
+                .type(storyRes.getType())
+                .view(storyRes.getView())
+                .description(storyRes.getDescription())
+                .status(storyRes.getStatus())
+                .build();
     }
-
-
 
 
 }

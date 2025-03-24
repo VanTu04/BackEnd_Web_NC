@@ -8,63 +8,44 @@ import org.springframework.data.jpa.domain.Specification;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public class StorySpecification {
-    public static Specification<Story> searchByFilter(String keyword) {
+    public static Specification<Story> searchAndFilter(String keyword, Set<String> filterFields) {
         return (root, query, criteriaBuilder) -> {
-            if (keyword == null || keyword.trim().isEmpty()) {
-                return criteriaBuilder.conjunction(); // Trả về tất cả nếu không có keyword
-            }
+            String pattern = keyword != null && !keyword.trim().isEmpty() ? "%" + keyword.toLowerCase() + "%" : null;
 
+            // Map định nghĩa các điều kiện lọc dựa vào filterFields
+            Map<String, BiFunction<String, Predicate[], Predicate>> filterMap = Map.of(
+                    "category", (k, p) -> {
+                        Join<Object, Object> categoryJoin = root.join("categories", JoinType.LEFT);
+                        return criteriaBuilder.like(criteriaBuilder.lower(categoryJoin.get("name")), k);
+                    },
+                    "type", (k, p) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("type").as(String.class)), k),
+                    "status", (k, p) -> criteriaBuilder.like(criteriaBuilder.lower(root.get("status")), k),
+                    "author", (k, p) -> {
+                        Join<Object, Object> authorJoin = root.join("author", JoinType.LEFT);
+                        return criteriaBuilder.like(criteriaBuilder.lower(authorJoin.get("fullName")), k);
+                    }
+            );
 
-            String[] keywords = keyword.trim().toLowerCase().split("\\s+");
-            List<Predicate> predicates = new ArrayList<>();
+            // Create a Predicate list from the passed filters
+            List<Predicate> predicates = Stream.concat(
+                    // Tìm kiếm theo title nếu có keyword
+                    pattern != null ? Stream.of(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern)) : Stream.empty(),
 
-            // LEFT JOIN với categories (chỉ JOIN một lần)
-            Join<Object, Object> categoryJoin = root.join("categories", JoinType.LEFT);
+                    // Lọc theo các trường hợp định nghĩa trong filterMap
+                    filterFields.stream()
+                            .map(field -> filterMap.containsKey(field) ? filterMap.get(field).apply(pattern, new Predicate[]{}) : null)
+                            .filter(predicate -> predicate != null)
+            ).collect(Collectors.toList());
 
-            for (String word : keywords) {
-                String pattern = "%" + word + "%";
-
-                predicates.add(criteriaBuilder.or(
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(categoryJoin.get("name")), pattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("type").as(String.class)), pattern),
-                        criteriaBuilder.like(criteriaBuilder.lower(root.get("status")), pattern)
-                ));
-            }
-
-            return criteriaBuilder.and(predicates.toArray(new Predicate[0])); // Phải khớp tất cả từ khóa
-        };
-    }
-
-
-
-    public static Specification<Story> searchByKeyword(String keyword) {
-        return (root, query, criteriaBuilder) -> {
-            List<Predicate> predicates = new ArrayList<>();
-            if (keyword == null || keyword.trim().isEmpty()) {
-                return criteriaBuilder.conjunction();
-            }
-            if (keyword != null && !keyword.trim().isEmpty()) {
-                String pattern = "%" + keyword.trim().toLowerCase() + "%";
-
-                // Search by title
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("title")), pattern));
-
-                // Search by type
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("type").as(String.class)), pattern));
-
-                // Search by status
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("status")), pattern));
-
-                // Search by author name (LEFT JOIN)
-                Join<Object, Object> authorJoin = root.join("author", JoinType.LEFT);
-                predicates.add(criteriaBuilder.like(criteriaBuilder.lower(authorJoin.get("fullName")), pattern));
-
-            }
-
-            return criteriaBuilder.or(predicates.toArray(new Predicate[0]));
+            // Nếu không có điều kiện nào hợp lệ, trả về tất cả ữ liệu
+            return predicates.isEmpty() ? criteriaBuilder.conjunction() : criteriaBuilder.and(predicates.toArray(new Predicate[0]));
         };
     }
 

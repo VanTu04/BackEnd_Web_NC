@@ -24,6 +24,6 @@ public interface StoryService {
     void ModeratedByAdmin(ModeratedByAdmin moderatedByAdmin);
     void deleteSoftStory(StoryCondition req, String bearerToken);
     void deleteStory(StoryCondition req,String bearerToken);
-    StoryDetailResponses getStoryById(String storyId);
+    StoryDetailResponses getStoryById(String authHeader,String storyId);
 
 }

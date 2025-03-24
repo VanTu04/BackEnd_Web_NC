@@ -3,7 +3,7 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponses;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
@@ -11,15 +11,14 @@ import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.FileRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.*;
 import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
+import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
@@ -40,6 +39,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final TokenHelper tokenHelper;
     private final JwtUtils jwtUtil;
     private final UserRepository userRepository;
+    private final HistoryReadingService readingService;
 
 
     @Override
@@ -123,17 +123,25 @@ public class ChapterServiceImpl implements ChapterService {
 
 
     @Override
-    public ChapterResponses getChapterDetail(String id) {
+    @Transactional
+    public ChapterResponseDetail getChapterDetail(String id,String bearerToken) {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
-        return ChapterResponses.builder()
+
+        readingService.saveHistory(bearerToken,chapter.getId());
+        chapterRepository.save(chapter);
+
+        return ChapterResponseDetail.builder()
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .content(chapter.getContent())
                 .price(chapter.getPrice())
-                .files(chapter.getFiles().stream().map(file->FileResponse.builder().id(file.getId()).build()).collect(Collectors.toList()))
+                .files(chapter.getFiles().stream()
+                        .map(file -> FileResponse.builder().id(file.getId()).build())
+                        .collect(Collectors.toList()))
                 .build();
     }
+
 
 
 }
