@@ -20,7 +20,4 @@ public class ChapterResponsePurchase extends ChaptersResponse {
 
     private TransactionType transactionType;
 
-    public BigDecimal getPrice() {
-        return (this.transactionType == TransactionType.PURCHASE) ? BigDecimal.ZERO : (this.price != null ? this.price : BigDecimal.ZERO);
-    }
 }

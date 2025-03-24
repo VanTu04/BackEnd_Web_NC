@@ -9,6 +9,7 @@ import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.*;
@@ -17,6 +18,7 @@ import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
+import com.vawndev.spring_boot_readnovel.Utils.Help.UserHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -40,7 +42,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final JwtUtils jwtUtil;
     private final UserRepository userRepository;
     private final HistoryReadingService readingService;
-
+    private final JwtUtils jwtUtils;
 
     @Override
 //    @PreAuthorize("hasRole('AUTHOR')")
@@ -128,6 +130,15 @@ public class ChapterServiceImpl implements ChapterService {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
 
+        User user=null;
+        if (bearerToken != null && !bearerToken.isEmpty()) {
+            try {
+                user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+            } catch (AppException e) {
+                user = null;
+            }
+        }
+        User finalUser = user;
         readingService.saveHistory(bearerToken,chapter.getId());
         chapterRepository.save(chapter);
 
@@ -135,7 +146,8 @@ public class ChapterServiceImpl implements ChapterService {
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .content(chapter.getContent())
-                .price(chapter.getPrice())
+                .price(UserHelper.getPriceByUser(chapter.getPrice(),finalUser))
+                .transactionType(TransactionType.DEPOSIT)
                 .files(chapter.getFiles().stream()
                         .map(file -> FileResponse.builder().id(file.getId()).build())
                         .collect(Collectors.toList()))

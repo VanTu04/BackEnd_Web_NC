@@ -30,6 +30,7 @@ import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
+import com.vawndev.spring_boot_readnovel.Utils.Help.UserHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
@@ -285,16 +286,6 @@ public class StoryServiceImpl implements StoryService {
         Story story =storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
         storyRepository.delete(story);
     }
-    private BigDecimal getPriceByUser(BigDecimal price,User user){
-        BigDecimal totalPrice;
-        if(user!=null){
-            totalPrice= user.getSubscription().getPlan().getType().equals(null) ? BigDecimal.ZERO : price;
-        }else{
-            totalPrice =price;
-
-        }
-        return  totalPrice ;
-    }
 
     @Override
     public StoryDetailResponses getStoryById(String bearerToken, String id) {
@@ -310,16 +301,17 @@ public class StoryServiceImpl implements StoryService {
                 user = null;
             }
         }
+        User finalUser = user;
+
         StoryResponse storyRes = storyMapper.toStoryResponse(story);
 
-        User finalUser = user;
         List<ChapterResponseDetail> chaptersRes = chapters.stream()
                 .map(chapter -> ChapterResponseDetail.builder()
                         .content(chapter.getContent())
                         .id(chapter.getId())
-                        .price(getPriceByUser(chapter.getPrice(), finalUser))
+                        .price(UserHelper.getPriceByUser(chapter.getPrice(), finalUser))
                         .title(chapter.getTitle())
-                        .transactionType(TransactionType.PURCHASE)
+                        .transactionType(TransactionType.DEPOSIT)
                         .build()
                 ).collect(Collectors.toList());
 

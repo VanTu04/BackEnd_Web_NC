@@ -21,8 +21,10 @@ import org.apache.hc.client5.http.auth.BearerToken;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -31,6 +33,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     private final SubscriptionRepository subscriptionRepository;
     private static boolean isPayment=true;
     private final SubscriptionPlansRepository subscriptionPlansRepository;
+    private final UserRepository userRepository;
 
     @Scheduled(cron = "0 0 0 * * ?") //auto run to check expired of account subscription in 12:00pm every day
     @Transactional
@@ -45,6 +48,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @Transactional
     public void upgradeSubscription(SubscriptionRequest req, String bearerToken) {
         try {
+            // Lấy thông tin người dùng từ token
             User user = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
 
             // Tìm subscription hiện tại của user
@@ -56,9 +60,17 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION);
             }
 
-            
-            // Kiểm tra trạng thái thanh toán
-            if (!isPayment) {
+            // Kiểm tra số dư của người dùng
+            BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
+
+            // Tìm Subscription Plan
+            SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+
+            // Kiểm tra xem người dùng có đủ số dư thanh toán không
+            if (balance.compareTo(subscriptionPlan.getPrice()) < 0) {
+                ErrorCode errorCode=ErrorCode.FAILED_PAYMENT;
+                errorCode.getMessage("Your balance is too low");
                 throw new AppException(ErrorCode.FAILED_PAYMENT);
             }
 
@@ -68,21 +80,26 @@ public class SubscriptionServiceImpl implements SubscriptionService {
                 subscription.setUser(user);
             }
 
-            // Tìm Subscription Plan
-            SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
-
-            // Gán gói mới và lưu
+            // Gán gói mới và trừ tiền trong tài khoản người dùng
             subscription.setPlan(subscriptionPlan);
+            BigDecimal newBalance = balance.subtract(subscriptionPlan.getPrice());
+
+            // Đảm bảo số dư không âm
+            if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+                throw new AppException(ErrorCode.FAILED_PAYMENT);
+            }
+
+            user.setBalance(newBalance);
+            userRepository.save(user);
             subscriptionRepository.save(subscription);
 
         } catch (AppException e) {
             throw e; // Nếu là lỗi đã xác định trước, giữ nguyên và trả về
         } catch (Exception e) {
-            throw new RuntimeException("Upgrade subscription failed for request: " + req.toString(), e);
+            // Ném ra lỗi với thông tin chi tiết
+            throw new AppException(ErrorCode.SERVER_ERROR);
         }
     }
-
 
 
     @Override

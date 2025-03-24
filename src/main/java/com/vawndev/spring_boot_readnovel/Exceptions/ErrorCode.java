@@ -29,7 +29,7 @@ public enum ErrorCode {
     FILE_NOT_FOUND(1019, "File not found", HttpStatus.NOT_FOUND),
     NOT_FOUND(1021,"Object {0} not found",HttpStatus.NOT_FOUND),
     INVALID_CATE(2020, "Invalid category", HttpStatus.BAD_REQUEST),
-    FAILED_PAYMENT(2021, "Failed to payment", HttpStatus.BAD_REQUEST),
+    FAILED_PAYMENT(2021, "Failed to payment because {0}", HttpStatus.BAD_REQUEST),
     CONFLICT(2022, "CONFLICT", HttpStatus.CONFLICT),
     CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until your subscription expires to upgrade.", HttpStatus.CONFLICT),
     ;
