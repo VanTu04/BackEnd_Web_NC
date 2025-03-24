@@ -71,8 +71,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
             // Kiểm tra xem người dùng có đủ số dư thanh toán không
             if (balance.compareTo(subscriptionPlan.getPrice()) < 0) {
-                ErrorCode errorCode=ErrorCode.FAILED_PAYMENT;
-                errorCode.getMessage("Your balance is too low");
                 throw new AppException(ErrorCode.FAILED_PAYMENT);
             }
 
