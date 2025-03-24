@@ -39,9 +39,7 @@ public enum ErrorCode {
         this.message = message;
         this.statusCode = statusCode;
     }
-    public String getMessage(String customMessage) {
-        return this.message.replace("{0}", customMessage);
-    }
+
 
     private final int code;
     private final String message;
