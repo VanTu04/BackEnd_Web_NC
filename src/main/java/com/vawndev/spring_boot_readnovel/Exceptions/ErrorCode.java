@@ -32,8 +32,8 @@ public enum ErrorCode {
     NOT_FOUND(1021, "Object {0} not found", HttpStatus.NOT_FOUND),
     FILE_NOT_FOUND(1022, "File not found", HttpStatus.NOT_FOUND),
     INVALID_CATE(2024, "Invalid category", HttpStatus.BAD_REQUEST),
-    FAILED_PAYMENT(2025, "Failed to payment", HttpStatus.BAD_REQUEST),
-    CONFLICT(2026, "CONFLICT", HttpStatus.CONFLICT),
+    FAILED_PAYMENT(2025, "{0},failed to payment", HttpStatus.BAD_REQUEST),
+    CONFLICT(2026, "{0} was already", HttpStatus.CONFLICT),
     CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until your subscription expires to upgrade.", HttpStatus.CONFLICT),
     OBJECT_INVAILD(1027, "{0} must be a value", HttpStatus.BAD_REQUEST),
 

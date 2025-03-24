@@ -11,4 +11,5 @@ public interface HistoryReadingService {
     void saveHistory(String bearerToken,String chapter_id);
     void deleteHistory(String bearerToken,String story_id);
     void deleteAllHistory(String bearerToken);
+
 }

@@ -53,8 +53,6 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
                 ));
 
         List<ReadingHistoryResponse> result = new ArrayList<>();
-        ErrorCode errorCode = ErrorCode.NOT_FOUND;
-        errorCode.getMessage("Story");
         storyChapterMap.forEach((storyId, chapterIds) -> {
             // Tìm story từ storyId
             Story story = storyRepository.findById(storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
@@ -94,8 +92,6 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     @Override
     public void saveHistory(String bearerToken, String chapter_id) {
         User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
-        ErrorCode errorCode = ErrorCode.NOT_FOUND;
-        errorCode.getMessage("Chapter");
         Chapter chapter=chapterRepository.findById(chapter_id).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
         ReadingHistory readingHistory=readingHistoryRepository.findByUserAndChapter(user, chapter);
         if (Objects.nonNull(readingHistory)) {
@@ -113,8 +109,7 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     @Override
     public void deleteHistory(String bearerToken, String story_id) {
         User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
-        ErrorCode errorCode = ErrorCode.NOT_FOUND;
-        errorCode.getMessage("Story");
+
         Story story=storyRepository.findById(story_id).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
         ReadingHistory readingHistory=readingHistoryRepository.findByUserAndStory(user,story);
         readingHistoryRepository.delete(readingHistory);

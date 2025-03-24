@@ -43,7 +43,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
 
     @Override
     @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void createSubscriptionPlan(SubscriptionCreatePlansRequest req, String bearerToken) {
         User admin = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
         SubscriptionPlans subscriptionPlans = subscriptionPlansRepository.findByType(req.getType());
@@ -59,7 +59,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
 
     @Override
     @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void removeSubscriptionPlan(ConditionRequest req, String bearerToken) {
         User admin = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
         Optional<SubscriptionPlans> optionalPlan = subscriptionPlansRepository.findById(req.getId());
@@ -74,7 +74,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
 
     @Override
     @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void deleteSubscriptionPlan(ConditionRequest req, String bearerToken) {
         User admin = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
         Optional<SubscriptionPlans> optionalPlan = subscriptionPlansRepository.findById(req.getId());
@@ -87,7 +87,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
 
     @Override
     @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void updateSubscriptionPlan(SubscriptionPlansRequest req, String bearerToken) {
         User admin = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
         Optional<SubscriptionPlans> optionalPlan = subscriptionPlansRepository.findByIdAndDeleteAtIsNull(req.getId());
@@ -95,6 +95,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
             SubscriptionPlans plan = optionalPlan.get();
             plan.setExpired(req.getExpired());
             plan.setType(req.getType());
+            plan.setPrice(req.getPrice());
             subscriptionPlansRepository.save(plan);
         } else {
             throw new AppException(ErrorCode.NOT_FOUND);
@@ -102,6 +103,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
     }
 
     @Override
+    @PreAuthorize("hasRole('ADMIN')")
     public void editSubscriptionPlan(ConditionRequest req, String bearerToken) {
         User admin = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
         Optional<SubscriptionPlans> optionalPlan = subscriptionPlansRepository.findById(req.getId());

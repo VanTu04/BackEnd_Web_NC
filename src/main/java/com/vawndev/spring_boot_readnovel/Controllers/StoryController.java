@@ -14,6 +14,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponse
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
@@ -37,19 +39,19 @@ public class StoryController {
     }
 
     @GetMapping("/detail/{id}")
-    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false) String authHeader,@PathVariable String id) {
+    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false) String authHeader,@PathVariable @NotBlank String id) {
         StoryDetailResponses result=storyService.getStoryById(authHeader,id);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ApiResponse<String> createStory(@RequestHeader("Authorization") String authHeader,@RequestPart String storyJson, @RequestPart MultipartFile image_cover)  {
+    public ApiResponse<String> createStory(@RequestHeader("Authorization") String authHeader,@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
             StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
             storyService.addStory(storyRequests,image_cover,authHeader);
             return ApiResponse.<String>builder().result("Success!").build();
     }
 
     @PatchMapping("/update")
-    public ApiResponse<String> updateStory(@RequestHeader("Authorization") String authHeader,@RequestParam StoryRequests req,@RequestParam String id) {
+    public ApiResponse<String> updateStory(@RequestHeader("Authorization") String authHeader, @RequestParam @Valid StoryRequests req, @RequestParam @NotBlank String id) {
         storyService.updateStoryByAuthor(req,id,authHeader);
         return ApiResponse.<String>builder().result("Success!").build();
     }
@@ -64,13 +66,13 @@ public class StoryController {
     }
 
     @PutMapping("/remove")
-    public ApiResponse<String> removeStory(@RequestBody StoryCondition req ,@RequestHeader("Authorization") String authHeader) {
+    public ApiResponse<String> removeStory(@RequestBody @Valid StoryCondition req ,@RequestHeader("Authorization") String authHeader) {
         storyService.deleteSoftStory(req,authHeader);
         return ApiResponse.<String>builder().result("success").build();
     }
 
     @DeleteMapping("/delete")
-    public ApiResponse<String> deleteStory(@RequestBody StoryCondition req,@RequestHeader("Authorization") String authHeader) {
+    public ApiResponse<String> deleteStory(@RequestBody @Valid StoryCondition req,@RequestHeader("Authorization") String authHeader) {
         storyService.deleteStory(req,authHeader);
         return ApiResponse.<String>builder().result("Success").build();
     }

@@ -9,6 +9,7 @@ import java.util.List;
 
 public interface SubscriptionService {
     void upgradeSubscription(SubscriptionRequest req, String bearerToken);
+    void upgradeRole( String bearerToken);
     SubscriptionResponse getSubscription(String email, String bearerToken);
 
 }
