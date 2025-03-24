@@ -3,6 +3,7 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,8 +44,20 @@ public class OtpServiceImpl implements OtpService {
     @Override
     @Transactional
     public void sendOtp(String email) {
+        // Validate email format
+        if (!isValidEmail(email)) {
+            throw new IllegalArgumentException("Invalid email format");
+        }
+
         String otp = generateOtp(email);
         emailService.sendOtpEmail(email, "Your OTP Code", "Your OTP is: " + otp);
+    }
+
+    // Helper method to validate email
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        return pattern.matcher(email).matches();
     }
 
     @Override
