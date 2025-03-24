@@ -1,10 +1,11 @@
 package com.vawndev.spring_boot_readnovel.Exceptions;
 
-import lombok.Getter;
+import java.text.MessageFormat;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.HttpStatusCode;
 
-import java.text.MessageFormat;
+import lombok.Getter;
 
 @Getter
 public enum ErrorCode {
@@ -35,7 +36,7 @@ public enum ErrorCode {
     CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until your subscription expires to upgrade.", HttpStatus.CONFLICT),
     OBJECT_INVAILD(1027, "{0} must be a value", HttpStatus.BAD_REQUEST),
 
-    INVALID(1028, "Invalid: ", HttpStatus.BAD_REQUEST),
+    INVALID(1028, "Invalid: {0}", HttpStatus.BAD_REQUEST),
     BLANK_NAME(1029,"Name must be fill",HttpStatus.BAD_REQUEST),
     PASSWORD_MISMATCH(1030,"Password must match",HttpStatus.BAD_REQUEST),
     NOT_ENOUGH(1031,"{0} not enough",HttpStatus.BAD_REQUEST),

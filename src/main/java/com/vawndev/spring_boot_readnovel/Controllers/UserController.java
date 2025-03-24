@@ -1,5 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
+import java.util.regex.Pattern;
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -27,9 +29,25 @@ public class UserController {
     
     @PostMapping("/request-otp")
     public ApiResponse<Void> requestOtp(@RequestParam String email) {
+                // Validate email format
+        if (!isValidEmail(email)) {
+            throw new AppException(ErrorCode.INVALID, "Invalid email format");
+        }
+      
         otpService.sendOtp(email);
         return ApiResponse.<Void>builder().build();
     }
+    // Forgot Password - Request OTP
+    @PostMapping("/forgot-password/request-otp")
+    public ApiResponse<Void> forgotPasswordRequestOtp(@RequestParam String email) {
+        if (!isValidEmail(email)) {
+            throw new AppException(ErrorCode.INVALID, "Invalid email format");
+        }
+        // Send OTP for password reset
+        otpService.sendOtp(email);
+        return ApiResponse.<Void>builder().message("OTP sent to registered email").build();
+    }
+
 
     @PostMapping("/create")
     public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest, @RequestParam String otp) {
@@ -47,13 +65,6 @@ public class UserController {
     public ApiResponse<UserResponse> upgradeAccount(@RequestBody @Valid UserCreationRequest userCreationRequest) {
         return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
     }
-    // Forgot Password - Request OTP
-    @PostMapping("/forgot-password/request-otp")
-    public ApiResponse<Void> forgotPasswordRequestOtp(@RequestParam String email) {
-        // Send OTP for password reset
-        otpService.sendOtp(email);
-        return ApiResponse.<Void>builder().message("OTP sent to registered email").build();
-    }
 
     // Forgot Password - Reset Password
     @PostMapping("/forgot-password/reset")
@@ -63,7 +74,7 @@ public class UserController {
                                            @RequestParam String confirmPassword) {
         // Check if passwords match
         if (!newPassword.equals(confirmPassword)) {
-            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH,"Passwords do not match");
         }
 
         // Validate OTP
@@ -75,5 +86,12 @@ public class UserController {
         userService.resetPassword(email, newPassword);
 
         return ApiResponse.<Void>builder().message("Password reset successfully").build();
+    }
+    
+    // Helper method to validate email
+    private boolean isValidEmail(String email) {
+        String emailRegex = "^[A-Za-z0-9+_.-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,6}$";
+        Pattern pattern = Pattern.compile(emailRegex);
+        return pattern.matcher(email).matches();
     }
 }

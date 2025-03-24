@@ -1,5 +1,15 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
@@ -17,16 +27,8 @@ import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -111,7 +113,7 @@ public class UserServiceImpl implements UserService {
     public void resetPassword(String email, String newPassword) {
         // Find the user by email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
+                .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED,"User")); 
 
         // Encode the new password
         user.setPassword(passwordEncoder.encode(newPassword));
