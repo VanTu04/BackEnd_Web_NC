@@ -10,9 +10,6 @@ import lombok.*;
 @Builder
 public class StoryCondition {
     @NotBlank(message = "id cannot be blank")
-
     private String id;
-    @NotBlank(message = "email cannot be blank")
 
-    private String email;
 }

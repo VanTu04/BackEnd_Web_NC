@@ -8,8 +8,8 @@ import com.vawndev.spring_boot_readnovel.Enum.SUBSCRIPTION_TYPE;
 import java.util.List;
 
 public interface SubscriptionService {
-    void upgradeSubscription(SubscriptionRequest req, String bearerToken);
-    void upgradeRole( String bearerToken);
-    SubscriptionResponse getSubscription(String email, String bearerToken);
+    void upgradeSubscription(SubscriptionRequest req);
+    void upgradeRole();
+    SubscriptionResponse getSubscription();
 
 }

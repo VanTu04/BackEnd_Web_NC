@@ -6,7 +6,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class SubscriptionPlansRequest extends ConditionRequest {
+public class SubscriptionPlansRequest{
     private String type;
     private Long expired;
     private BigDecimal price;

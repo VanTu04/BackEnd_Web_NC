@@ -19,9 +19,8 @@ public class WithdrawController {
 
     @PostMapping
     public ApiResponse<WithdrawResponse> withdraw(
-            @RequestHeader("Authorization") String bearerToken,
             @RequestBody @Valid WithdrawRequest withdrawRequest) {
-        WithdrawResponse response = withdrawService.withdraw(bearerToken, withdrawRequest);
+        WithdrawResponse response = withdrawService.withdraw( withdrawRequest);
         return ApiResponse.<WithdrawResponse>builder()
                 .result(response)
                 .message("Successfully withdrawn")
@@ -30,10 +29,9 @@ public class WithdrawController {
 
     @PutMapping("/{id}")
     public ApiResponse<WithdrawResponse> editWithdraw(
-            @RequestHeader("Authorization") String bearerToken,
             @PathVariable("id") String withdrawId,
             @RequestParam TransactionStatus status) {
-        WithdrawResponse response = withdrawService.editWithdraw(bearerToken, withdrawId, status);
+        WithdrawResponse response = withdrawService.editWithdraw( withdrawId, status);
         return ApiResponse.<WithdrawResponse>builder()
                 .result(response)
                 .message("Successfully withdrawn")
@@ -44,10 +42,9 @@ public class WithdrawController {
 
     @GetMapping
     public ApiResponse<PageResponse<WithdrawResponse>> getWithdraws(
-            @RequestHeader("Authorization") String bearerToken,
             @RequestParam com.vawndev.spring_boot_readnovel.Enum.TransactionStatus status,
             @RequestBody PageRequest req) {
-        PageResponse<WithdrawResponse> response = withdrawService.getWithdraws(bearerToken, status, req);
+        PageResponse<WithdrawResponse> response = withdrawService.getWithdraws( status, req);
         return ApiResponse.<PageResponse<WithdrawResponse>>builder()
                 .result(response)
                 .message("Successfully withdrawn")

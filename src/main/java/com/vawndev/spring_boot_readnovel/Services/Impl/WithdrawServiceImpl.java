@@ -39,11 +39,14 @@ public class WithdrawServiceImpl implements WithdrawService {
     private final TokenHelper tokenHelper;
     private final WithdrawTransactionRepository withdrawTransactionRepository;
     private final UserRepository userRepository;
+    private User getAuthenticatedUser() {
+        return tokenHelper.getUserO2Auth();
+    }
 
     @Override
-    public WithdrawResponse withdraw(String bearerToken, WithdrawRequest withdrawRequest) {
+    public WithdrawResponse withdraw( WithdrawRequest withdrawRequest) {
 
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+        User user = getAuthenticatedUser();;
         BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
 
         if (balance.compareTo(withdrawRequest.getAmountRequest()) < 0) {
@@ -91,8 +94,8 @@ public class WithdrawServiceImpl implements WithdrawService {
 
     @Override
     @Transactional
-    public WithdrawResponse editWithdraw(String bearerToken, String withdrawId, TransactionStatus status) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public WithdrawResponse editWithdraw( String withdrawId, TransactionStatus status) {
+        User user = getAuthenticatedUser();;
 
         WithdrawTransaction withdrawTransaction = withdrawTransactionRepository
                 .findByIdAndUser(withdrawId, user)
@@ -140,8 +143,8 @@ public class WithdrawServiceImpl implements WithdrawService {
     @Override
     @Transactional
 //    @PreAuthorize("hasRole('ADMIN')")
-    public WithdrawResponse approvedByAdmin(String bearerToken, String withdrawId, TransactionStatus status) {
-        jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public WithdrawResponse approvedByAdmin( String withdrawId, TransactionStatus status) {
+        getAuthenticatedUser();;
 
         WithdrawTransaction withdrawTransaction = withdrawTransactionRepository
                 .findById(withdrawId)
@@ -173,8 +176,8 @@ public class WithdrawServiceImpl implements WithdrawService {
     }
 
     @Override
-    public PageResponse<WithdrawResponse> getWithdraws(String bearerToken, TransactionStatus status,PageRequest req) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public PageResponse<WithdrawResponse> getWithdraws( TransactionStatus status,PageRequest req) {
+        User user = getAuthenticatedUser();;
         Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<WithdrawTransaction> withdrawTransaction = withdrawTransactionRepository.findAllByUserAndStatus(user, status ,pageable);
         List <WithdrawResponse> withdrawResponses = withdrawTransaction.getContent().stream().map(withdraw->WithdrawResponse

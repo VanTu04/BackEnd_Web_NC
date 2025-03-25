@@ -23,7 +23,7 @@ public class Chapter extends BaseEntity {
     private String content;
 
     @Column(name = "views")
-    private int views;
+    private Long views;
 
     private BigDecimal price;
 

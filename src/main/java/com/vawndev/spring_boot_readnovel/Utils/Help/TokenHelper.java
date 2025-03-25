@@ -6,6 +6,9 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -38,5 +41,25 @@ public class TokenHelper {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
     }
+
+    public User getUserO2Auth() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
+        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "You do not have permission to access this resource");
+        }
+        String email = null;
+        if (authentication.getPrincipal() instanceof Jwt jwt) {
+            email = jwt.getClaim("sub");
+        }
+
+        if (email == null) {
+            throw new AppException(ErrorCode.UNAUTHORIZED, "Invalid token: Email claim not found");
+        }
+
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+    }
+
 
 }

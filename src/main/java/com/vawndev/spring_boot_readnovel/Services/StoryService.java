@@ -18,12 +18,12 @@ public interface StoryService {
     PageResponse<StoriesResponse> getStoriesUpdating(PageRequest req);
     List<StoriesResponse> getStoriesRank();
     PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req);
-    void addStory(StoryRequests req, MultipartFile image, String bearerToken);
-    void updateStoryByAuthor(StoryRequests req,String id,String authHeader);
-    void updateCoverImage(StoryCondition req, MultipartFile image,String bearerToken);
+    void addStory(StoryRequests req, MultipartFile image);
+    void updateStoryByAuthor(StoryRequests req,String id);
+    void updateCoverImage(StoryCondition req, MultipartFile image);
     void ModeratedByAdmin(ModeratedByAdmin moderatedByAdmin);
-    void deleteSoftStory(StoryCondition req, String bearerToken);
-    void deleteStory(StoryCondition req,String bearerToken);
-    StoryDetailResponses getStoryById(String authHeader,String storyId);
+    void deleteSoftStory(StoryCondition req);
+    void deleteStory(StoryCondition req);
+    StoryDetailResponses getStoryById(String bearerToken, String id);
 
 }

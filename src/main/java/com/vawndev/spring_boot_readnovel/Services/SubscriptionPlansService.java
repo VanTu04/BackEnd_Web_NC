@@ -9,10 +9,10 @@ import java.util.List;
 
 public interface SubscriptionPlansService {
     List<SubscriptionPlansResponse> getAllSubscriptionPlans();
-    void createSubscriptionPlan(SubscriptionCreatePlansRequest req, String bearerToken);
-    void removeSubscriptionPlan(ConditionRequest req , String bearerToken);
-    void deleteSubscriptionPlan(ConditionRequest req,String bearerToken);
-    void updateSubscriptionPlan(SubscriptionPlansRequest req,String bearerToken);
-    void editSubscriptionPlan(ConditionRequest req,String bearerToken);
-    List<SubscriptionPlansResponse> getAllSubscriptionPlansTrash(String email,String bearerToken);
+    void createSubscriptionPlan(SubscriptionCreatePlansRequest req);
+    void removeSubscriptionPlan(String id_plan);
+    void deleteSubscriptionPlan(String id_plan);
+    void updateSubscriptionPlan(SubscriptionPlansRequest req,String id_plan);
+    void editSubscriptionPlan(ConditionRequest req, String id_plan);
+    List<SubscriptionPlansResponse> getAllSubscriptionPlansTrash();
 }

@@ -40,6 +40,7 @@ import org.springframework.beans.BeanWrapper;
 import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -61,6 +62,10 @@ public class StoryServiceImpl implements StoryService {
     private final CategoryRepository categoryRepository;
     private final TokenHelper tokenHelper;
     private final JwtUtils jwtUtils;
+    private User getAuthenticatedUser() {
+        return tokenHelper.getUserO2Auth();
+    }
+
 
 
     private String[] getNullPropertyNames(Object source) {
@@ -177,9 +182,9 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-//    @PreAuthorize("hasRole('AUTHOR')")
-    public void addStory(StoryRequests req, MultipartFile image_cover ,String bearerToken) {
-        User author = tokenHelper.getRealAuthorizedUser(req.getEmailAuthor(), bearerToken);
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public void addStory(StoryRequests req, MultipartFile image_cover ) {
+        User author = getAuthenticatedUser();
         try{
             ImageCoverRequest imageCoverRequest=new ImageCoverRequest();
             imageCoverRequest.setImage_cover(image_cover);
@@ -215,9 +220,9 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-//    @PreAuthorize("hasRole('AUTHOR')")
-    public void updateStoryByAuthor(StoryRequests req,String id,String bearerToken) {
-        User author = tokenHelper.getRealAuthorizedUser(req.getEmailAuthor(), bearerToken);
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public void updateStoryByAuthor(StoryRequests req,String id) {
+        User author = getAuthenticatedUser();
         Story story = storyRepository.findByIdAndAuthor(id ,author)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         try {
@@ -229,8 +234,8 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public void updateCoverImage(StoryCondition req, MultipartFile image,String bearerToken) {
-        User author = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
+    public void updateCoverImage(StoryCondition req, MultipartFile image) {
+        User author = getAuthenticatedUser();
         Story story = storyRepository.findByIdAndAuthor(req.getId() ,author)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         try{
@@ -251,9 +256,9 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public void ModeratedByAdmin(ModeratedByAdmin req) {
-        User user = author(req.getEmail());
+            getAuthenticatedUser();
             Story story=storyRepository.findById(req.getStory_id()).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
             try {
                 if (req.getIsAvailable()!=null){
@@ -266,9 +271,9 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-//    @PreAuthorize("hasRole('AUTHOR')")
-    public void deleteSoftStory(StoryCondition req,String bearerToken) {
-        User author = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public void deleteSoftStory(StoryCondition req) {
+        User author = getAuthenticatedUser();
         Story story=storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
             try {
                     story.setDeleteAt(Instant.now());
@@ -280,12 +285,22 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-//    @PreAuthorize("hasRole('ADMIN')")
-    public void deleteStory(StoryCondition req, String bearerToken) {
-        User author = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
-        Story story =storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
+    @PreAuthorize("hasRole('ADMIN') or hasAuthority('AUTHOR')")
+    public void deleteStory(StoryCondition req) {
+        User author = getAuthenticatedUser();
+        Story story;
+
+        if (author.getRoles().contains("AUTHOR")) {
+            story = storyRepository.findByIdAndAuthor(req.getId(), author)
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        } else {
+            story = storyRepository.findById(req.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        }
+
         storyRepository.delete(story);
     }
+
 
     @Override
     public StoryDetailResponses getStoryById(String bearerToken, String id) {

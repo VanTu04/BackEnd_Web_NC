@@ -39,41 +39,41 @@ public class StoryController {
     }
 
     @GetMapping("/detail/{id}")
-    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false) String authHeader,@PathVariable @NotBlank String id) {
-        StoryDetailResponses result=storyService.getStoryById(authHeader,id);
+    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false)  String bearerToken,@PathVariable @NotBlank String id) {
+        StoryDetailResponses result=storyService.getStoryById(bearerToken, id);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ApiResponse<String> createStory(@RequestHeader("Authorization") String authHeader,@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
+    public ApiResponse<String> createStory(@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
             StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
-            storyService.addStory(storyRequests,image_cover,authHeader);
+            storyService.addStory(storyRequests,image_cover);
             return ApiResponse.<String>builder().result("Success!").build();
     }
 
     @PatchMapping("/update")
-    public ApiResponse<String> updateStory(@RequestHeader("Authorization") String authHeader, @RequestParam @Valid StoryRequests req, @RequestParam @NotBlank String id) {
-        storyService.updateStoryByAuthor(req,id,authHeader);
+    public ApiResponse<String> updateStory( @RequestParam @Valid StoryRequests req, @RequestParam @NotBlank String id) {
+        storyService.updateStoryByAuthor(req,id);
         return ApiResponse.<String>builder().result("Success!").build();
     }
     @PutMapping(value = "/update/cover", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ApiResponse<String> updateStoryCover(
             @RequestParam StoryCondition req,
-            @RequestPart MultipartFile image_cover,
-            @RequestHeader("Authorization") String authHeader) {
+            @RequestPart MultipartFile image_cover
+            ) {
 
-        storyService.updateCoverImage(req, image_cover,authHeader);
+        storyService.updateCoverImage(req, image_cover);
         return ApiResponse.<String>builder().result("success").build();
     }
 
     @PutMapping("/remove")
-    public ApiResponse<String> removeStory(@RequestBody @Valid StoryCondition req ,@RequestHeader("Authorization") String authHeader) {
-        storyService.deleteSoftStory(req,authHeader);
+    public ApiResponse<String> removeStory(@RequestBody @Valid StoryCondition req ) {
+        storyService.deleteSoftStory(req);
         return ApiResponse.<String>builder().result("success").build();
     }
 
     @DeleteMapping("/delete")
-    public ApiResponse<String> deleteStory(@RequestBody @Valid StoryCondition req,@RequestHeader("Authorization") String authHeader) {
-        storyService.deleteStory(req,authHeader);
+    public ApiResponse<String> deleteStory(@RequestBody @Valid StoryCondition req) {
+        storyService.deleteStory(req);
         return ApiResponse.<String>builder().result("Success").build();
     }
 

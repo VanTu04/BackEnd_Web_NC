@@ -25,6 +25,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -36,10 +37,14 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     private final ReadingHistoryRepository readingHistoryRepository;
     private final JwtUtils jwtUtils;
     private final TokenHelper tokenHelper;
+    private User getAuthenticatedUser() {
+        return tokenHelper.getUserO2Auth();
+    }
 
     @Override
-    public PageResponse<ReadingHistoryResponse> getHistory(String bearerToken, PageRequest req) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public PageResponse<ReadingHistoryResponse> getHistory(PageRequest req) {
+        User user = getAuthenticatedUser();
+
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
 
         Page<ReadingHistory> histories = readingHistoryRepository.findByUser(user.getId(), pageable);
@@ -90,14 +95,16 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     }
 
     @Override
-    public void saveHistory(String bearerToken, String chapter_id) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public void saveHistory( String chapter_id) {
+        User user = getAuthenticatedUser();
         Chapter chapter=chapterRepository.findById(chapter_id).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
         ReadingHistory readingHistory=readingHistoryRepository.findByUserAndChapter(user, chapter);
         if (Objects.nonNull(readingHistory)) {
             return;
         }
         chapter.getStory().setViews(chapter.getStory().getViews() + 1);
+        chapter.setViews(chapter.getViews() + 1);
+        chapter.setCreatedAt(Instant.now());
         readingHistory = ReadingHistory
                 .builder()
                 .chapter(chapter)
@@ -107,8 +114,8 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     }
 
     @Override
-    public void deleteHistory(String bearerToken, String story_id) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public void deleteHistory( String story_id) {
+        User user = getAuthenticatedUser();
 
         Story story=storyRepository.findById(story_id).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
         ReadingHistory readingHistory=readingHistoryRepository.findByUserAndStory(user,story);
@@ -116,8 +123,8 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     }
 
     @Override
-    public void deleteAllHistory(String bearerToken) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    public void deleteAllHistory() {
+        User user = getAuthenticatedUser();
         readingHistoryRepository.deleteByUserId(user.getId());
     }
 

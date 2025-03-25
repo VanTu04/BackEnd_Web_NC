@@ -22,8 +22,8 @@ public class MyController {
     private final SubscriptionService subscriptionService;
 
     @GetMapping("/history")
-    public ApiResponse<PageResponse<ReadingHistoryResponse>> getReadingHistory(@RequestHeader("Authorization")String authHeader, @RequestParam PageRequest pageRequest) {
-        PageResponse<ReadingHistoryResponse> result=historyReadingService.getHistory(authHeader, pageRequest);
+    public ApiResponse<PageResponse<ReadingHistoryResponse>> getReadingHistory( @RequestParam PageRequest pageRequest) {
+        PageResponse<ReadingHistoryResponse> result=historyReadingService.getHistory(pageRequest);
         return ApiResponse.<PageResponse<ReadingHistoryResponse>>builder()
                 .result(result)
                 .message("Successfully")
@@ -31,19 +31,19 @@ public class MyController {
     }
 
     @DeleteMapping( "/history/delete")
-    public ApiResponse<String> deleteReadingHistory(@RequestHeader("Authorization") String authHeader,@RequestBody String story_id)  {
-        historyReadingService.deleteHistory(authHeader,story_id);
+    public ApiResponse<String> deleteReadingHistory(@RequestBody String story_id)  {
+        historyReadingService.deleteHistory(story_id);
         return ApiResponse.<String>builder().result("Success!").build();
     }
     @DeleteMapping( "/history/deleteAll")
     public ApiResponse<String> deleteAllReadingHistory(@RequestHeader("Authorization") String authHeader)  {
-        historyReadingService.deleteAllHistory(authHeader);
+        historyReadingService.deleteAllHistory();
         return ApiResponse.<String>builder().result("Success!").build();
     }
 
     @GetMapping("/subscription")
-    public ApiResponse<SubscriptionResponse> getSubscriptions(@RequestHeader("Authorization") String authHeader, @RequestParam String email) {
-        SubscriptionResponse response=subscriptionService.getSubscription(email,authHeader);
+    public ApiResponse<SubscriptionResponse> getSubscriptions() {
+        SubscriptionResponse response=subscriptionService.getSubscription();
         return ApiResponse.<SubscriptionResponse>builder().message("successfully").result(response).build();
     }
 

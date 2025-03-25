@@ -17,6 +17,10 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.apache.hc.client5.http.auth.BearerToken;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -30,12 +34,16 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SubscriptionServiceImpl implements SubscriptionService {
     private final TokenHelper tokenHelper;
-    private final SubscriptionRepository subscriptionRepository;
+    private final SubscriptionRepository subscriptionRepository ;
     private final SubscriptionPlansRepository subscriptionPlansRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final WalletTransactionRepository transactionRepository;
     private final JwtUtils jwtUtils;
+    private User getAuthenticatedUser() {
+        return tokenHelper.getUserO2Auth();
+    }
+
 
     @Scheduled(cron = "0 0 0 * * ?") // Auto run to check expired of account subscription at 12:00 PM every day
     @Transactional
@@ -50,68 +58,51 @@ public class SubscriptionServiceImpl implements SubscriptionService {
 
     @Override
     @Transactional
-    public void upgradeSubscription(SubscriptionRequest req, String bearerToken) {
+    @PreAuthorize("hasAuthority('AUTHOR') or hasAuthority('USER')")
+    public void upgradeSubscription(SubscriptionRequest req) {
+        User user = getAuthenticatedUser();
+        Subscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
 
-            User user = tokenHelper.getRealAuthorizedUser(req.getEmail(), bearerToken);
+        // ✅ Kiểm tra nếu user đã có subscription còn hạn
+        if (subscription != null && subscription.getExpiredAt() != null
+                && subscription.getExpiredAt().isAfter(Instant.now())) {
+            throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION);
+        }
 
-            Subscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
+        // ✅ Kiểm tra số dư
+        BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
+        SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
 
-            if (subscription != null && subscription.getExpiredAt() != null
-                    && subscription.getExpiredAt().isAfter(Instant.now())) {
-                throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION);
-            }
+        if (balance.compareTo(subscriptionPlan.getPrice()) < 0) {
+            throw new AppException(ErrorCode.FAILED_PAYMENT);
+        }
 
-            // Kiểm tra số dư của người dùng
-            BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
+        // ✅ Nếu chưa có subscription, tạo mới
+        if (subscription == null) {
+            subscription = new Subscription();
+            subscription.setUser(user);
+        }
 
-            // Tìm Subscription Plan
-            SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
-                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        subscription.setPlan(subscriptionPlan);
+        BigDecimal newBalance = balance.subtract(subscriptionPlan.getPrice());
 
-            // Kiểm tra xem người dùng có đủ số dư thanh toán không
-            if (balance.compareTo(subscriptionPlan.getPrice()) < 0) {
-                throw new AppException(ErrorCode.FAILED_PAYMENT);
-            }
+        if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
+            throw new AppException(ErrorCode.FAILED_PAYMENT);
+        }
 
-            // Nếu chưa có subscription, tạo mới
-            if (subscription == null) {
-                subscription = new Subscription();
-                subscription.setUser(user);
-            }
-
-            // Gán gói mới và trừ tiền trong tài khoản người dùng
-            subscription.setPlan(subscriptionPlan);
-            BigDecimal newBalance = balance.subtract(subscriptionPlan.getPrice());
-
-            // Đảm bảo số dư không âm
-            if (newBalance.compareTo(BigDecimal.ZERO) < 0) {
-                throw new AppException(ErrorCode.FAILED_PAYMENT);
-            }
-            //có nên không cần phải xét duyệt
-//            WalletTransaction walletTransaction=WalletTransaction
-//                    .builder()
-//                    .transactionType(TransactionType.DEPOSIT)
-//                    .status(TransactionStatus.PENDING)
-//                    .amount(subscriptionPlan.getPrice())
-//                    .description("Upgrade subscription to " + subscriptionPlan.getType())
-//                    .user(user)
-//                    .build();
-//            transactionRepository.save(walletTransaction);
-
-            user.setBalance(newBalance);
-            user.setSubscription(subscription);
-            userRepository.save(user);
-            subscriptionRepository.save(subscription);
-
-
+        // ✅ Lưu thông tin mới vào database
+        user.setBalance(newBalance);
+        user.setSubscription(subscription);
+        userRepository.save(user);
+        subscriptionRepository.save(subscription);
     }
 
 
-
-
     @Override
-    public SubscriptionResponse getSubscription(String email, String bearerToken) {
-            User user = tokenHelper.getRealAuthorizedUser(email, bearerToken);
+    @PreAuthorize("hasAuthority('AUTHOR') or hasAuthority('USER')")
+        public SubscriptionResponse getSubscription() {
+            User user = getAuthenticatedUser();
             Subscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
 
             if (subscription == null) {
@@ -129,8 +120,9 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     }
     @Override
     @Transactional
-    public void upgradeRole(String bearerToken) {
-        User user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+    @PreAuthorize("hasRole('USER')")
+        public void upgradeRole() {
+        User user =getAuthenticatedUser();
 
         user.getRoles().forEach(role -> {
             if (role.getName().equals("AUTHOR")) {

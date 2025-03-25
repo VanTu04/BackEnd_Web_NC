@@ -3,12 +3,15 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.RawFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
@@ -24,7 +27,11 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
+import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -43,22 +50,46 @@ public class ChapterServiceImpl implements ChapterService {
     private final UserRepository userRepository;
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
+    private User getAuthenticatedUser() {
+        return tokenHelper.getUserO2Auth();
+    }
 
     @Override
-//    @PreAuthorize("hasRole('AUTHOR')")
-    public String addChapter(ChapterUploadRequest chapterUploadRequest,String tokenBearer) {
-        FileRequest freq = chapterUploadRequest.getFile();
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public String addChapter(ChapterUploadRequest chapterUploadRequest, List<MultipartFile> uploadedFiles) {
         ChapterRequest creq = chapterUploadRequest.getChapter();
-        User Auth=tokenHelper.getRealAuthorizedUser(chapterUploadRequest.getChapter().getAuthorEmail(),tokenBearer);
-        try {
-            Story story = storyRepository.findByIdAndAuthor(creq.getStory_id(),Auth)
-                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        User Auth=getAuthenticatedUser();
+        List<MultipartFile> images = new ArrayList<>();
+        List<MultipartFile> files = new ArrayList<>();
+        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(),Auth).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND,"Story not found"));
+        if (uploadedFiles != null && !uploadedFiles.isEmpty()) {
+            for (MultipartFile file : uploadedFiles) {
+                if (file.getContentType() != null && file.getContentType().startsWith("image/") && story.getType().equals(StoryType.COMIC)) {
+                    images.add(file);
+                } else {
+                    files.add(file);
+                }
+            }
+        }
+        if (!files.isEmpty()) {
+            RawFileRequest rawUpload = new RawFileRequest();
+            rawUpload.setFile(files);
+            chapterUploadRequest.setFile(rawUpload);
+        }
 
-            List<String> listUrl;
+        if (!images.isEmpty()) {
+            ImageFileRequest imageUpload = new ImageFileRequest();
+            imageUpload.setFile(images);
+            chapterUploadRequest.setFile(imageUpload);
+        }
+
+
+           List<String> listUrl;
             try {
+                FileRequest freq = chapterUploadRequest.getFile();
                 listUrl = cloundService.getUrlChapterAfterUpload(freq);
             } catch (IOException e) {
-                throw new RuntimeException("Error uploading to Cloudinary", e);
+                throw new AppException(ErrorCode.SERVER_ERROR);
             }
             Chapter chapter = Chapter.builder()
                     .title(creq.getTitle())
@@ -66,7 +97,9 @@ public class ChapterServiceImpl implements ChapterService {
                     .price(creq.getPrice())
                     .story(story)
                     .build();
+            story.setPrice(story.getPrice().add(chapter.getPrice()));
             Chapter savedChapter = chapterRepository.save(chapter);
+            storyRepository.save(story);
 
             List<File> imageList = listUrl.stream()
                     .map(url -> File.builder()
@@ -77,77 +110,85 @@ public class ChapterServiceImpl implements ChapterService {
 
             fileRepository.saveAll(imageList);
             return chapter.getId();
-
-        }catch (Exception e) {
-            throw new RuntimeException(e);
-        }
-    }
+         }
 
     @Override
-    @PreAuthorize("hasAnyRole('AUTHOR','ADMIN')")
-    public void deleteChapter(String id, String email, String tokenBearer) {
-        try {
-            User user = jwtUtil.validToken(tokenHelper.getTokenInfo(tokenBearer));
-            User auth;
-            boolean isAuthor = user.getRoles().stream().anyMatch(role -> "AUTHOR".equals(role.getName()));
-            boolean isAdmin = user.getRoles().stream().anyMatch(role -> "ADMIN".equals(role.getName()));
+    @PreAuthorize("hasAuthority('AUTHOR') or hasAuthority('ADMIN')")
+    @Transactional
+    public void deleteChapter(String id) {
+        User user = getAuthenticatedUser();
+        Chapter chapter;
 
-            if (isAuthor) {
-                auth = tokenHelper.getRealAuthorizedUser(email, tokenBearer);
-            } else if (isAdmin) {
-                auth = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-            } else {
-                throw new AppException(ErrorCode.UNAUTHORIZED);
-            }
-
-            Chapter chapter = chapterRepository.findByIdAndAuthorId(id, auth.getId())
+        if (user.getRoles().contains("ADMIN")) {
+            chapter = chapterRepository.findById(id)
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
-
-            List<File> files = fileRepository.findByChapterId(chapter.getId());
-
-            List<String> publicId = files.stream()
-                    .map(file -> FileUpload.extractPublicId(file.getUrl()))
-                    .collect(Collectors.toList());
-
-            try {
-                cloundService.removeUrlOnChapterDelete(publicId);
-            } catch (Exception e) {
-                throw new RuntimeException("Lỗi khi xóa file trên Cloudinary: " + e.getMessage());
-            }
-
-            fileRepository.deleteAll(files);
-            chapterRepository.delete(chapter);
-        } catch (Exception e) {
-            throw new AppException(ErrorCode.USER_NOT_EXISTED);
+        } else {
+            chapter = chapterRepository.findByIdAndAuthorId(id, user.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
         }
+
+        List<File> files = fileRepository.findByChapterId(chapter.getId());
+        List<String> publicIds = files.stream()
+                .map(file -> FileUpload.extractPublicId(file.getUrl()))
+                .collect(Collectors.toList());
+
+        try {
+            cloundService.removeUrlOnChapterDelete(publicIds);
+        } catch (Exception e) {
+            throw new AppException(ErrorCode.SERVER_ERROR, "Lỗi khi xóa file trên Cloud: " + e.getMessage());
+        }
+
+        Story story = storyRepository.findById(chapter.getStory().getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found"));
+
+        if (chapter.getPrice() != null && story.getPrice() != null) {
+            story.setPrice(story.getPrice().subtract(chapter.getPrice()));
+        }
+
+        fileRepository.deleteAll(files);
+        chapterRepository.delete(chapter);
+        storyRepository.save(story);
     }
+
+
+
 
 
 
     @Override
     @Transactional
-    public ChapterResponseDetail getChapterDetail(String id,String bearerToken) {
+    public ChapterResponseDetail getChapterDetail(String id, String bearerToken) {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
 
-        User user=null;
+        User user = null;
+
         if (bearerToken != null && !bearerToken.isEmpty()) {
             try {
                 user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
             } catch (AppException e) {
-                user = null;
+                throw new AppException(ErrorCode.UNAUTHORIZED);
             }
         }
-        User finalUser = user;
-        readingService.saveHistory(bearerToken,chapter.getId());
-        chapterRepository.save(chapter);
+
+        if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0){
+            if (user.getSubscription() ==null){
+                throw new AppException(ErrorCode.CAPITAL, "You must be upgrade your account or buy to read this chapter");
+            }
+        }
+
+        // Chỉ lưu lịch sử đọc nếu user hợp lệ
+        if (user != null) {
+            readingService.saveHistory(chapter.getId());
+        }
 
         return ChapterResponseDetail.builder()
                 .id(chapter.getId())
                 .title(chapter.getTitle())
                 .content(chapter.getContent())
-                .price(UserHelper.getPriceByUser(chapter.getPrice(),finalUser))
+                .price(UserHelper.getPriceByUser(chapter.getPrice(), user))
                 .transactionType(TransactionType.DEPOSIT)
+                .views(chapter.getViews())
                 .files(chapter.getFiles().stream()
                         .map(file -> FileResponse.builder().id(file.getId()).build())
                         .collect(Collectors.toList()))

@@ -86,35 +86,35 @@ public class AdminController {
     }
 
     @PostMapping("/subscription/add")
-    public ApiResponse<String> createSubscriptionPlan(@RequestBody @Valid SubscriptionCreatePlansRequest req, @RequestHeader("Authorization") String bearerToken){
-        subscriptionPlansService.createSubscriptionPlan(req, bearerToken);
+    public ApiResponse<String> createSubscriptionPlan(@RequestBody @Valid SubscriptionCreatePlansRequest req){
+        subscriptionPlansService.createSubscriptionPlan(req);
         return ApiResponse.<String>builder().result("Subscription plan created successfully!").build();
     }
 
     @PatchMapping("/subscription/update")
-    public ApiResponse<String> updateSubscriptionPlan(@RequestBody @Valid SubscriptionPlansRequest req, @RequestHeader("Authorization") String bearerToken){
-        subscriptionPlansService.updateSubscriptionPlan(req, bearerToken);
+    public ApiResponse<String> updateSubscriptionPlan(@RequestBody @Valid SubscriptionPlansRequest req,@RequestParam @NotBlank String id_plan){
+        subscriptionPlansService.updateSubscriptionPlan(req,id_plan);
         return ApiResponse.<String>builder().result("Subscription plan updated successfully!").build();
     }
 
     @PutMapping("/subscription/remove")
-    public ApiResponse<String> removeSubscriptionPlan(@RequestBody @Valid ConditionRequest req, @RequestHeader("Authorization") String bearerToken){
-        subscriptionPlansService.removeSubscriptionPlan(req, bearerToken);
+    public ApiResponse<String> removeSubscriptionPlan(@RequestParam @NotBlank String id_plan){
+        subscriptionPlansService.removeSubscriptionPlan(id_plan);
         return ApiResponse.<String>builder().result("Subscription plan removed successfully!").build();
     }
     @PutMapping("/subscription/edit")
-    public ApiResponse<String> editSubscriptionPlan(@RequestBody @Valid ConditionRequest req, @RequestHeader("Authorization") String bearerToken){
-        subscriptionPlansService.editSubscriptionPlan(req, bearerToken);
+    public ApiResponse<String> editSubscriptionPlan(@RequestBody @Valid ConditionRequest req,@RequestParam @NotBlank String id_plan){
+        subscriptionPlansService.editSubscriptionPlan(req,id_plan);
         return ApiResponse.<String>builder().result("Subscription plan removed successfully!").build();
     }
     @GetMapping("/subscription/trash")
-    public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlansTrash(@RequestParam @NotBlank String email, @RequestHeader("Authorization") String bearerToken){
-        List<SubscriptionPlansResponse> subscriptionPlansResponses= subscriptionPlansService.getAllSubscriptionPlansTrash(email,bearerToken);
+    public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlansTrash(){
+        List<SubscriptionPlansResponse> subscriptionPlansResponses= subscriptionPlansService.getAllSubscriptionPlansTrash();
         return ApiResponse.<List<SubscriptionPlansResponse>>builder().result(subscriptionPlansResponses).build();
     }
     @DeleteMapping("/subscription/delete")
-    public ApiResponse<String> deleteSubscriptionPlan(@RequestBody @Valid ConditionRequest req, @RequestHeader("Authorization") String bearerToken){
-        subscriptionPlansService.deleteSubscriptionPlan(req, bearerToken);
+    public ApiResponse<String> deleteSubscriptionPlan(@RequestParam @NotBlank String id_plan){
+        subscriptionPlansService.deleteSubscriptionPlan(id_plan);
         return ApiResponse.<String>builder().result("Subscription plan deleted successfully!").build();
     }
     // =================== WITHDRAW MANAGEMENT ===================
@@ -124,7 +124,7 @@ public class AdminController {
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable("id") String withdrawId,
             @RequestParam TransactionStatus status) {
-        WithdrawResponse response = withdrawService.approvedByAdmin(bearerToken, withdrawId, status);
+        WithdrawResponse response = withdrawService.approvedByAdmin( withdrawId, status);
         return ApiResponse.<WithdrawResponse>
                 builder()
                 .result(response)

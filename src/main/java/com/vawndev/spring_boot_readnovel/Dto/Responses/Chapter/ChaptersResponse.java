@@ -15,4 +15,6 @@ public class ChaptersResponse {
     private String title;
 
     private String content;
+
+    private Long views;
 }

@@ -21,14 +21,14 @@ public class SubscriptionController {
     private final SubscriptionPlansService subscriptionPlansService;
 
     @PostMapping("/upgrade/role")
-    public ApiResponse<String> upgradeRole(@RequestHeader("Authorization") String authHeader) {
-        subscriptionService.upgradeRole(authHeader);
+    public ApiResponse<String> upgradeRole() {
+        subscriptionService.upgradeRole();
         return ApiResponse.<String>builder().message("Subscription role upgraded").build();
     }
 
     @PostMapping("/upgrade")
-    public ApiResponse<String> upgradeSubscription(@RequestBody @Valid SubscriptionRequest req, @RequestHeader("Authorization") String authHeader) {
-        subscriptionService.upgradeSubscription(req,authHeader);
+    public ApiResponse<String> upgradeSubscription(@RequestBody @Valid SubscriptionRequest req) {
+        subscriptionService.upgradeSubscription(req);
         return ApiResponse.<String>builder().message("Subscription upgraded").build();
     }
 
