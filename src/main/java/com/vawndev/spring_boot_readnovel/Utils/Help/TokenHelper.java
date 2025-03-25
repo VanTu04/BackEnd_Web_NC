@@ -54,7 +54,7 @@ public class TokenHelper {
         }
 
         if (email == null) {
-            throw new AppException(ErrorCode.UNAUTHORIZED, "Invalid token: Email claim not found");
+            throw new AppException(ErrorCode.UNAUTHORIZED);
         }
 
         return userRepository.findByEmail(email)

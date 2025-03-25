@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Repositories;
 
+import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
@@ -11,6 +12,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +42,17 @@ public interface StoryRepository extends JpaRepository<Story, String> {
         ORDER BY s.views DESC, s.rate DESC
         """)
     List<Story> findTopStories(IS_AVAILBLE available,
+                               List<STORY_STATUS> statusList);
+
+    @Query("""
+        SELECT s FROM Story s
+        WHERE s.isVisibility = TRUE 
+        AND  s.isAvailable = :available 
+        AND s.status IN :statusList     
+        AND s.isBanned = FALSE            
+        ORDER BY s.views DESC
+        """)
+    Page<Story> findMostViews(IS_AVAILBLE available,
                                List<STORY_STATUS> statusList,
                                Pageable pageable);
     @Query("""
@@ -60,5 +73,9 @@ public interface StoryRepository extends JpaRepository<Story, String> {
 
     @Query("SELECT COUNT(s) FROM Story s WHERE s.isAvailable = 'REJECTED' AND MONTH(s.createdAt) = :month AND YEAR(s.createdAt) = :year")
     Long countRejectedStories(@Param("month") int month, @Param("year") int year);
+
+    @Query("SELECT s FROM Story s JOIN s.categories c WHERE c.id IN :categoryIds ORDER BY s.id DESC")
+    Page<Story> findAllByCategoriesIn(List<String> categoryIds ,Pageable pageable);
+
 
 }

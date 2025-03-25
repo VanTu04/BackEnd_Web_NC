@@ -14,7 +14,7 @@ import java.util.List;
 
 public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, String> {
 
-    Page<ReadingHistory> findByUser(String userId, Pageable pageable);
+    Page<ReadingHistory> findByUser(User user, Pageable pageable);
 
     ReadingHistory findByUserAndChapter(User user, Chapter chapter);
 

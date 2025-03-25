@@ -47,7 +47,7 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
 
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
 
-        Page<ReadingHistory> histories = readingHistoryRepository.findByUser(user.getId(), pageable);
+        Page<ReadingHistory> histories = readingHistoryRepository.findByUser(user, pageable);
 
         // Nhóm chapter theo story_id
         Map<String, Set<String>> storyChapterMap = histories.getContent()

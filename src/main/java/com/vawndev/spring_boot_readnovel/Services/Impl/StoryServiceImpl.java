@@ -11,10 +11,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryResponse;
-import com.vawndev.spring_boot_readnovel.Entities.Category;
-import com.vawndev.spring_boot_readnovel.Entities.Chapter;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
-import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Entities.*;
 import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
 import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.SUBSCRIPTION_TYPE;
@@ -22,10 +19,7 @@ import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
-import com.vawndev.spring_boot_readnovel.Repositories.CategoryRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.*;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
@@ -62,6 +56,8 @@ public class StoryServiceImpl implements StoryService {
     private final CategoryRepository categoryRepository;
     private final TokenHelper tokenHelper;
     private final JwtUtils jwtUtils;
+    private final ReadingHistoryRepository readingHistoryRepository;
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
@@ -154,11 +150,68 @@ public class StoryServiceImpl implements StoryService {
         }
     }
 
+
+    @Override
+    public PageResponse<StoriesResponse> recommendStories(PageRequest req, String BearerToken) {
+        List<StoriesResponse> result;
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        List<STORY_STATUS> status = List.of(STORY_STATUS.COMPLETED, STORY_STATUS.UPDATING);
+
+        User user = Optional.ofNullable(BearerToken)
+                .filter(token -> !token.isEmpty())
+                .map(token -> jwtUtils.validToken(tokenHelper.getTokenInfo(token)))
+                .orElse(null);
+
+        // Nếu không có user → lấy truyện nhiều lượt xem nhất
+        if (user == null) {
+            return getPageResponse(req, storyRepository.findMostViews(IS_AVAILBLE.ACCEPTED, status, pageable));
+        }
+
+        // Lấy lịch sử đọc
+        Page<ReadingHistory> storiesPage = readingHistoryRepository.findByUser(user, pageable);
+        Map<String, Integer> categoriesCount = new HashMap<>();
+
+        // Đếm số lần đọc theo thể loại
+        storiesPage.getContent().forEach(readingHistory ->
+                readingHistory.getStory().getCategories().forEach(category ->
+                        categoriesCount.merge(category.getId(), 1, Integer::sum)
+                )
+        );
+
+        // Sắp xếp thể loại theo số lần đọc giảm dần
+        List<String> mostCategories = categoriesCount.entrySet().stream()
+                .sorted(Map.Entry.<String, Integer>comparingByValue(Comparator.reverseOrder()))
+                .map(Map.Entry::getKey)
+                .collect(Collectors.toList());
+
+        // Get stories list base the most category suggest or fallback to the most stories list
+        Page<Story> storyList = !mostCategories.isEmpty()
+                ? storyRepository.findAllByCategoriesIn(mostCategories, pageable)
+                : storyRepository.findMostViews(IS_AVAILBLE.ACCEPTED, status, pageable);
+
+        return getPageResponse(req, storyList);
+    }
+
+    private PageResponse<StoriesResponse> getPageResponse(PageRequest req, Page<Story> storyList) {
+        List<StoriesResponse> result = storyList.getContent().stream()
+                .map(storyMapper::toStoriesResponse)
+                .collect(Collectors.toList());
+
+        return PageResponse.<StoriesResponse>builder()
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .total(storyList.getTotalPages())
+                .data(result)
+                .build();
+    }
+
+
+
     public List<StoriesResponse> getStoriesRank() {
         List<STORY_STATUS> status = List.of(STORY_STATUS.COMPLETED, STORY_STATUS.UPDATING);
         Pageable pageable = PaginationUtil.createPageable(0,9);
         try {
-            List<Story> stories=storyRepository.findTopStories(IS_AVAILBLE.ACCEPTED, status, pageable);
+            List<Story> stories=storyRepository.findTopStories(IS_AVAILBLE.ACCEPTED, status);
             List<StoriesResponse> storyRepositories=stories.stream().map(story->storyMapper.toStoriesResponse(story)).collect(Collectors.toList());
             return storyRepositories;
         } catch (Exception e) {
