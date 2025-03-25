@@ -164,18 +164,15 @@ public class ChapterServiceImpl implements ChapterService {
         User user = null;
 
         if (bearerToken != null && !bearerToken.isEmpty()) {
-            try {
                 user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
-            } catch (AppException e) {
-                throw new AppException(ErrorCode.UNAUTHORIZED);
+        }
+
+        if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0) {
+            if (user == null || user.getSubscription() == null) {
+                throw new AppException(ErrorCode.CAPITAL, "You must upgrade your account or buy to read this chapter");
             }
         }
 
-        if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0){
-            if (user.getSubscription() ==null){
-                throw new AppException(ErrorCode.CAPITAL, "You must be upgrade your account or buy to read this chapter");
-            }
-        }
 
         // Chỉ lưu lịch sử đọc nếu user hợp lệ
         if (user != null) {
