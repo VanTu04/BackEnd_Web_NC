@@ -3,30 +3,33 @@ package com.vawndev.spring_boot_readnovel.Entities;
 import jakarta.persistence.*;
 import lombok.*;
 
-import java.util.UUID;
-import java.time.LocalDateTime;
+import java.time.Instant;
+
 
 @Entity
 @Data
-@Builder
-@NoArgsConstructor
 @AllArgsConstructor
-public class ReadingHistory extends BaseEntity{
+@NoArgsConstructor
+@Builder
+@Table(name = "reading_history", uniqueConstraints = {
+        @UniqueConstraint(columnNames = {"user_id", "chapter_id"})
+})
+public class ReadingHistory  {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    @ManyToOne
-    @JoinColumn(name = "user_id", nullable = false)
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id",nullable = false)
     private User user;
 
-    @ManyToOne
-    @JoinColumn(name = "story_id", nullable = false)
-    private Story story;
+    private Instant createdAt = Instant.now();
 
-    @Column(name = "chapter_id", nullable = false)
-    private String chapterId;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "chapter_id",nullable = false)
+    private Chapter chapter;
+    public Story getStory() {
+        return this.chapter.getStory();
+    }
 
-    @Column(name = "last_read_at", nullable = false)
-    private LocalDateTime lastReadAt;
 }

@@ -6,6 +6,8 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.math.BigDecimal;
+
 @Entity
 @Data
 @AllArgsConstructor
@@ -14,4 +16,5 @@ import lombok.NoArgsConstructor;
 public class SubscriptionPlans extends BaseEntity{
     private String type;
     private Long expired;
+    private BigDecimal price;
 }

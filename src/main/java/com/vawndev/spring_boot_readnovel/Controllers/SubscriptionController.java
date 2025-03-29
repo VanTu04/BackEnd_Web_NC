@@ -6,6 +6,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.Subscription
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionResponse;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionPlansService;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionService;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -19,17 +20,19 @@ public class SubscriptionController {
     private final SubscriptionService subscriptionService;
     private final SubscriptionPlansService subscriptionPlansService;
 
+    @PostMapping("/upgrade/role")
+    public ApiResponse<String> upgradeRole() {
+        subscriptionService.upgradeRole();
+        return ApiResponse.<String>builder().message("Subscription role upgraded").build();
+    }
+
     @PostMapping("/upgrade")
-    public ApiResponse<String> upgradeSubscription(@RequestBody SubscriptionRequest req, @RequestHeader("Authorization") String authHeader) {
-        subscriptionService.upgradeSubscription(req,authHeader);
+    public ApiResponse<String> upgradeSubscription(@RequestBody @Valid SubscriptionRequest req) {
+        subscriptionService.upgradeSubscription(req);
         return ApiResponse.<String>builder().message("Subscription upgraded").build();
     }
 
-    @GetMapping("/my")
-    public ApiResponse<SubscriptionResponse> getSubscriptions(@RequestHeader("Authorization") String authHeader, @RequestParam String email) {
-        SubscriptionResponse response=subscriptionService.getSubscription(email,authHeader);
-        return ApiResponse.<SubscriptionResponse>builder().message("successfully").result(response).build();
-    }
+
 
     @GetMapping("")
     public ApiResponse<List<SubscriptionPlansResponse>> getSubscriptions() {

@@ -10,7 +10,4 @@ public class ConditionRequest {
     @NotBlank(message = "id cannot be blank")
     private String id;
 
-    @NotNull(message = "Email cannot be null")
-    @NotBlank(message = "Email cannot be blank")
-    private String email;
 }

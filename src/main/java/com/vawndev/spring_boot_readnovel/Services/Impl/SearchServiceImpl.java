@@ -10,6 +10,7 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.SearchRepository;
 import com.vawndev.spring_boot_readnovel.Services.SearchService;
+import com.vawndev.spring_boot_readnovel.Specification.StorySpecification;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
@@ -18,9 +19,9 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-import static com.vawndev.spring_boot_readnovel.Specification.StorySpecification.searchByFilter;
-import static com.vawndev.spring_boot_readnovel.Specification.StorySpecification.searchByKeyword;
+
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @Service
@@ -29,11 +30,12 @@ public class SearchServiceImpl implements SearchService {
     private final SearchRepository searchRepository;
     private final StoryMapper storyMapper;
     @Override
-    public PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit) {
+    public PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit, Set<String> filterFields) {
         try {
-
             Pageable pageable = PaginationUtil.createPageable(page, limit);
-            Specification<Story> spec = searchByFilter(keyword).or(searchByKeyword(keyword));
+
+            // Gọi Specification với keyword và các trường lọc
+            Specification<Story> spec = StorySpecification.searchAndFilter(keyword, filterFields);
 
             Page<Story> storyPage = searchRepository.findAll(spec, pageable);
 
@@ -46,7 +48,7 @@ public class SearchServiceImpl implements SearchService {
                     .data(storiesList)
                     .page(page)
                     .limit(limit)
-                    .total(storyPage.getSize())
+                    .total(storyPage.getTotalPages()) // Sửa lại để lấy tổng số bản ghi
                     .build();
 
         } catch (AppException e) {
@@ -55,4 +57,5 @@ public class SearchServiceImpl implements SearchService {
             throw new RuntimeException("Lỗi khi tìm kiếm truyện: " + e.getMessage(), e);
         }
     }
-    }
+
+}

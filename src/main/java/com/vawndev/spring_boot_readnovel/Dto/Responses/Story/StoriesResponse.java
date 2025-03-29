@@ -26,8 +26,6 @@ public class StoriesResponse extends TimeZoneResponse {
 
     private Long view;
 
-    private int views;
-
     private STORY_STATUS status;
 
     private List<CategoryResponse> categories;

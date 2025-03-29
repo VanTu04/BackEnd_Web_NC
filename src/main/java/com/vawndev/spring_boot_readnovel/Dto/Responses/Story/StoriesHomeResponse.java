@@ -18,5 +18,6 @@ public class StoriesHomeResponse {
     private PageResponse<StoriesResponse> stories;
     private PageResponse<StoriesResponse> getStoriesComingSoon;
     private PageResponse<StoriesResponse> getStoriesUpdating;
+    private PageResponse<StoriesResponse> getStoriesRecommend;
     private List<StoriesResponse> getStoriesRank;
 }
