@@ -1,26 +1,28 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import java.time.Instant;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.stereotype.Service;
+import org.springframework.web.server.ResponseStatusException;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionCreatePlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionPlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
 import com.vawndev.spring_boot_readnovel.Entities.SubscriptionPlans;
-import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.SubscriptionPlansRepository;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionPlansService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
+
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
-import org.springframework.web.server.ResponseStatusException;
-import org.springframework.http.HttpStatus;
-
-import java.time.Instant;
-import java.util.List;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -69,7 +71,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
             plan.setDeleteAt(Instant.now());
             subscriptionPlansRepository.save(plan);
         } else {
-            throw new AppException(ErrorCode.OBJECT_NOT_FOUND);
+            throw new AppException(ErrorCode.NOT_FOUND);
         }
     }
 
@@ -99,7 +101,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
             plan.setPrice(req.getPrice());
             subscriptionPlansRepository.save(plan);
         } else {
-            throw new AppException(ErrorCode.OBJECT_NOT_FOUND);
+            throw new AppException(ErrorCode.NOT_FOUND, "Subscription plan not found");
         }
     }
 

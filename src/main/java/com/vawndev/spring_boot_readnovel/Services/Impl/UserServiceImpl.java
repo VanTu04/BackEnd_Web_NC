@@ -79,7 +79,7 @@ public class UserServiceImpl implements UserService {
     }
 
     private User findUserById(String id) {
-        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
+        return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
     }
 
     @Override
@@ -107,14 +107,14 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public User getUserByEmail(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED, "User"));
+        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
     }
 
     @Override
     public void resetPassword(String email, String newPassword) {
         // Find the user by email
         User user = userRepository.findByEmail(email)
-                .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED,"User")); 
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,"User")); 
 
         // Encode the new password
         user.setPassword(passwordEncoder.encode(newPassword));

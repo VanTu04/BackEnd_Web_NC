@@ -1,15 +1,17 @@
 package com.vawndev.spring_boot_readnovel.Utils.Help;
 
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.oauth2.jwt.Jwt;
+import org.springframework.stereotype.Component;
+
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.oauth2.jwt.Jwt;
-import org.springframework.stereotype.Component;
 
 @Component
 @RequiredArgsConstructor
@@ -30,7 +32,7 @@ public class TokenHelper {
             User user = jwtUtils.validToken(token);
 
             User author = userRepository.findByEmail(email)
-                    .orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User not found"));
 
             if (!user.getEmail().equals(author.getEmail())) {
                 throw new AppException(ErrorCode.UNAUTHORIZED);

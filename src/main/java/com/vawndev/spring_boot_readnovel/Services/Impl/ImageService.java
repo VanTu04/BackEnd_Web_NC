@@ -1,20 +1,23 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.URL;
+import java.util.Base64;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
-import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.FileRepository;
-import com.vawndev.spring_boot_readnovel.Utils.SecurityUtils;
-import lombok.RequiredArgsConstructor;
-import org.springframework.stereotype.Service;
 
-import java.io.IOException;
-import java.io.InputStream;
-import java.net.URL;
-import java.util.*;
+import lombok.RequiredArgsConstructor;
 
 
 @Service
@@ -51,7 +54,7 @@ public class ImageService {
 
                     fileMap.put(id, "data:" + mimeType + ";base64," + base64);
                 } catch (IOException e) {
-                    throw new AppException(ErrorCode.OBJECT_NOT_EXISTED, "File");
+                    throw new AppException(ErrorCode.NOT_FOUND, "File");
                 }
             }, () -> System.err.println("❌ Không tìm thấy file với ID: " + id));
         }

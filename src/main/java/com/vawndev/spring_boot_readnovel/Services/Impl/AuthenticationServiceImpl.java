@@ -1,5 +1,14 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import org.springframework.http.ResponseCookie;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Auth.AuthenticationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Auth.AuthenticationResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
@@ -10,15 +19,8 @@ import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.AuthenticationService;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
+
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseCookie;
-import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
-import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
@@ -34,7 +36,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         // kiem tra user co trong db khong
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User not found"));
         // kiem tra mat khau
             boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
             if(!valid) {
@@ -71,7 +73,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 //    @PreAuthorize("hasRole('ADMIN')")
     public UserResponse getAccount() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User not found"));
         return userMapper.toUserResponse(user);
     }
 

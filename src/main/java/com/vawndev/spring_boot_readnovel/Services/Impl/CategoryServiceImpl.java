@@ -51,7 +51,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void RemoveCategory(String id) {
         Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
-            throw new AppException(ErrorCode.OBJECT_NOT_EXISTED);
+            throw new AppException(ErrorCode.NOT_FOUND, "Category not found");
 
         }
         exstingCategory.setDeleteAt(Instant.now());
@@ -64,7 +64,7 @@ public class CategoryServiceImpl implements CategoryService {
     public void DeleteCategory(String id) {
         Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
-            throw new AppException(ErrorCode.OBJECT_NOT_EXISTED);
+            throw new AppException(ErrorCode.NOT_FOUND, "Category not found");
         }
         categoryRepository.delete(exstingCategory);
     }

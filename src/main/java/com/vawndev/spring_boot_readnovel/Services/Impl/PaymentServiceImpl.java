@@ -1,27 +1,37 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import com.vawndev.spring_boot_readnovel.Configurations.VNPayConfig;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.PaymentResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
-import com.vawndev.spring_boot_readnovel.Entities.*;
-import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
-import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
-import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
-import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Repositories.*;
-import com.vawndev.spring_boot_readnovel.Services.PaymentService;
-import com.vawndev.spring_boot_readnovel.Utils.VNPayUtil;
-import jakarta.servlet.http.HttpServletRequest;
-import jakarta.transaction.Transactional;
-import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.stereotype.Service;
+
+import com.vawndev.spring_boot_readnovel.Configurations.VNPayConfig;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.PaymentResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
+import com.vawndev.spring_boot_readnovel.Entities.Chapter;
+import com.vawndev.spring_boot_readnovel.Entities.Ownership;
+import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Entities.WalletTransaction;
+import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
+import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
+import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
+import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.OwnershipRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Repositories.WalletTransactionRepository;
+import com.vawndev.spring_boot_readnovel.Services.PaymentService;
+import com.vawndev.spring_boot_readnovel.Utils.VNPayUtil;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @Transactional
@@ -40,7 +50,7 @@ public class PaymentServiceImpl implements PaymentService {
         long amount = a * 100L;
         String bankCode = request.getParameter("bankCode");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED, "User"));
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
         WalletTransaction walletTransaction = walletTransactionRepository.save(
                 WalletTransaction.builder()
@@ -76,10 +86,10 @@ public class PaymentServiceImpl implements PaymentService {
     @Override
     public WalletTransactionResponse createWalletTransaction(String vnp_TxnRef) {
 
-        WalletTransaction walletTransaction = walletTransactionRepository.findById(vnp_TxnRef).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_FOUND));
+        WalletTransaction walletTransaction = walletTransactionRepository.findById(vnp_TxnRef).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Transaction"));
         walletTransaction.setStatus(TransactionStatus.COMPLETED);
 
-        User user = userRepository.findById(walletTransaction.getUser().getId()).orElseThrow(() -> new AppException(ErrorCode.OBJECT_NOT_EXISTED));
+        User user = userRepository.findById(walletTransaction.getUser().getId()).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
         user.setBalance(user.getBalance().add(walletTransaction.getAmount()));
         userRepository.save(user);
 
