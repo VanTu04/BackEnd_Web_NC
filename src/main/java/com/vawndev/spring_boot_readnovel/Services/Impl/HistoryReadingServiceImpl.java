@@ -1,8 +1,18 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponsePurchase;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChaptersResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
@@ -20,14 +30,8 @@ import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -128,5 +132,30 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
         readingHistoryRepository.deleteByUserId(user.getId());
     }
 
+    @Override
+    public ReadingHistoryResponse getLatestHistory() {
+        User user = getAuthenticatedUser(); // Lấy thông tin người dùng hiện tại
 
+        // Lấy lịch sử đọc gần nhất
+        ReadingHistory latestHistory = readingHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "No reading history found for the user."));
+
+        // Lấy thông tin truyện và chương từ lịch sử đọc
+        Story story = latestHistory.getChapter().getStory();
+        StoriesResponse storyResponse = StoriesResponse.builder()
+                .id(story.getId())
+                .title(story.getTitle())
+                .status(story.getStatus())
+                .coverImage(story.getCoverImage())
+                .build();
+
+        Chapter chapter = latestHistory.getChapter();
+        ChaptersResponse chapterResponse = ChaptersResponse.builder()
+                .id(chapter.getId())
+                .title(chapter.getTitle())
+                .content(chapter.getContent())
+                .build();
+
+        return new ReadingHistoryResponse(storyResponse, List.of(chapterResponse));
+    }
 }

@@ -1,28 +1,39 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
 
-import com.fasterxml.jackson.core.JsonProcessingException;
+import org.springframework.http.MediaType;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestHeader;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
+import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.ModeratedByAdmin;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesHomeResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
+import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
-import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.http.MediaType;
-import org.springframework.web.bind.annotation.*;
-import org.springframework.web.multipart.MultipartFile;
 
-import java.util.List;
 
 @Slf4j
 @RestController
@@ -30,6 +41,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryService storyService;
+    private final HistoryReadingService historyReadingService;
 
     @GetMapping("")
     public ApiResponse<PageResponse<StoriesResponse>> getStory(
@@ -77,5 +89,16 @@ public class StoryController {
         return ApiResponse.<String>builder().result("Success").build();
     }
 
-    
+    @GetMapping("/continue-reading")
+    public ApiResponse<ReadingHistoryResponse> continueReading(@RequestHeader("Authorization") String authHeader) {
+        // Lấy lịch sử đọc gần nhất dựa trên Authorization
+        ReadingHistoryResponse latestHistory = historyReadingService.getLatestHistory();
+        return ApiResponse.<ReadingHistoryResponse>builder().result(latestHistory).build();
+    }
+
+    private String getUserIdFromAuthHeader(String authHeader) {
+        // Giả sử bạn có logic để giải mã Authorization header và lấy userId
+        // Ví dụ: authHeader chứa JWT token, bạn cần giải mã để lấy userId
+        return "example-user-id"; // Thay thế bằng logic thực tế
+    }
 }
