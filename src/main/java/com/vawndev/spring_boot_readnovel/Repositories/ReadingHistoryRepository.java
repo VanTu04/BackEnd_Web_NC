@@ -11,6 +11,7 @@ import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 
 import java.util.List;
+import java.util.Optional;
 
 public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, String> {
 
@@ -24,5 +25,14 @@ public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, 
     @Modifying
     @Query("DELETE FROM ReadingHistory r WHERE r.user.id = :userId")
     void deleteByUserId(String userId);
+
+    @Query("SELECT hr.chapter FROM ReadingHistory hr " +
+            "JOIN hr.chapter c " +
+            "WHERE c.story.id = :storyId AND hr.user.id = :userId " +
+            "ORDER BY hr.createdAt DESC")
+    Optional<Chapter> findLatestChapter(String storyId, String userId);
+
+    @Query("SELECT c FROM Chapter c WHERE c.story.id = :storyId ORDER BY c.createdAt ASC")
+    Optional<Chapter> findFirstChapterByStoryId( String storyId);
 
 }

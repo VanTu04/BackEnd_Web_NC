@@ -7,12 +7,16 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChaptersResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.ReadingHistory;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
+import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.ReadingHistoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
@@ -35,8 +39,8 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     private final StoryRepository storyRepository;
     private final ChapterRepository chapterRepository;
     private final ReadingHistoryRepository readingHistoryRepository;
-    private final JwtUtils jwtUtils;
     private final TokenHelper tokenHelper;
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
@@ -126,6 +130,28 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     public void deleteAllHistory() {
         User user = getAuthenticatedUser();
         readingHistoryRepository.deleteByUserId(user.getId());
+    }
+
+    public ChaptersResponse getLatestChapter(String storyId) {
+        User user = getAuthenticatedUser();
+        List<STORY_STATUS> statusList=List.of(STORY_STATUS.COMPLETED,STORY_STATUS.UPDATING);
+        storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED,statusList,storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story"));
+        Long chapterCount = storyRepository.countChapters(storyId);
+        if (chapterCount == 0) {
+            throw new AppException(ErrorCode.INVALID_STORY);
+        }
+        Chapter chapter = readingHistoryRepository
+                .findLatestChapter(storyId, user.getId())
+                .orElseGet(() -> readingHistoryRepository
+                        .findFirstChapterByStoryId(storyId)
+                        .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found")));
+
+        return ChaptersResponse.builder()
+                .content(chapter.getContent())
+                .title(chapter.getTitle())
+                .views(chapter.getViews())
+                .id(chapter.getId())
+                .build();
     }
 
 

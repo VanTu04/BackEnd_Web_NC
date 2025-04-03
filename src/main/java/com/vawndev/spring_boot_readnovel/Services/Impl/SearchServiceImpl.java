@@ -48,7 +48,7 @@ public class SearchServiceImpl implements SearchService {
                     .data(storiesList)
                     .page(page)
                     .limit(limit)
-                    .total(storyPage.getTotalPages()) // Sửa lại để lấy tổng số bản ghi
+                    .total(storyPage.getTotalPages())
                     .build();
 
         } catch (AppException e) {
