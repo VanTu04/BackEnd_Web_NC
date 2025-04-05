@@ -37,23 +37,23 @@ public class UserServiceImpl implements UserService {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
 
-    @Override
-    public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
-        Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        Page<User> users=userRepository.findAll(pageable);
-        List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user->
-                UserDetailReponse
-                        .builder()
-                        .email(user.getEmail())
-                        .fullName(user.getFullName())
-                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
-                        .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
-                        .deleteAt(!user.getDeleteAt().equals(null) ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt()) : null )
-                        .build()
-                ).collect(Collectors.toList());
-        PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit()).data(userDetailReponseList).total(users.getTotalPages()).build();
-        return null;
-    }
+        @Override
+        public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
+            Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
+            Page<User> users=userRepository.findAll(pageable);
+            List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user->
+                    UserDetailReponse
+                            .builder()
+                            .email(user.getEmail())
+                            .fullName(user.getFullName())
+                            .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
+                            .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
+                            .deleteAt(user.getDeleteAt() != null  ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt()) : null )
+                            .build()
+                    ).collect(Collectors.toList());
+            return PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit()).data(userDetailReponseList).total(users.getTotalPages()).build();
+
+        }
 
     @Override
     public UserResponse createUser(UserCreationRequest userRequest) {
