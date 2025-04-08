@@ -1,13 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponsePurchase;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChaptersResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.ReadingHistory;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
@@ -16,13 +13,11 @@ import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
 import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.ReadingHistoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
-import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -96,6 +91,26 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
                 .data(result)
                 .total(histories.getTotalPages())
                 .build();
+    }
+
+    @Override
+    public Set<String> getChaptersIdHistory(PageRequest req, String storyId,User currentUser) {
+        if (currentUser == null) {
+            return Collections.emptySet();
+        }
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        List<STORY_STATUS> statusList=List.of(STORY_STATUS.COMPLETED,STORY_STATUS.UPDATING);
+        storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED,statusList,storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story"));
+        Long chapterCount = storyRepository.countChapters(storyId);
+        if (chapterCount == 0) {
+            throw new AppException(ErrorCode.INVALID_STORY);
+        }
+        Page<Chapter> chapter = readingHistoryRepository
+                .findReadingChapters(storyId, currentUser.getId(),pageable);
+
+        Set<String> chapterIds = chapter.getContent().stream().map(Chapter::getId).collect(Collectors.toSet());
+        return chapterIds;
+
     }
 
     @Override

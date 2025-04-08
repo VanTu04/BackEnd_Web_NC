@@ -46,8 +46,6 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
     private final FileRepository fileRepository;
     private final TokenHelper tokenHelper;
-    private final JwtUtils jwtUtil;
-    private final UserRepository userRepository;
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
     private User getAuthenticatedUser() {

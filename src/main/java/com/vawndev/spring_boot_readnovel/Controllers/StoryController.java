@@ -39,8 +39,8 @@ public class StoryController {
     }
 
     @GetMapping("/detail/{id}")
-    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false)  String bearerToken,@PathVariable @NotBlank String id) {
-        StoryDetailResponses result=storyService.getStoryById(bearerToken, id);
+    public ApiResponse<StoryDetailResponses> getStoryDetail(@RequestHeader(value = "Authorization",required = false)  String bearerToken,@PathVariable @NotBlank String id,@ModelAttribute  PageRequest req) {
+        StoryDetailResponses result=storyService.getStoryById(bearerToken, id,req);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })

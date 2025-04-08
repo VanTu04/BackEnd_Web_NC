@@ -13,3 +13,4 @@ public class CloudinaryConfig {
         return new Cloudinary(dotenv.get("CLOUDINARY_URL"));
     }
 }
+    

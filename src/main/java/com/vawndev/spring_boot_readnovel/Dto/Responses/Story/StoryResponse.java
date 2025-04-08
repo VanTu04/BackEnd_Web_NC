@@ -26,8 +26,6 @@ public class StoryResponse {
 
     private String description;
 
-    private Long view;
-
     private StoryType type;
 
     private UserResponse author;

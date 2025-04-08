@@ -17,4 +17,6 @@ public class ChaptersResponse {
     private String content;
 
     private Long views;
+
+    private boolean isRead = false;
 }

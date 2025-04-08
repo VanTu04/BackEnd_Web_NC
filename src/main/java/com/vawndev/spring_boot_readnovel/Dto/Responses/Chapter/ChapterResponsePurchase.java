@@ -14,10 +14,7 @@ import java.math.BigDecimal;
 @SuperBuilder
 
 public class ChapterResponsePurchase extends ChaptersResponse {
-
-
     private BigDecimal price;
-
     private TransactionType transactionType;
 
 }
