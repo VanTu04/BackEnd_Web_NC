@@ -39,7 +39,7 @@ public enum ErrorCode {
     INVALID(1028, "Invalid: ", HttpStatus.BAD_REQUEST),
     BLANK_NAME(1029,"Name must be fill",HttpStatus.BAD_REQUEST),
     PASSWORD_MISMATCH(1030,"Password must match",HttpStatus.BAD_REQUEST),
-
+    BLANK_DATA(1031,"Blank data",HttpStatus.BAD_REQUEST),
     ;
 
     ErrorCode(int code, String message, HttpStatusCode statusCode) {

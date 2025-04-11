@@ -53,6 +53,11 @@ logging:
         security: DEBUG
         web: DEBUG
 
+encryption:
+  aes:
+    password: eL8/8q4qcxBL+hLn1d/YwQ==
+    salt: c1185cc206e23482
+
 payment:
   vnPay:
     url: ${PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}

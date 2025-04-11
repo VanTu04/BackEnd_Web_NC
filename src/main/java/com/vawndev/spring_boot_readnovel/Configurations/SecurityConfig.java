@@ -5,6 +5,7 @@ import com.nimbusds.jose.util.Base64;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.CustomOAuth2UserService;
+import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginFailureHandler;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -43,14 +44,14 @@ public class SecurityConfig {
             "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh","/**",""
     };
 
-    @Value("${jwt.signer-key}")
-    private String SIGNER_KEY;
-
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+
+    @Autowired
+    private OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -70,6 +71,7 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
+                        .failureHandler(oAuth2LoginFailureHandler)
                 )
                 .exceptionHandling(
                         exception -> exception
@@ -82,32 +84,6 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
-
-    @Bean
-    public JwtDecoder jwtDecoder() {
-        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder
-                .withSecretKey(getSecretAccessKey())
-                .macAlgorithm(MacAlgorithm.HS512)
-                .build();
-        return token -> {
-          try {
-              return jwtDecoder.decode(token);
-          } catch (Exception e){
-              throw new AppException(ErrorCode.INVALID_TOKEN);
-          }
-        };
-    }
-
-    @Bean
-    public JwtEncoder jwtEncoder() {
-        return new NimbusJwtEncoder(new ImmutableSecret<>(getSecretAccessKey()));
-    }
-
-    private SecretKey getSecretAccessKey() {
-        byte[] keyBytes = Base64.from(SIGNER_KEY).decode();
-        return new SecretKeySpec(keyBytes, 0, keyBytes.length, MacAlgorithm.HS512.getName());
-    }
-
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
