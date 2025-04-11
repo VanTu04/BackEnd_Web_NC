@@ -3,6 +3,8 @@ package com.vawndev.spring_boot_readnovel.Controllers;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Services.FavoriteStoryService;
+import jakarta.validation.constraints.Min;
+import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,8 +24,8 @@ public class FavoriteStoryController {
 
     @GetMapping
     public ApiResponse<?> getFavorites(
-            @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size
+            @RequestParam(defaultValue = "0") @Min(0) int page,
+            @RequestParam(defaultValue = "5") @Positive int size
     ) {
         List<StoriesResponse> favorites = favoriteStoryService.getFavoriteStories(page, size);
         return ApiResponse.<List<StoriesResponse>>builder().message("Successfully").result(favorites).build();
