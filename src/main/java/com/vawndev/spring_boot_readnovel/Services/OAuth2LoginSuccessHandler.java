@@ -3,6 +3,7 @@ package com.vawndev.spring_boot_readnovel.Services;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Auth.AuthenticationResponse;
+import com.vawndev.spring_boot_readnovel.Entities.Role;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
@@ -20,6 +21,7 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @Service
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
@@ -60,7 +62,11 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         ApiResponse<AuthenticationResponse> apiResponse = ApiResponse.<AuthenticationResponse>builder()
                 .code(1000)
                 .message("Login successful")
-                .result(AuthenticationResponse.builder().accessToken(accessToken).build())
+                .result(AuthenticationResponse.builder()
+                        .accessToken(accessToken)
+                        .role(existingUser.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                        .build()
+                )
                 .build();
 
         response.setContentType("application/json");
