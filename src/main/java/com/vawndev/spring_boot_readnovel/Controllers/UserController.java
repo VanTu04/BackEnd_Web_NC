@@ -39,32 +39,15 @@ public class UserController {
 
     @PostMapping("/pre-register")
     public ApiResponse<String> preRegister(@RequestBody @Valid UserCreationRequest request) throws JsonProcessingException {
-        if (!request.isPasswordMatching()) {
-            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
-        }
-
-        String jsonData = objectMapper.writeValueAsString(request);
-        String encrypted = aesEncryptionUtil.encrypt(jsonData);
-
-        otpService.sendOtp(request.getEmail()); // Gửi OTP đến email
-
-        return ApiResponse.<String>builder().result(encrypted).build(); // FE giữ lại encrypted
+        return ApiResponse.<String>builder()
+                .result(userService.handlePreRegister(request))
+                .build();
     }
 
     @PostMapping("/confirm-register")
     public ApiResponse<UserResponse> confirmRegister(@RequestBody @Valid ConfirmOtpRequest confirmRequest) throws JsonProcessingException {
-        String encrypted = confirmRequest.getEncryptedData();
-        String otp = confirmRequest.getOtp();
-
-        String decryptedJson = aesEncryptionUtil.decrypt(encrypted);
-        UserCreationRequest request = objectMapper.readValue(decryptedJson, UserCreationRequest.class);
-
-        if (!otpService.validateOtp(request.getEmail(), otp)) {
-            throw new AppException(ErrorCode.INVALID, "OTP is invalid");
-        }
-
         return ApiResponse.<UserResponse>builder()
-                .result(userService.createUser(request))
+                .result(userService.handleConfirmRegister(confirmRequest))
                 .build();
     }
 

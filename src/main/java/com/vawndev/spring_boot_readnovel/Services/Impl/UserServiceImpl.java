@@ -1,7 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
@@ -14,7 +17,9 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.RoleRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Services.OtpService;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
+import com.vawndev.spring_boot_readnovel.Utils.AesEncryptionUtil;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +42,9 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
+    private final OtpService otpService;
+    private final ObjectMapper objectMapper;
+    private final AesEncryptionUtil aesEncryptionUtil;
 
         @Override
         @PreAuthorize("hasRole('ADMIN')")
@@ -127,6 +135,34 @@ public class UserServiceImpl implements UserService {
         }
     }
 
+    @Override
+    public String handlePreRegister(UserCreationRequest request) throws JsonProcessingException {
+        if(userRepository.findByEmail(request.getEmail()).isPresent()){
+            throw new AppException(ErrorCode.USER_EXISTED);
+        }
+        if (!request.isPasswordMatching()) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
 
+        String jsonData = objectMapper.writeValueAsString(request);
+        String encrypted = aesEncryptionUtil.encrypt(jsonData);
+
+        otpService.sendOtp(request.getEmail());
+        return encrypted;
+    }
+
+    @Override
+    public UserResponse handleConfirmRegister(ConfirmOtpRequest confirmRequest) throws JsonProcessingException {
+        String encrypted = confirmRequest.getEncryptedData();
+        String otp = confirmRequest.getOtp();
+
+        String decryptedJson = aesEncryptionUtil.decrypt(encrypted);
+        UserCreationRequest request = objectMapper.readValue(decryptedJson, UserCreationRequest.class);
+
+        if (!otpService.validateOtp(request.getEmail(), otp)) {
+            throw new AppException(ErrorCode.INVALID, "OTP is invalid");
+        }
+        return this.createUser(request);
+    }
 
 }
