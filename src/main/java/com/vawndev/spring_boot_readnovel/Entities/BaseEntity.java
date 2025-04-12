@@ -27,4 +27,6 @@ abstract class BaseEntity {
     private Instant updatedAt = Instant.now();
 
     private Instant deleteAt = null;
+
+
 }

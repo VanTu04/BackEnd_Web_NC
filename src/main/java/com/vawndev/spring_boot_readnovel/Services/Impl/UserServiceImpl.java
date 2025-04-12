@@ -21,7 +21,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -37,10 +39,11 @@ public class UserServiceImpl implements UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-
+    
         @Override
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAnyAuthority('ADMIN')")
         public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
+            String email = SecurityContextHolder.getContext().getAuthentication().getAuthorities().toString();
             Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
             Page<User> users=userRepository.findAll(pageable);
             List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user->

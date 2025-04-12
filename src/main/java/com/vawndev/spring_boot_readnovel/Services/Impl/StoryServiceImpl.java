@@ -360,6 +360,7 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public StoryDetailResponses getStoryById(String bearerToken, String id,PageRequest req) {
+
         Story story = storyRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         Pageable pageable=PaginationUtil.createPageable(req.getPage(),req.getLimit());
