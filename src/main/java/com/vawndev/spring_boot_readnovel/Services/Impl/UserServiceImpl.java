@@ -1,5 +1,16 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import java.util.HashSet;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.springframework.dao.DataIntegrityViolationException;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
@@ -22,17 +33,8 @@ import com.vawndev.spring_boot_readnovel.Services.UserService;
 import com.vawndev.spring_boot_readnovel.Utils.AesEncryptionUtil;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
-import lombok.RequiredArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
 
-import java.util.HashSet;
-import java.util.List;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -47,7 +49,7 @@ public class UserServiceImpl implements UserService {
     private final AesEncryptionUtil aesEncryptionUtil;
 
         @Override
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAuthority('ADMIN')")
         public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
             Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
             Page<User> users=userRepository.findAll(pageable);
