@@ -20,7 +20,7 @@ public class User extends BaseEntity{
 
     @Column(unique = true, nullable = false)
     private String email;
-
+    @Column(nullable = false)
     private String password;
 
     @Column(name = "date_of_birth")
@@ -35,17 +35,11 @@ public class User extends BaseEntity{
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
-    @Column(name = "google_id")
-    private String googleId;
-
     @Column(nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
 
     @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
-    private Subscription subscription;
 
     @PrePersist
     public void prePersist() {

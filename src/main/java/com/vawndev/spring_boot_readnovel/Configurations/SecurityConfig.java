@@ -5,7 +5,6 @@ import com.nimbusds.jose.util.Base64;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.CustomOAuth2UserService;
-import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginFailureHandler;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -34,7 +33,6 @@ import org.springframework.web.filter.CorsFilter;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -42,17 +40,17 @@ import java.util.List;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh",
+            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh","/**"
     };
+
+    @Value("${jwt.signer-key}")
+    private String SIGNER_KEY;
 
     @Autowired
     private CustomOAuth2UserService customOAuth2UserService;
 
     @Autowired
     private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
-    @Autowired
-    private OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -63,7 +61,7 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
                 .authorizeHttpRequests(request -> {
-                    request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                    request.requestMatchers( PUBLIC_ENDPOINTS).permitAll()
                             .anyRequest().authenticated();
                 })
                 .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
@@ -72,7 +70,6 @@ public class SecurityConfig {
                                 .userService(customOAuth2UserService)
                         )
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
                 )
                 .exceptionHandling(
                         exception -> exception
@@ -85,6 +82,32 @@ public class SecurityConfig {
                 .csrf(AbstractHttpConfigurer::disable);
         return httpSecurity.build();
     }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder
+                .withSecretKey(getSecretAccessKey())
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
+        return token -> {
+          try {
+              return jwtDecoder.decode(token);
+          } catch (Exception e){
+              throw new AppException(ErrorCode.INVALID_TOKEN);
+          }
+        };
+    }
+
+    @Bean
+    public JwtEncoder jwtEncoder() {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(getSecretAccessKey()));
+    }
+
+    private SecretKey getSecretAccessKey() {
+        byte[] keyBytes = Base64.from(SIGNER_KEY).decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, MacAlgorithm.HS512.getName());
+    }
+
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -102,17 +125,13 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        // Thêm địa chỉ frontend cho phép
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-        corsConfiguration.setAllowCredentials(true);  // Quan trọng để gửi cookie và header Authorization
-        corsConfiguration.setExposedHeaders(List.of("Authorization", "Set-Cookie", "X-Requested-With"));
+        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
 
         return new CorsFilter(urlBasedCorsConfigurationSource);
     }
-
 }

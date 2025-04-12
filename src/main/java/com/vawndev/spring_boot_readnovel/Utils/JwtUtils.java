@@ -5,10 +5,8 @@ import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
-import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.http.ResponseCookie;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Component;
@@ -79,15 +77,5 @@ public class JwtUtils {
         } catch (Exception e){
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
-    }
-
-    public ResponseCookie createRefreshTokenCookie(String refreshToken, long seconds) {
-        return ResponseCookie
-                .from("refresh_token", refreshToken)
-                .httpOnly(true)
-                .secure(true)
-                .maxAge(seconds)
-                .path("/")
-                .build();
     }
 }

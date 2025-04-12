@@ -1,7 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Story;
 
 
-import jakarta.validation.constraints.NotBlank;
 import lombok.*;
 
 @Getter @Setter
@@ -9,7 +8,6 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 public class StoryCondition {
-    @NotBlank(message = "id cannot be blank")
-    private String id;
-
+    private boolean isApproved;
+    private boolean isArchived;
 }

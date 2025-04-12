@@ -10,12 +10,8 @@ public class AppException extends RuntimeException {
     private ErrorCode errorCode;
     private String messageString;
 
-    public AppException(ErrorCode errorCode, Object... args) {
-        super(errorCode.getFormattedMessage(args));
-        this.errorCode = errorCode;
-        System.out.println("🚀 Exception Created -> " + super.getMessage());
-    }
     public AppException(ErrorCode errorCode) {
+        super(errorCode.getMessage());
         this.errorCode = errorCode;
     }
 

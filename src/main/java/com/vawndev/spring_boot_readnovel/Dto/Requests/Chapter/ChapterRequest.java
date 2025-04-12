@@ -1,30 +1,24 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter;
 
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
+import com.vawndev.spring_boot_readnovel.Entities.Image;
+import com.vawndev.spring_boot_readnovel.Entities.Story;
 import lombok.*;
 
 
 import java.math.BigDecimal;
+import java.util.List;
 
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter @Setter
 public class ChapterRequest {
-    @NotBlank(message = "title must be not blank")
 
     private String title;
-    @NotBlank(message = "author email must be not blank")
-
-    private String authorEmail;
-    @NotBlank(message = "id story must be not blank")
 
     private String story_id;
-    @NotBlank(message = "id cotent must be not blank")
 
     private String content;
-    @NotNull(message = "price must be not blank")
 
     private BigDecimal price;
 

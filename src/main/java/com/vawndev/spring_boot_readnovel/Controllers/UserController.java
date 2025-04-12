@@ -1,67 +1,70 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.DeleteMapping;
+import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.PutMapping;
+import org.springframework.web.bind.annotation.RequestBody;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.OtpService;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
-import com.vawndev.spring_boot_readnovel.Utils.AesEncryptionUtil;
-import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
+
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.*;
-
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 public class UserController {
     private final UserService userService;
     private final OtpService otpService;
-    private final ObjectMapper objectMapper;
-    private final AesEncryptionUtil aesEncryptionUtil;
-//    @PostMapping("")
-//    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest, @RequestParam String otp) {
-//        if (!userCreationRequest.isPasswordMatching()) {
-//            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
-//        }
-//
-//        if (otpService.validateOtp(userCreationRequest.getEmail(), otp)) {
-//            return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
-//        } else {
-//            throw new AppException(ErrorCode.INVALID, "OTP is invalid");
-//        }
-//    }
 
-    @PostMapping("/pre-register")
-    public ApiResponse<String> preRegister(@RequestBody @Valid UserCreationRequest request) throws JsonProcessingException {
-        return ApiResponse.<String>builder()
-                .result(userService.handlePreRegister(request))
-                .build();
+    @PostMapping("/request-otp")
+    public ApiResponse<Void> requestOtp(@RequestParam String email) {
+        otpService.sendOtp(email);
+        return ApiResponse.<Void>builder().build();
     }
 
-    @PostMapping("/confirm-register")
-    public ApiResponse<UserResponse> confirmRegister(@RequestBody @Valid ConfirmOtpRequest confirmRequest) throws JsonProcessingException {
-        return ApiResponse.<UserResponse>builder()
-                .result(userService.handleConfirmRegister(confirmRequest))
-                .build();
+    @PostMapping("/create")
+    public ApiResponse<UserResponse> createUser(@RequestBody @Valid UserCreationRequest userCreationRequest, @RequestParam String otp) {
+        if (!userCreationRequest.isPasswordMatching()) {
+            throw new AppException(ErrorCode.PASSWORD_MISMATCH);
+        }
+
+        if (otpService.validateOtp(userCreationRequest.getEmail(), otp)) {
+            return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
+        } else {
+            throw new AppException(ErrorCode.INVALID, "OTP is invalid");
+        }
     }
 
-
-    @PostMapping("/upgrade")
-    public ApiResponse<UserResponse> upgradeAccount(@RequestBody @Valid UserCreationRequest userCreationRequest) {
-        return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
+    @GetMapping("/get/{id}")
+    public ResponseEntity<ApiResponse<UserResponse>> getUserById(@PathVariable String id) {
+        UserResponse userResponse = userService.getUser(id);
+        return ResponseEntity.ok(ApiResponse.<UserResponse>builder().result(userResponse).build());
     }
 
-//    @PostMapping("/request-otp")
-//    public ApiResponse<Void> requestOtp(@RequestParam String email) {
-//        otpService.sendOtp(email);
-//        return ApiResponse.<Void>builder().build();
-//    }
+    @PutMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
+        userService.updateUser(id, request);
+        return ResponseEntity.ok(ApiResponse.<Void>builder().build());
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
+        userService.deleteUser(id);
+        return ResponseEntity.ok(ApiResponse.<Void>builder().build());
+    }
 
     // Forgot Password - Request OTP
     @PostMapping("/forgot-password/request-otp")
@@ -73,9 +76,9 @@ public class UserController {
 
     // Forgot Password - Reset Password
     @PostMapping("/forgot-password/reset")
-    public ApiResponse<Void> resetPassword(@RequestParam String email,
-                                           @RequestParam String otp,
-                                           @RequestParam String newPassword,
+    public ApiResponse<Void> resetPassword(@RequestParam String email, 
+                                           @RequestParam String otp, 
+                                           @RequestParam String newPassword, 
                                            @RequestParam String confirmPassword) {
         // Check if passwords match
         if (!newPassword.equals(confirmPassword)) {

@@ -1,18 +1,11 @@
 package com.vawndev.spring_boot_readnovel.Utils;
 
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import jakarta.servlet.http.HttpServletRequest;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
-import java.io.BufferedReader;
-import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.OutputStream;
-import java.net.HttpURLConnection;
-import java.net.URL;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.util.Map;
@@ -97,34 +90,6 @@ public class VNPayUtil {
             return URLEncoder.encode(value, StandardCharsets.UTF_8);
         } catch (Exception e) {
             throw new AppException(ErrorCode.ERROR_ENCODE);
-        }
-    }
-
-    private static final ObjectMapper objectMapper = new ObjectMapper();
-
-    public static String sendPostRequest(String url, Map<String, String> params) throws Exception {
-        URL obj = new URL(url);
-        HttpURLConnection con = (HttpURLConnection) obj.openConnection();
-        con.setRequestMethod("POST");
-        con.setRequestProperty("Content-Type", "application/json");
-        con.setDoOutput(true);
-
-        // Chuyển tham số thành JSON
-        String jsonInputString = objectMapper.writeValueAsString(params);
-
-        try (OutputStream os = con.getOutputStream()) {
-            os.write(jsonInputString.getBytes("utf-8"));
-        }
-
-        int responseCode = con.getResponseCode();
-        if (responseCode != HttpURLConnection.HTTP_OK) {
-            throw new RuntimeException("VNPay API error: " + responseCode);
-        }
-
-        // Đọc phản hồi từ VNPay
-        try (InputStream is = con.getInputStream();
-             BufferedReader br = new BufferedReader(new InputStreamReader(is, StandardCharsets.UTF_8))) {
-            return br.lines().collect(Collectors.joining("\n"));
         }
     }
 }

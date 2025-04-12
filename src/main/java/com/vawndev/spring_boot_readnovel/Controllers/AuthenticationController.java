@@ -41,7 +41,6 @@ public class AuthenticationController {
                 .body(ApiResponse.<AuthenticationResponse>builder().result(
                         AuthenticationResponse.builder()
                                 .accessToken(result.getAccessToken())
-                                .role(result.getRole())
                                 .build())
                         .build()
                 );

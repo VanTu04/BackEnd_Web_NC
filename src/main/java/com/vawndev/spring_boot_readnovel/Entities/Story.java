@@ -1,7 +1,5 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
-import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
-import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import jakarta.persistence.*;
 import lombok.*;
@@ -33,19 +31,11 @@ public class Story extends BaseEntity{
 
     private BigDecimal price;
 
-    @Enumerated(EnumType.STRING)
     @Column(name = "is_available")
-    private IS_AVAILBLE isAvailable;
+    private boolean isAvailable;
 
-    @Enumerated(EnumType.STRING)
-    @Column(name = "status")
-    private STORY_STATUS status;
-
-    @Column(name = "is_visibility")
-    private boolean isVisibility;
-
-    @Column(name="is_banned")
-    private boolean isBanned;
+    @Column(name = "is_approved")
+    private boolean isApproved;
 
     private double rate;
 

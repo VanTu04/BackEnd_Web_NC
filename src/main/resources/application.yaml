@@ -1,12 +1,10 @@
 spring:
   application:
     name: spring-boot-readnovel
-  profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
-    url: ${DBMS_CONNECTION}
-    username: ${DBMS_USERNAME}
-    password: ${DBMS_PASSWORD}
+    url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/Read}
+    username: ${DBMS_USERNAME:postgres}
+    password: ${DBMS_PASSWORD:020604}
   jpa:
     show-sql: true
     hibernate:
@@ -17,58 +15,52 @@ spring:
         jdbc:
           lob:
             non_contextual_creation: true
+
   security:
     oauth2:
       client:
         registration:
           google:
-            client-id: ${ID_GOOGLE}
-            client-secret: ${SECRET_GOOGLE}
-            redirect-uri: ${REDIRECT_URI}
-            scope:
-              - email
-              - profile
-
+            client-id: bgf
+            client-secret: vfz
+          facebook:
+            client-id: 1120903846076823
+            client-secret: 6b2f8e3ed19f8eb3c385684bbc7e21ab
+  
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${USERNAME_MAIL}
-    password: ${PASSWORD_MAIL}
+    username: mlanhem28@gmail.com
+    password: tdxdniynteyvvojr
     properties:
       mail:
         smtp:
           auth: true
           starttls:
             enable: true
-
 server:
   port: 8080
-
 jwt:
-  signer-key: ${SIGNER_KEY_JWT}
-  valid-duration: ${ACCESS_TIME_JWT}
-  refreshable-duration: ${REFRESH_TIME_JWT}
-logging:
-  level:
-    org:
-      springframework:
-        security: DEBUG
-        web: DEBUG
+  signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
+  valid-duration: 3600 # in second
+  refreshable-duration: 36000 # in seconds
+cloudinary:
+  cloud_name: ddwnxdhdp
+  api_key: 629552276132893
+  api_secret: e0SPR4CmjsqWLMw4QE5bJFXSnRE
+
 
 payment:
   vnPay:
-    url: ${PAY_URL}
-    tmnCode: ${TMN_CODE}
-    secretKey: ${SECRET_KEY}
-    returnUrl: ${RETURN_URL}
-    version: ${VERSION}
-    command: ${COMMAND}
-    orderType: ${ORDER_TYPE}
-
-cloudinary:
-  url: ${CLOUDINARY_URL}
-
-encryption:
-  aes:
-    password: eL8/8q4qcxBL+hLn1d/YwQ==
-    salt: c1185cc206e23482
+    url: ${PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+    tmnCode: ${TMN_CODE:WXBCTBAJ}
+    secretKey: ${SECRET_KEY:OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO}
+    returnUrl: ${RETURN_URL:http://localhost:8080/payment/vn-pay-callback}
+    version: ${VERSION:2.1.0}
+    command: ${COMMAND:pay}
+    orderType: ${ORDER_TYPE:other}
+logging:
+  level:
+    root: DEBUG
+    org.springframework.mail: DEBUG
+    org.eclipse.angus.mail.smtp: DEBUG

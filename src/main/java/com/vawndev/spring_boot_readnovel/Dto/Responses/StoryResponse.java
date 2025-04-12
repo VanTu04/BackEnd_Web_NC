@@ -1,6 +1,5 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -15,7 +14,6 @@ import java.util.Locale.Category;
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@JsonInclude(JsonInclude.Include.NON_NULL)
 public class StoryResponse {
     private String id;
     private String title;

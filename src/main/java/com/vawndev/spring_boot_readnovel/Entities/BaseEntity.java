@@ -9,7 +9,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import java.time.Instant;
 import java.time.LocalDateTime;
 
 @MappedSuperclass
@@ -22,9 +21,9 @@ abstract class BaseEntity {
     @GeneratedValue(strategy = GenerationType.UUID)
     private String id;
 
-    private Instant createdAt = Instant.now();
+    private LocalDateTime createdAt = LocalDateTime.now();
 
-    private Instant updatedAt = Instant.now();
+    private LocalDateTime updatedAt = LocalDateTime.now();
 
-    private Instant deleteAt = null;
+    private LocalDateTime deleteAt = null;
 }
