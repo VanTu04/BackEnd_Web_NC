@@ -22,6 +22,9 @@ public class Chapter extends BaseEntity {
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "views")
+    private Long views;
+
     private BigDecimal price;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)

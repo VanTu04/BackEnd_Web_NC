@@ -3,11 +3,9 @@ package com.vawndev.spring_boot_readnovel.Dto.Requests.User;
 import jakarta.persistence.Lob;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Size;
 import lombok.*;
 
-import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter

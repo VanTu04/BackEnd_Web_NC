@@ -10,10 +10,7 @@ import lombok.*;
 @NoArgsConstructor
 @Builder
 @Table(name = "ownership")
-public class Ownership {
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+public class Ownership extends BaseEntity{
 
     @ManyToOne
     @JoinColumn(name = "user_id", nullable = false)
@@ -22,4 +19,6 @@ public class Ownership {
     @ManyToOne
     @JoinColumn(name = "chapter_id", nullable = false)
     private Chapter chapter;
+
+
 }
