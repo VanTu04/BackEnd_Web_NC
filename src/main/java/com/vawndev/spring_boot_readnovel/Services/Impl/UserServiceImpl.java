@@ -58,8 +58,34 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse updateUser(String userId, UserUpdateRequest request) {
-        return null;
+        User user = findUserById(userId);
+        System.out.println("User found: " + user);
+
+        // Kiểm tra mật khẩu hiện tại
+        if (request.getPassword() != null && !passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Current password is incorrect.");
+        }
+    
+        // Cập nhật thông tin người dùng nếu các trường không null
+        if (request.getFullName() != null && !request.getFullName().isEmpty()) {
+            user.setFullName(request.getFullName());
+        }
+    
+        if (request.getDateOfBirth() != null) {
+            user.setDateOfBirth(request.getDateOfBirth());
+        }
+    
+        try {
+            // Lưu người dùng đã được cập nhật
+            user = userRepository.save(user);
+        } catch (DataIntegrityViolationException exception) {
+            throw new AppException(ErrorCode.ERROR_SAVE_DATA, "Error updating user data.");
+        }
+    
+        // Trả về phản hồi sau khi cập nhật thành công
+        return userMapper.toUserResponse(user);
     }
+    
 
     @Override
     public void deleteUser(String userId) {

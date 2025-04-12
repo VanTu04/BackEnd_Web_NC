@@ -12,8 +12,7 @@ import java.util.List;
 @Builder
 public class UserUpdateRequest {
     private String password;
-    private String firstName;
-    private String lastName;
+    private String fullName;
     private LocalDate dateOfBirth;
-    private List<String> roles;
+
 }

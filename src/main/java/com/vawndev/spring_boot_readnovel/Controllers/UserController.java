@@ -56,9 +56,19 @@ public class UserController {
 
     @PutMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> updateUser(@PathVariable String id, @RequestBody UserUpdateRequest request) {
-        userService.updateUser(id, request);
-        return ResponseEntity.ok(ApiResponse.<Void>builder().build());
+        try {
+            // Gọi service để cập nhật người dùng
+            userService.updateUser(id, request);
+            return ResponseEntity.ok(ApiResponse.<Void>builder().build());
+        } catch (AppException e) {
+            // Xử lý ngoại lệ AppException nếu không tìm thấy người dùng hoặc có lỗi khác
+            return ResponseEntity.status(400).body(ApiResponse.<Void>builder().message(e.getMessage()).build());
+        } catch (Exception e) {
+            // Xử lý các ngoại lệ khác
+            return ResponseEntity.status(500).body(ApiResponse.<Void>builder().message("Internal server error").build());
+        }
     }
+    
 
     @DeleteMapping("/{id}")
     public ResponseEntity<ApiResponse<Void>> deleteUser(@PathVariable String id) {
