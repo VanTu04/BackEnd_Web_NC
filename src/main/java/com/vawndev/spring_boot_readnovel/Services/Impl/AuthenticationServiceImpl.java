@@ -80,11 +80,12 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         return AuthenticationResponse.builder()
                 .accessToken(token)
                 .refreshToken(refreshToken)
+                .role(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
                 .build();
     }
 
     @Override
-    @PreAuthorize("hasAuthority('ADMIN')")
+//    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public UserResponse getAccount() {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));

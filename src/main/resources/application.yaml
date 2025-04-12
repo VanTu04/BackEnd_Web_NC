@@ -1,10 +1,12 @@
 spring:
   application:
     name: spring-boot-readnovel
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
   datasource:
-    url: ${DBMS_CONNECTION:jdbc:postgresql://localhost:5432/Read}
-    username: ${DBMS_USERNAME:postgres}
-    password: ${DBMS_PASSWORD:123456}
+    url: ${DBMS_CONNECTION}
+    username: ${DBMS_USERNAME}
+    password: ${DBMS_PASSWORD}
   jpa:
     show-sql: true
     hibernate:
@@ -20,9 +22,9 @@ spring:
       client:
         registration:
           google:
-            client-id: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
-            client-secret: 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
-            redirect-uri: ${REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
+            client-id: ${ID_GOOGLE}
+            client-secret: ${SECRET_GOOGLE}
+            redirect-uri: ${REDIRECT_URI}
             scope:
               - email
               - profile
@@ -30,8 +32,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: mlanhem28@gmail.com
-    password: tdxdniynteyvvojr
+    username: ${USERNAME_MAIL}
+    password: ${PASSWORD_MAIL}
     properties:
       mail:
         smtp:
@@ -43,9 +45,9 @@ server:
   port: 8080
 
 jwt:
-  signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
-  valid-duration: 3600 # in second
-  refreshable-duration: 36000 # in seconds
+  signer-key: ${SIGNER_KEY_JWT}
+  valid-duration: ${ACCESS_TIME_JWT}
+  refreshable-duration: ${REFRESH_TIME_JWT}
 logging:
   level:
     org:
@@ -55,10 +57,18 @@ logging:
 
 payment:
   vnPay:
-    url: ${PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
-    tmnCode: ${TMN_CODE:WXBCTBAJ}
-    secretKey: ${SECRET_KEY:OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO}
-    returnUrl: ${RETURN_URL:http://localhost:8080/payment/vn-pay-callback}
-    version: ${VERSION:2.1.0}
-    command: ${COMMAND:pay}
-    orderType: ${ORDER_TYPE:other}
+    url: ${PAY_URL}
+    tmnCode: ${TMN_CODE}
+    secretKey: ${SECRET_KEY}
+    returnUrl: ${RETURN_URL}
+    version: ${VERSION}
+    command: ${COMMAND}
+    orderType: ${ORDER_TYPE}
+
+cloudinary:
+  url: ${CLOUDINARY_URL}
+
+encryption:
+  aes:
+    password: eL8/8q4qcxBL+hLn1d/YwQ==
+    salt: c1185cc206e23482

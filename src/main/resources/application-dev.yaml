@@ -1,0 +1,36 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/Read
+    username: postgres
+    password: 123456
+
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
+            client-secret: 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
+            redirect-uri: http://localhost:8080/login/oauth2/code/google
+
+  mail:
+    username: mlanhem28@gmail.com
+    password: tdxdniynteyvvojr
+
+jwt:
+  signer-key: "yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ=="
+  valid-duration: 3600 # in second
+  refreshable-duration: 36000 # in seconds
+
+payment:
+  vnPay:
+    url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+    tmnCode: WXBCTBAJ
+    secretKey: SECRET_KEY:OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO
+    returnUrl: RETURN_URL:http://localhost:8080/payment/vn-pay-callback
+    version: 2.1.0
+    command: pay
+    orderType: other
+
+cloudinary:
+  url: cloudinary://569898377162755:X820dhqTuh4BR-6Fc9-tnts6RF0@dxpyuj1mm
