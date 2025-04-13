@@ -51,8 +51,10 @@ public class SecurityConfig {
             "/oauth2/authorization/google",
             "/auth/google/callback",
             "auth/google",
-            "/story/**",
-            "/chapter/**",
+            "/story/detail/**",
+            "/story",
+            "/homepage",
+            "/chapter/detail/**",
     };
 
     @Autowired
@@ -90,6 +92,7 @@ public class SecurityConfig {
                             }
                             // Dùng mặc định nếu không phải public
                             JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtDecoder);
+                            provider.setJwtAuthenticationConverter(jwtAuthenticationConverter());
                             return provider::authenticate;
                         })
                 )

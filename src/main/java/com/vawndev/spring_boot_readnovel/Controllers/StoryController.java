@@ -19,6 +19,8 @@ import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.MediaType;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -45,7 +47,9 @@ public class StoryController {
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ApiResponse<String> createStory(@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
-            StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+        StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
             storyService.addStory(storyRequests,image_cover);
             return ApiResponse.<String>builder().result("Success!").build();
     }

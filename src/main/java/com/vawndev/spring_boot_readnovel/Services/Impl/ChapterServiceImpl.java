@@ -26,7 +26,10 @@ import com.vawndev.spring_boot_readnovel.Utils.Help.UserHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -50,7 +53,6 @@ public class ChapterServiceImpl implements ChapterService {
     private final TokenHelper tokenHelper;
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
-    private final ReadingHistoryRepository readingHistoryRepository;
 
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
@@ -58,9 +60,13 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
+    @Transactional
     public String addChapter(ChapterUploadRequest chapterUploadRequest, List<MultipartFile> uploadedFiles) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
         ChapterRequest creq = chapterUploadRequest.getChapter();
         User Auth=getAuthenticatedUser();
+
         List<MultipartFile> images = new ArrayList<>();
         List<MultipartFile> files = new ArrayList<>();
         Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(),Auth).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND,"Story not found"));

@@ -37,6 +37,8 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -360,10 +362,12 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public StoryDetailResponses getStoryById(String bearerToken, String id,PageRequest req) {
+
         Story story = storyRepository.findByAcceptId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         Pageable pageable=PaginationUtil.createPageable(req.getPage(),req.getLimit());
         Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(),pageable);
+
         User user=null;
         if (bearerToken != null && !bearerToken.isEmpty()) {
             try {
