@@ -11,6 +11,7 @@ import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
@@ -92,12 +93,13 @@ public class ChapterServiceImpl implements ChapterService {
                 throw new AppException(ErrorCode.SERVER_ERROR);
             }
             Chapter chapter = Chapter.builder()
-                    .title(creq.getTitle())
+                    .title("Chương " + storyRepository.countChapters(story.getId()) )
                     .content(creq.getContent())
                     .price(creq.getPrice())
                     .story(story)
                     .build();
             story.setPrice(story.getPrice().add(chapter.getPrice()));
+            story.setStatus(STORY_STATUS.UPDATING);
             Chapter savedChapter = chapterRepository.save(chapter);
             storyRepository.save(story);
 

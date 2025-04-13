@@ -18,6 +18,15 @@ import java.util.Optional;
 
 @Repository
 public interface StoryRepository extends JpaRepository<Story, String> {
+
+    @Query("""
+    SELECT s FROM Story s 
+    WHERE s.isVisibility = TRUE 
+    AND s.isBanned = FALSE      
+    AND s.id =:id    
+    """)
+    Optional<Story> findByAcceptId(@Param("id") String id);
+
     Optional<Story> findByIdAndAuthor(String id, User author);
     @Query("""
     SELECT s FROM Story s 

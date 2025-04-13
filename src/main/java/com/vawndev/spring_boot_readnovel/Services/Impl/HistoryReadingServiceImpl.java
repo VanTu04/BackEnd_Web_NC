@@ -99,12 +99,7 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
             return Collections.emptySet();
         }
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        List<STORY_STATUS> statusList=List.of(STORY_STATUS.COMPLETED,STORY_STATUS.UPDATING);
-        storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED,statusList,storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story"));
-        Long chapterCount = storyRepository.countChapters(storyId);
-        if (chapterCount == 0) {
-            throw new AppException(ErrorCode.INVALID_STORY);
-        }
+        storyRepository.findByAcceptId(storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story history not found"));
         Page<Chapter> chapter = readingHistoryRepository
                 .findReadingChapters(storyId, currentUser.getId(),pageable);
 
@@ -151,10 +146,6 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
         User user = getAuthenticatedUser();
         List<STORY_STATUS> statusList=List.of(STORY_STATUS.COMPLETED,STORY_STATUS.UPDATING);
         storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED,statusList,storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story"));
-        Long chapterCount = storyRepository.countChapters(storyId);
-        if (chapterCount == 0) {
-            throw new AppException(ErrorCode.INVALID_STORY);
-        }
         Chapter chapter = readingHistoryRepository
                 .findLatestChapter(storyId, user.getId())
                 .orElseGet(() -> readingHistoryRepository

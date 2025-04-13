@@ -26,7 +26,7 @@ import java.util.List;
 
 @Slf4j
 @RestController
-@RequestMapping("/story")
+    @RequestMapping("/story")
 @RequiredArgsConstructor
 public class StoryController {
     private final StoryService storyService;

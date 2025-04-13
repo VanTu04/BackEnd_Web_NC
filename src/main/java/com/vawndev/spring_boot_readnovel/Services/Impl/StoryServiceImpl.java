@@ -86,7 +86,6 @@ public class StoryServiceImpl implements StoryService {
 
         try {
             Page<Story> storyPage = storyRepository.findAccepted(IS_AVAILBLE.ACCEPTED, status, pageable);
-
             List<StoriesResponse> stories = storyPage.getContent().stream()
                     .map(this::convertToResponse)
                     .collect(Collectors.toList());
@@ -361,8 +360,7 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public StoryDetailResponses getStoryById(String bearerToken, String id,PageRequest req) {
-
-        Story story = storyRepository.findById(id)
+        Story story = storyRepository.findByAcceptId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         Pageable pageable=PaginationUtil.createPageable(req.getPage(),req.getLimit());
         Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(),pageable);

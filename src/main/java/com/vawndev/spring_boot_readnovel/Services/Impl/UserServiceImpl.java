@@ -47,7 +47,7 @@ public class UserServiceImpl implements UserService {
     private final AesEncryptionUtil aesEncryptionUtil;
 
         @Override
-        @PreAuthorize("hasRole('ADMIN')")
+        @PreAuthorize("hasAuthority('ADMIN')")
         public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
             Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
             Page<User> users=userRepository.findAll(pageable);
