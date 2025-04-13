@@ -27,6 +27,7 @@ public class ReadingHistory  {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "chapter_id",nullable = false)
+
     private Chapter chapter;
     public Story getStory() {
         return this.chapter.getStory();

@@ -32,6 +32,19 @@ public interface StoryRepository extends JpaRepository<Story, String> {
             List<STORY_STATUS> statusList,
             Pageable pageable
     );
+@Query("""
+    SELECT s FROM Story s 
+    WHERE s.isVisibility = TRUE 
+    AND  s.isAvailable = :available 
+    AND s.status IN :statusList
+    AND s.isBanned = FALSE    
+    AND s.id=:storyId    
+    """)
+    Optional<Story> findAcceptedId(
+            IS_AVAILBLE available,
+            List<STORY_STATUS> statusList,
+            String storyId
+    );
 
     @Query("""
         SELECT s FROM Story s
@@ -77,5 +90,6 @@ public interface StoryRepository extends JpaRepository<Story, String> {
     @Query("SELECT s FROM Story s JOIN s.categories c WHERE c.id IN :categoryIds ORDER BY s.id DESC")
     Page<Story> findAllByCategoriesIn(List<String> categoryIds ,Pageable pageable);
 
-
+    @Query("SELECT COUNT(c) FROM Chapter c JOIN c.story s WHERE s.id = :storyId")
+    Long countChapters( String storyId);
 }

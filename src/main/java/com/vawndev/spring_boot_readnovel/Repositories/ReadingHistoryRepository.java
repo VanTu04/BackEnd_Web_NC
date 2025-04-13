@@ -1,20 +1,18 @@
 package com.vawndev.spring_boot_readnovel.Repositories;
 
-import java.util.Optional;
-
+import com.vawndev.spring_boot_readnovel.Entities.Chapter;
+import com.vawndev.spring_boot_readnovel.Entities.ReadingHistory;
+import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Entities.User;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.stereotype.Repository;
 
-import com.vawndev.spring_boot_readnovel.Entities.Chapter;
-import com.vawndev.spring_boot_readnovel.Entities.ReadingHistory;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
-import com.vawndev.spring_boot_readnovel.Entities.User;
+import java.util.List;
+import java.util.Optional;
 
-@Repository
 public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, String> {
 
     Page<ReadingHistory> findByUser(User user, Pageable pageable);
@@ -28,6 +26,13 @@ public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, 
     @Query("DELETE FROM ReadingHistory r WHERE r.user.id = :userId")
     void deleteByUserId(String userId);
 
-    Optional<ReadingHistory> findFirstByUserIdOrderByCreatedAtDesc(String userId);
+    @Query("SELECT hr.chapter FROM ReadingHistory hr " +
+            "JOIN hr.chapter c " +
+            "WHERE c.story.id = :storyId AND hr.user.id = :userId " +
+            "ORDER BY hr.createdAt DESC")
+    Optional<Chapter> findLatestChapter(String storyId, String userId);
+
+    @Query("SELECT c FROM Chapter c WHERE c.story.id = :storyId ORDER BY c.createdAt ASC")
+    Optional<Chapter> findFirstChapterByStoryId( String storyId);
 
 }
