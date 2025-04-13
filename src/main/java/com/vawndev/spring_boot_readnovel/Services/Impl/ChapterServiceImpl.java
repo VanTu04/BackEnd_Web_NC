@@ -32,6 +32,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -93,13 +94,16 @@ public class ChapterServiceImpl implements ChapterService {
                 throw new AppException(ErrorCode.SERVER_ERROR);
             }
             Chapter chapter = Chapter.builder()
-                    .title("Chương " + storyRepository.countChapters(story.getId()) )
+                    .title("Chương " + ( storyRepository.countChapters(story.getId()) + 1)  )
                     .content(creq.getContent())
                     .price(creq.getPrice())
                     .story(story)
                     .build();
             story.setPrice(story.getPrice().add(chapter.getPrice()));
-            story.setStatus(STORY_STATUS.UPDATING);
+            if(story.getStatus().equals(STORY_STATUS.UPDATING) ){
+                story.setStatus(STORY_STATUS.UPDATING );
+            }
+            story.setUpdatedAt(Instant.now());
             Chapter savedChapter = chapterRepository.save(chapter);
             storyRepository.save(story);
 

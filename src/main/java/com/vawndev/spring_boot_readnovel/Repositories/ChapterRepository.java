@@ -12,6 +12,7 @@ import java.util.Optional;
 
 @Repository
 public interface ChapterRepository extends JpaRepository<Chapter, String> {
+    @Query("SELECT c FROM Chapter c WHERE c.story.id = :storyId ORDER BY c.createdAt DESC")
     Page<Chapter> findAllByStoryId(String storyId, Pageable pageable);
     @Query("SELECT c FROM Chapter c " +
             "JOIN Story s ON c.story.id = s.id " +
