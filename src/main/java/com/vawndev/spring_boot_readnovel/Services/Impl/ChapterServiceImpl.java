@@ -48,6 +48,8 @@ public class ChapterServiceImpl implements ChapterService {
     private final TokenHelper tokenHelper;
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
+    private final ReadingHistoryRepository readingHistoryRepository;
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
@@ -175,6 +177,7 @@ public class ChapterServiceImpl implements ChapterService {
         // Chỉ lưu lịch sử đọc nếu user hợp lệ
         if (user != null) {
             readingService.saveHistory(chapter.getId());
+
         }
 
         return ChapterResponseDetail.builder()

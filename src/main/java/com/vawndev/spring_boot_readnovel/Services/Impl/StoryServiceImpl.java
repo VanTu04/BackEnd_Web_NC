@@ -270,7 +270,8 @@ public class StoryServiceImpl implements StoryService {
                     .build();
             storyRepository.save(story);
         } catch (Exception e) {
-            throw new RuntimeException("Error while processing file: " + image_cover.getOriginalFilename() + " - " + e.getMessage(), e);
+//            throw new AppException(ErrorCode.NOT_FOUND, "will be not be large than 2MB and only jpg,png,jpeg ");
+            throw new RuntimeException(e.getMessage());
         }
     }
 

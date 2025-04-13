@@ -36,7 +36,7 @@ public class CategoryServiceImpl implements CategoryService {
         return categoriesResponse;
     }
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void addCategory(String name) {
         categoryRepository.findByName(name).ifPresent(category -> {
             throw new AppException(ErrorCode.UNCATEGORIZED_EXCEPTION);
