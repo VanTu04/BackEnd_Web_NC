@@ -25,6 +25,7 @@ import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
+import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
@@ -42,7 +43,16 @@ import java.util.List;
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
-            "/users", "/auth/token", "/auth/introspect", "/auth/logout", "/auth/refresh",
+            "/users",
+            "/auth/token",
+            "/auth/introspect",
+            "/auth/logout",
+            "/auth/refresh",
+            "/oauth2/authorization/google",
+            "/auth/google/callback",
+            "auth/google",
+            "/story/**",
+            "/chapter/**",
     };
 
     @Autowired
@@ -54,6 +64,9 @@ public class SecurityConfig {
     @Autowired
     private OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
+    @Autowired
+    private JwtDecoder jwtDecoder;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
@@ -62,11 +75,24 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .authorizeHttpRequests(request -> {
-                    request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                            .anyRequest().authenticated();
-                })
-                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
+                .authorizeHttpRequests(request -> request
+                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                        .anyRequest().authenticated()
+                )
+                .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationManagerResolver(request -> {
+                            String path = request.getRequestURI();
+                            for (String publicEndpoint : PUBLIC_ENDPOINTS) {
+                                if (path.matches(publicEndpoint.replace("**", ".*"))) {
+                                    // Bỏ qua xác thực JWT cho endpoint public
+                                    return authentication -> null;
+                                }
+                            }
+                            // Dùng mặc định nếu không phải public
+                            JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtDecoder);
+                            return provider::authenticate;
+                        })
+                )
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
                                 .userService(customOAuth2UserService)
@@ -74,17 +100,17 @@ public class SecurityConfig {
                         .successHandler(oAuth2LoginSuccessHandler)
                         .failureHandler(oAuth2LoginFailureHandler)
                 )
-                .exceptionHandling(
-                        exception -> exception
-                                        .authenticationEntryPoint(new CustomAuthenticationEntrypoint()) //401
-                                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()) // 403
-                );
-        httpSecurity
+                .exceptionHandling(exception -> exception
+                        .authenticationEntryPoint(new CustomAuthenticationEntrypoint())
+                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
+                )
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable);
+
         return httpSecurity.build();
     }
+
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
