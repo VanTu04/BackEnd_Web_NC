@@ -35,9 +35,6 @@ public class User extends BaseEntity{
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
-    @Column(name = "google_id")
-    private String googleId;
-
     @Column(nullable = false)
     private BigDecimal balance = BigDecimal.ZERO;
 

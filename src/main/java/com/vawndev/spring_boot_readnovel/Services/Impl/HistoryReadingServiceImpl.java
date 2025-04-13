@@ -1,22 +1,28 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
+import java.time.Instant;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.stereotype.Service;
+
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponsePurchase;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChaptersResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.ReadingHistory;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
-import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
-import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.ReadingHistoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
@@ -24,14 +30,8 @@ import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
-import lombok.RequiredArgsConstructor;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
-import org.springframework.stereotype.Service;
 
-import java.time.Instant;
-import java.util.*;
-import java.util.stream.Collectors;
+import lombok.RequiredArgsConstructor;
 
 @Service
 @RequiredArgsConstructor
@@ -39,8 +39,8 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     private final StoryRepository storyRepository;
     private final ChapterRepository chapterRepository;
     private final ReadingHistoryRepository readingHistoryRepository;
+    private final JwtUtils jwtUtils;
     private final TokenHelper tokenHelper;
-
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
@@ -132,27 +132,30 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
         readingHistoryRepository.deleteByUserId(user.getId());
     }
 
-    public ChaptersResponse getLatestChapter(String storyId) {
-        User user = getAuthenticatedUser();
-        List<STORY_STATUS> statusList=List.of(STORY_STATUS.COMPLETED,STORY_STATUS.UPDATING);
-        storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED,statusList,storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story"));
-        Long chapterCount = storyRepository.countChapters(storyId);
-        if (chapterCount == 0) {
-            throw new AppException(ErrorCode.INVALID_STORY);
-        }
-        Chapter chapter = readingHistoryRepository
-                .findLatestChapter(storyId, user.getId())
-                .orElseGet(() -> readingHistoryRepository
-                        .findFirstChapterByStoryId(storyId)
-                        .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found")));
+    @Override
+    public ReadingHistoryResponse getLatestHistory() {
+        User user = getAuthenticatedUser(); // Lấy thông tin người dùng hiện tại
 
-        return ChaptersResponse.builder()
-                .content(chapter.getContent())
-                .title(chapter.getTitle())
-                .views(chapter.getViews())
-                .id(chapter.getId())
+        // Lấy lịch sử đọc gần nhất
+        ReadingHistory latestHistory = readingHistoryRepository.findFirstByUserIdOrderByCreatedAtDesc(user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "No reading history found for the user."));
+
+        // Lấy thông tin truyện và chương từ lịch sử đọc
+        Story story = latestHistory.getChapter().getStory();
+        StoriesResponse storyResponse = StoriesResponse.builder()
+                .id(story.getId())
+                .title(story.getTitle())
+                .status(story.getStatus())
+                .coverImage(story.getCoverImage())
                 .build();
+
+        Chapter chapter = latestHistory.getChapter();
+        ChaptersResponse chapterResponse = ChaptersResponse.builder()
+                .id(chapter.getId())
+                .title(chapter.getTitle())
+                .content(chapter.getContent())
+                .build();
+
+        return new ReadingHistoryResponse(storyResponse, List.of(chapterResponse));
     }
-
-
 }

@@ -3,7 +3,6 @@ package com.vawndev.spring_boot_readnovel.Controllers;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChaptersResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionResponse;
@@ -27,15 +26,6 @@ public class MyController {
         PageResponse<ReadingHistoryResponse> result=historyReadingService.getHistory(pageRequest);
         return ApiResponse.<PageResponse<ReadingHistoryResponse>>builder()
                 .result(result)
-                .message("Successfully")
-                .build();
-    }
-
-    @GetMapping("/continue-reading")
-    public ApiResponse<ChaptersResponse> getLatestChapter(@RequestParam String story_id) {
-        ChaptersResponse chapter=historyReadingService.getLatestChapter(story_id);
-        return ApiResponse.<ChaptersResponse>builder()
-                .result(chapter)
                 .message("Successfully")
                 .build();
     }

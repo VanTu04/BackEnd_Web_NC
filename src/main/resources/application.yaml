@@ -2,7 +2,7 @@ spring:
   application:
     name: spring-boot-readnovel
   profiles:
-    active: ${SPRING_PROFILES_ACTIVE:dev}
+    active: ${SPRING_PROFILES_ACTIVE:prod}
   datasource:
     url: ${DBMS_CONNECTION}
     username: ${DBMS_USERNAME}
@@ -67,8 +67,3 @@ payment:
 
 cloudinary:
   url: ${CLOUDINARY_URL}
-
-encryption:
-  aes:
-    password: eL8/8q4qcxBL+hLn1d/YwQ==
-    salt: c1185cc206e23482

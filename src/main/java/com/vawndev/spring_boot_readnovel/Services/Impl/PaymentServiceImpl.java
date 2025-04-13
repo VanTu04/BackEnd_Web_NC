@@ -1,5 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import java.math.BigDecimal;
+import java.util.Map;
+
+import org.springframework.stereotype.Service;
+
 import com.vawndev.spring_boot_readnovel.Configurations.VNPayConfig;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.PaymentResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
@@ -13,20 +18,33 @@ import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.WalletTransactionRepository;
 import com.vawndev.spring_boot_readnovel.Services.PaymentService;
 import com.vawndev.spring_boot_readnovel.Utils.VNPayUtil;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.stereotype.Service;
-
-import java.math.BigDecimal;
-import java.util.Map;
 
 @Service
 @Transactional
 @RequiredArgsConstructor
 public class PaymentServiceImpl implements PaymentService {
+
+    @Override
+    public void purchaseStory(String storyId) {
+        // Implement the logic for purchasing a story
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public void purchaseChapter(String chapterId) {
+        // Implement the logic for purchasing a chapter
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    public PaymentResponse createVNPayPayment(HttpServletRequest request, int amount) {
+        // Implement the logic for creating a VNPay payment with an amount
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
 
     private final VNPayConfig payConfig;
     private final UserRepository userRepository;
@@ -36,8 +54,8 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponse createVNPayPayment(HttpServletRequest request) {
         long amount = Integer.parseInt(request.getParameter("amount")) * 100L;
         String bankCode = request.getParameter("bankCode");
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        String userId = request.getParameter("userId");
+        User user = userRepository.findById(userId).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
 
         WalletTransaction walletTransaction = walletTransactionRepository.save(
                 WalletTransaction.builder()
@@ -61,12 +79,12 @@ public class PaymentServiceImpl implements PaymentService {
         queryUrl += "&vnp_SecureHash=" + vnpSecureHash;
         String paymentUrl = payConfig.getVnp_PayUrl() + "?" + queryUrl;
 
-        return PaymentResponse.builder()
-                .code("ok")
-                .message("success")
-                .paymentUrl(paymentUrl)
-                .build();
-    }
+                return PaymentResponse.builder()
+                        .code("ok")
+                        .message("success")
+                        .paymentUrl(paymentUrl)
+                        .build();
+            }
 
 
 

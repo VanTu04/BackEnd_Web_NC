@@ -18,9 +18,9 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SearchController {
     private final SearchService searchService;
-    @GetMapping("")
+    @GetMapping("/search")
     public ApiResponse<PageResponse<StoriesResponse>> searchChapters(
-            @RequestParam(required = false) String keyword,
+            @RequestParam String keyword,
             @RequestParam int page,
             @RequestParam int limit,
             @RequestParam(required = false) Set<String> filterFields

@@ -5,7 +5,6 @@ import com.nimbusds.jose.util.Base64;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.CustomOAuth2UserService;
-import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginFailureHandler;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginSuccessHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -19,23 +18,23 @@ import org.springframework.security.config.annotation.web.configurers.AbstractHt
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.JwtDecoder;
 import org.springframework.security.oauth2.jwt.JwtEncoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtDecoder;
 import org.springframework.security.oauth2.jwt.NimbusJwtEncoder;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationConverter;
-import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationProvider;
 import org.springframework.security.oauth2.server.resource.authentication.JwtGrantedAuthoritiesConverter;
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
-import java.util.List;
 
 @Configuration
 @EnableWebSecurity
@@ -48,24 +47,19 @@ public class SecurityConfig {
             "/auth/introspect",
             "/auth/logout",
             "/auth/refresh",
-            "/oauth2/authorization/google",
-            "/auth/google/callback",
-            "auth/google",
-            "/story/**",
-            "/chapter/**",
+            "/payment/vn-pay-callback/",
+            "/payment/vn-pay-callback",
     };
 
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+    @Value("${jwt.signer-key}")
+    private String SIGNER_KEY;
 
-    @Autowired
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
-
-    @Autowired
-    private OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
-
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    public DefaultOAuth2UserService customOAuth2UserService() {
+        return new CustomOAuth2UserService();
+    }
+    public AuthenticationSuccessHandler oidcAuthenticationSuccessHandler() {
+        return new OAuth2LoginSuccessHandler();
+    }
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -75,40 +69,52 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .authorizeHttpRequests(request -> request
-                        .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated()
-                )
-                .oauth2ResourceServer(oauth2 -> oauth2
-                        .authenticationManagerResolver(request -> {
-                            String path = request.getRequestURI();
-                            for (String publicEndpoint : PUBLIC_ENDPOINTS) {
-                                if (path.matches(publicEndpoint.replace("**", ".*"))) {
-                                    // Bỏ qua xác thực JWT cho endpoint public
-                                    return authentication -> null;
-                                }
-                            }
-                            // Dùng mặc định nếu không phải public
-                            JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtDecoder);
-                            return provider::authenticate;
-                        })
-                )
+                .authorizeHttpRequests(request -> {
+                    request.requestMatchers(PUBLIC_ENDPOINTS).permitAll()
+                            .anyRequest().authenticated();
+                })
+                .oauth2ResourceServer((oauth2) -> oauth2.jwt(Customizer.withDefaults()))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
+                                .userService(customOAuth2UserService())
                         )
-                        .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
+                        .successHandler(oidcAuthenticationSuccessHandler())
                 )
-                .exceptionHandling(exception -> exception
-                        .authenticationEntryPoint(new CustomAuthenticationEntrypoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-                )
+                .exceptionHandling(
+                        exception -> exception
+                                        .authenticationEntryPoint(new CustomAuthenticationEntrypoint()) //401
+                                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()) // 403
+                );
+        httpSecurity
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable);
-
         return httpSecurity.build();
+    }
+
+    @Bean
+    public JwtDecoder jwtDecoder() {
+        NimbusJwtDecoder jwtDecoder = NimbusJwtDecoder
+                .withSecretKey(getSecretAccessKey())
+                .macAlgorithm(MacAlgorithm.HS512)
+                .build();
+        return token -> {
+          try {
+              return jwtDecoder.decode(token);
+          } catch (Exception e){
+              throw new AppException(ErrorCode.INVALID_TOKEN);
+          }
+        };
+    }
+
+    @Bean
+    public JwtEncoder jwtEncoder() {
+        return new NimbusJwtEncoder(new ImmutableSecret<>(getSecretAccessKey()));
+    }
+
+    private SecretKey getSecretAccessKey() {
+        byte[] keyBytes = Base64.from(SIGNER_KEY).decode();
+        return new SecretKeySpec(keyBytes, 0, keyBytes.length, MacAlgorithm.HS512.getName());
     }
 
 
@@ -128,17 +134,13 @@ public class SecurityConfig {
     public CorsFilter corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-        // Thêm địa chỉ frontend cho phép
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-        corsConfiguration.setAllowCredentials(true);  // Quan trọng để gửi cookie và header Authorization
-        corsConfiguration.setExposedHeaders(List.of("Authorization", "Set-Cookie", "X-Requested-With"));
+        corsConfiguration.addAllowedOrigin("*");
+        corsConfiguration.addAllowedMethod("*");
+        corsConfiguration.addAllowedHeader("*");
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
 
         return new CorsFilter(urlBasedCorsConfigurationSource);
     }
-
 }
