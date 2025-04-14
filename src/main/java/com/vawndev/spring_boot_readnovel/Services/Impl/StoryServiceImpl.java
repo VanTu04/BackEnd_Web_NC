@@ -7,6 +7,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryCondition;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponsePurchase;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
@@ -21,6 +22,7 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.*;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
+import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
@@ -35,6 +37,8 @@ import org.springframework.beans.BeanWrapperImpl;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -53,6 +57,7 @@ public class StoryServiceImpl implements StoryService {
     private final ChapterRepository chapterRepository;
     private final StoryMapper storyMapper;
     private final CloundService cloundService;
+    private final HistoryReadingService historyReadingService;
     private final CategoryRepository categoryRepository;
     private final TokenHelper tokenHelper;
     private final JwtUtils jwtUtils;
@@ -83,7 +88,6 @@ public class StoryServiceImpl implements StoryService {
 
         try {
             Page<Story> storyPage = storyRepository.findAccepted(IS_AVAILBLE.ACCEPTED, status, pageable);
-
             List<StoriesResponse> stories = storyPage.getContent().stream()
                     .map(this::convertToResponse)
                     .collect(Collectors.toList());
@@ -267,7 +271,8 @@ public class StoryServiceImpl implements StoryService {
                     .build();
             storyRepository.save(story);
         } catch (Exception e) {
-            throw new RuntimeException("Error while processing file: " + image_cover.getOriginalFilename() + " - " + e.getMessage(), e);
+//            throw new AppException(ErrorCode.NOT_FOUND, "will be not be large than 2MB and only jpg,png,jpeg ");
+            throw new RuntimeException(e.getMessage());
         }
     }
 
@@ -356,11 +361,13 @@ public class StoryServiceImpl implements StoryService {
 
 
     @Override
-    public StoryDetailResponses getStoryById(String bearerToken, String id) {
-        Story story = storyRepository.findById(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+    public StoryDetailResponses getStoryById(String bearerToken, String id,PageRequest req) {
 
-        List<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId());
+        Story story = storyRepository.findByAcceptId(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        Pageable pageable=PaginationUtil.createPageable(req.getPage(),req.getLimit());
+        Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(),pageable);
+
         User user=null;
         if (bearerToken != null && !bearerToken.isEmpty()) {
             try {
@@ -373,18 +380,21 @@ public class StoryServiceImpl implements StoryService {
 
         StoryResponse storyRes = storyMapper.toStoryResponse(story);
 
-        List<ChapterResponseDetail> chaptersRes = chapters.stream()
+        Set<String> chapterIds=new HashSet<>(historyReadingService.getChaptersIdHistory(req, id, finalUser));
+        List<ChapterResponsePurchase> chaptersRes = chapters.getContent().stream()
                 .map(chapter -> ChapterResponseDetail.builder()
                         .content(chapter.getContent())
                         .id(chapter.getId())
                         .price(UserHelper.getPriceByUser(chapter.getPrice(), finalUser))
+                        .isRead(chapterIds.contains(chapter.getId()))
                         .title(chapter.getTitle())
+                        .views(chapter.getViews())
                         .transactionType(TransactionType.DEPOSIT)
                         .build()
                 ).collect(Collectors.toList());
 
         BigDecimal bigPrice = chaptersRes.stream()
-                .map(ChapterResponseDetail::getPrice)
+                .map(ChapterResponsePurchase::getPrice)
                 .reduce(BigDecimal.ZERO, BigDecimal::add);
 
         // Trả về Response
@@ -401,7 +411,6 @@ public class StoryServiceImpl implements StoryService {
                 .rate(storyRes.getRate())
                 .views(storyRes.getViews())
                 .type(storyRes.getType())
-                .view(storyRes.getView())
                 .description(storyRes.getDescription())
                 .status(storyRes.getStatus())
                 .build();

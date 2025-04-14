@@ -11,6 +11,7 @@ import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.File;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
@@ -25,12 +26,16 @@ import com.vawndev.spring_boot_readnovel.Utils.Help.UserHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -46,19 +51,22 @@ public class ChapterServiceImpl implements ChapterService {
     private final ChapterRepository chapterRepository;
     private final FileRepository fileRepository;
     private final TokenHelper tokenHelper;
-    private final JwtUtils jwtUtil;
-    private final UserRepository userRepository;
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
 
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
+    @Transactional
     public String addChapter(ChapterUploadRequest chapterUploadRequest, List<MultipartFile> uploadedFiles) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
         ChapterRequest creq = chapterUploadRequest.getChapter();
         User Auth=getAuthenticatedUser();
+
         List<MultipartFile> images = new ArrayList<>();
         List<MultipartFile> files = new ArrayList<>();
         Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(),Auth).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND,"Story not found"));
@@ -92,12 +100,16 @@ public class ChapterServiceImpl implements ChapterService {
                 throw new AppException(ErrorCode.SERVER_ERROR);
             }
             Chapter chapter = Chapter.builder()
-                    .title(creq.getTitle())
+                    .title("Chương " + ( storyRepository.countChapters(story.getId()) + 1)  )
                     .content(creq.getContent())
                     .price(creq.getPrice())
                     .story(story)
                     .build();
             story.setPrice(story.getPrice().add(chapter.getPrice()));
+            if(story.getStatus().equals(STORY_STATUS.UPDATING) ){
+                story.setStatus(STORY_STATUS.UPDATING );
+            }
+            story.setUpdatedAt(Instant.now());
             Chapter savedChapter = chapterRepository.save(chapter);
             storyRepository.save(story);
 
@@ -177,6 +189,7 @@ public class ChapterServiceImpl implements ChapterService {
         // Chỉ lưu lịch sử đọc nếu user hợp lệ
         if (user != null) {
             readingService.saveHistory(chapter.getId());
+
         }
 
         return ChapterResponseDetail.builder()

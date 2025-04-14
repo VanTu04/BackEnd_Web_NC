@@ -19,7 +19,6 @@ public class StoryRequests {
 
     private StoryType type;
 
-    private String emailAuthor;
 
     private List<CategoryRequests> categories;
 

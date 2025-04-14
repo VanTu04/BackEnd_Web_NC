@@ -4,21 +4,37 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageCoverRequest;
+import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
+import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Utils.FileUpload;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.util.*;
 
 import lombok.RequiredArgsConstructor;
+
+import javax.imageio.ImageIO;
 
 @Service
 @RequiredArgsConstructor
 public class CloundServiceImpl implements CloundService {
 
     private final Cloudinary cloudinary;
+
+    private void CheckRadioImage(MultipartFile file ,int widthReq,int heightReq) throws IOException {
+        BufferedImage image = ImageIO.read(file.getInputStream());
+
+        int width = image.getWidth();
+        int height = image.getHeight();
+
+        if (width > widthReq || height > heightReq) {
+            throw new AppException(ErrorCode.OBJECT_INVAILD, "Image size must be at least 600px in width and 900px in height");
+        }
+    }
 
     @Override
     public List<String> getUrlChapterAfterUpload(FileRequest req) throws IOException {
@@ -89,7 +105,7 @@ public class CloundServiceImpl implements CloundService {
         if (cover == null || cover.getImage_cover() == null) {
             throw new IllegalArgumentException("Không có ảnh để upload");
         }
-
+        CheckRadioImage(cover.getImage_cover(),700,1000);
         FileUpload.validFormatImageCover(cover.getImage_cover().getOriginalFilename());
 
         FileUpload.assertAllowed(cover.getImage_cover(), ".*\\.(jpg|jpeg|png)$");

@@ -9,6 +9,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Services.CategoryService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RestController;
@@ -23,6 +25,8 @@ public class HomeController {
 
     @GetMapping("/homepage")
     public ApiResponse<StoriesHomeResponse> getStoriesHomepage(@RequestHeader(value = "Authorization" ,required = false) String BearerToken) {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
         PageRequest page1= new PageRequest(0,20);
         PageRequest page2 = new PageRequest(0,13);
         CategoriesResponse categories = categoryService.getCategories();
