@@ -18,6 +18,21 @@ import java.util.Optional;
 
 @Repository
 public interface StoryRepository extends JpaRepository<Story, String> {
+    @Query("""
+    SELECT s FROM Story s 
+    JOIN s.categories c 
+    WHERE c.id = :idCate 
+    ORDER BY s.createdAt DESC
+""")
+    Page<Story> findAcceptedByCate( String idCate, Pageable pageable);
+
+
+    @Query("""
+    SELECT s FROM Story s 
+    WHERE s.author.id=:authorId
+    ORDER BY s.createdAt DESC   
+    """)
+    Page<Story>findByAuthorId(String authorId, Pageable pageable);
 
     @Query("""
     SELECT s FROM Story s 

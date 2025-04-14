@@ -17,6 +17,7 @@ public interface StoryService {
     PageResponse<StoriesResponse> getStoriesComingSoon(PageRequest req);
     PageResponse<StoriesResponse> getStoriesUpdating(PageRequest req);
     PageResponse<StoriesResponse> recommendStories(PageRequest req,String BearerToken);
+    PageResponse<StoriesResponse> getMyList(PageRequest req);
     List<StoriesResponse> getStoriesRank();
     PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req);
     void addStory(StoryRequests req, MultipartFile image);

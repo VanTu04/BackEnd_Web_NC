@@ -6,8 +6,11 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChaptersResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionResponse;
+import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
+import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.MediaType;
@@ -20,10 +23,20 @@ import java.math.BigDecimal;
 @RequiredArgsConstructor
 public class MyController {
     private final HistoryReadingService historyReadingService;
+    private final StoryService storyService;
     private final SubscriptionService subscriptionService;
 
+    @GetMapping("/list")
+    public ApiResponse<PageResponse<StoriesResponse>> getList(@ModelAttribute PageRequest pageRequest) {
+        PageResponse<StoriesResponse> result=storyService.getMyList(pageRequest);
+        return ApiResponse.<PageResponse<StoriesResponse>>builder()
+                .result(result)
+                .message("Successfully")
+                .build();
+    }
+
     @GetMapping("/history")
-    public ApiResponse<PageResponse<ReadingHistoryResponse>> getReadingHistory( @RequestParam PageRequest pageRequest) {
+    public ApiResponse<PageResponse<ReadingHistoryResponse>> getReadingHistory( @ModelAttribute  PageRequest pageRequest) {
         PageResponse<ReadingHistoryResponse> result=historyReadingService.getHistory(pageRequest);
         return ApiResponse.<PageResponse<ReadingHistoryResponse>>builder()
                 .result(result)

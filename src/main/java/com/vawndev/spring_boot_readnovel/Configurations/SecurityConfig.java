@@ -55,6 +55,7 @@ public class SecurityConfig {
             "/story",
             "/homepage",
             "/chapter/detail/**",
+            "/search/**"
     };
 
     @Autowired

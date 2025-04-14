@@ -196,6 +196,19 @@ public class StoryServiceImpl implements StoryService {
         return getPageResponse(req, storyList);
     }
 
+    @Override
+    public PageResponse<StoriesResponse> getMyList(PageRequest req) {
+        User user =getAuthenticatedUser();
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<Story> story=storyRepository.findByAuthorId(user.getId(),pageable);
+        List<StoriesResponse> stories=story.getContent().stream().map(str->storyMapper.toStoriesResponse(str)).collect(Collectors.toList());
+        return PageResponse.<StoriesResponse>builder()
+                .data(stories)
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .build();
+    }
+
     private PageResponse<StoriesResponse> getPageResponse(PageRequest req, Page<Story> storyList) {
         List<StoriesResponse> result = storyList.getContent().stream()
                 .map(storyMapper::toStoriesResponse)

@@ -9,4 +9,5 @@ import java.util.Set;
 
 public interface SearchService {
     PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit, Set<String> filterFields) ;
+    PageResponse<StoriesResponse> cateStory(String keyword, int page, int limit) ;
 }

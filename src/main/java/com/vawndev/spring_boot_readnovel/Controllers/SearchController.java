@@ -6,10 +6,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Services.SearchService;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Set;
 
@@ -30,6 +27,19 @@ public class SearchController {
         }
 
         PageResponse<StoriesResponse> result = searchService.searchStory(keyword, page, limit, filterFields);
+        return ApiResponse.<PageResponse<StoriesResponse>>builder()
+                .message("Successfully")
+                .result(result)
+                .build();
+    }
+    @GetMapping("/story_cate/{id}")
+    public ApiResponse<PageResponse<StoriesResponse>> searchStoryByCate(
+            @PathVariable(required = false) String id,
+            @RequestParam int page,
+            @RequestParam int limit
+                ) {
+
+        PageResponse<StoriesResponse> result = searchService.cateStory(id, page, limit);
         return ApiResponse.<PageResponse<StoriesResponse>>builder()
                 .message("Successfully")
                 .result(result)

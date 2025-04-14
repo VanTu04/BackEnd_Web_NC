@@ -66,13 +66,13 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         // ✅ Kiểm tra nếu user đã có subscription còn hạn
         if (subscription != null && subscription.getExpiredAt() != null
                 && subscription.getExpiredAt().isAfter(Instant.now())) {
-            throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION);
+            throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION, TimeZoneConvert.convertUtcToUserTimezone(subscription.getExpiredAt()));
         }
 
         // ✅ Kiểm tra số dư
         BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
         SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
-                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+                .orElseThrow(() -> new AppException(ErrorCode.FAILED_PAYMENT,"Your balance is insufficient"));
 
         if (balance.compareTo(subscriptionPlan.getPrice()) < 0) {
             throw new AppException(ErrorCode.FAILED_PAYMENT);
