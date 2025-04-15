@@ -19,4 +19,12 @@ public interface ChapterRepository extends JpaRepository<Chapter, String> {
             "JOIN User u ON u.id = s.author.id " +
             "WHERE c.id = :chapterId AND u.id = :userId")
     Optional<Chapter> findByIdAndAuthorId( String chapterId,String userId);
+
+    @Query("SELECT c.id FROM Chapter c WHERE c.createdAt > (SELECT ch.createdAt FROM Chapter ch WHERE ch.id = :chapterId) ORDER BY c.createdAt ASC")
+    List<String> findNextChapter(String chapterId, Pageable pageable);
+
+    @Query("SELECT c.id FROM Chapter c WHERE c.createdAt < (SELECT ch.createdAt FROM Chapter ch WHERE ch.id = :chapterId) ORDER BY c.createdAt DESC")
+    List<String> findPrevChapter(String chapterId, Pageable pageable);
+
+
 }

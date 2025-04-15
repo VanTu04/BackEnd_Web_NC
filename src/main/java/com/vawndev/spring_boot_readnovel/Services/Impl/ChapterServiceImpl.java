@@ -24,10 +24,8 @@ import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.security.access.prepost.PostAuthorize;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -150,14 +148,15 @@ public class ChapterServiceImpl implements ChapterService {
             chapterRepository.delete(chapter);
             storyRepository.save(story);
         } catch (AppException e) {
-            log.error("AppException occurred while deleting chapter: " + id, e);
             throw e; // Re-throw to handle specific application-level errors
         } catch (Exception e) {
-            log.error("Unexpected error occurred while deleting chapter: " + id, e);
             throw new AppException(ErrorCode.SERVER_ERROR, "Unexpected error: " + e.getMessage());
         }
 
     }
+
+
+
 
 
     private Chapter getChapterByIdAndPermissions(String id, User user) {
@@ -227,6 +226,15 @@ public class ChapterServiceImpl implements ChapterService {
             readingService.saveHistory(chapter.getId());
 
         }
+        String next = chapterRepository.findNextChapter(id, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElse(null);
+        String prev = chapterRepository.findPrevChapter(id, PageRequest.of(0, 1))
+                .stream()
+                .findFirst()
+                .orElse(null);
+
 
         return ChapterResponseDetail.builder()
                 .id(chapter.getId())
@@ -235,6 +243,8 @@ public class ChapterServiceImpl implements ChapterService {
                 .price(UserHelper.getPriceByUser(chapter.getPrice(), user))
                 .transactionType(TransactionType.DEPOSIT)
                 .views(chapter.getViews())
+                .next(next)
+                .prev(prev)
                 .files(chapter.getFiles().stream()
                         .map(file -> FileResponse.builder().id(file.getId()).build())
                         .collect(Collectors.toList()))
