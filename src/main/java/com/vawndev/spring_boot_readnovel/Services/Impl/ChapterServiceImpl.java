@@ -7,10 +7,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.RawFileRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.FileResponse;
-import com.vawndev.spring_boot_readnovel.Entities.Chapter;
-import com.vawndev.spring_boot_readnovel.Entities.File;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
-import com.vawndev.spring_boot_readnovel.Entities.User;
+import com.vawndev.spring_boot_readnovel.Entities.*;
 import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
@@ -26,6 +23,7 @@ import com.vawndev.spring_boot_readnovel.Utils.Help.UserHelper;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
@@ -44,6 +42,7 @@ import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
+@Slf4j
 public class ChapterServiceImpl implements ChapterService {
 
     private final CloundService cloundService;
@@ -53,6 +52,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final TokenHelper tokenHelper;
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
+    private final ReadingHistoryRepository readingHistoryRepository;
 
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
@@ -62,8 +62,6 @@ public class ChapterServiceImpl implements ChapterService {
     @PreAuthorize("hasAuthority('AUTHOR')")
     @Transactional
     public String addChapter(ChapterUploadRequest chapterUploadRequest, List<MultipartFile> uploadedFiles) {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
         ChapterRequest creq = chapterUploadRequest.getChapter();
         User Auth=getAuthenticatedUser();
 
@@ -102,6 +100,7 @@ public class ChapterServiceImpl implements ChapterService {
             Chapter chapter = Chapter.builder()
                     .title("Chương " + ( storyRepository.countChapters(story.getId()) + 1)  )
                     .content(creq.getContent())
+                    .views(0L)
                     .price(creq.getPrice())
                     .story(story)
                     .build();
@@ -127,42 +126,79 @@ public class ChapterServiceImpl implements ChapterService {
     @Override
     @PreAuthorize("hasAuthority('AUTHOR') or hasAuthority('ADMIN')")
     @Transactional
-    public void deleteChapter(String id) {
-        User user = getAuthenticatedUser();
-        Chapter chapter;
 
-        if (user.getRoles().contains("ADMIN")) {
-            chapter = chapterRepository.findById(id)
-                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
-        } else {
-            chapter = chapterRepository.findByIdAndAuthorId(id, user.getId())
-                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+    public void deleteChapter(String id) {
+        try{
+            User user = getAuthenticatedUser();
+            Chapter chapter = getChapterByIdAndPermissions(id, user);
+
+            List<File> files = fileRepository.findByChapterId(chapter.getId());
+            List<String> publicIds = extractPublicIds(files);
+
+            try {
+                removeFilesFromCloud(publicIds);
+            } catch (Exception e) {
+                throw new AppException(ErrorCode.SERVER_ERROR, "Lỗi khi xóa file trên Cloud: " + e.getMessage());
+            }
+
+            Story story = getStoryByChapter(chapter);
+
+            updateStoryPrice(chapter, story);
+
+            deleteRelatedEntities(chapter, files);
+
+            chapterRepository.delete(chapter);
+            storyRepository.save(story);
+        } catch (AppException e) {
+            log.error("AppException occurred while deleting chapter: " + id, e);
+            throw e; // Re-throw to handle specific application-level errors
+        } catch (Exception e) {
+            log.error("Unexpected error occurred while deleting chapter: " + id, e);
+            throw new AppException(ErrorCode.SERVER_ERROR, "Unexpected error: " + e.getMessage());
         }
 
-        List<File> files = fileRepository.findByChapterId(chapter.getId());
-        List<String> publicIds = files.stream()
+    }
+
+
+    private Chapter getChapterByIdAndPermissions(String id, User user) {
+        if (user.getRoles().contains("ADMIN")) {
+            return chapterRepository.findById(id)
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+        } else {
+            return chapterRepository.findByIdAndAuthorId(id, user.getId())
+                    .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
+        }
+    }
+
+    private List<String> extractPublicIds(List<File> files) {
+        return files.stream()
                 .map(file -> FileUpload.extractPublicId(file.getUrl()))
                 .collect(Collectors.toList());
+    }
 
+    private void removeFilesFromCloud(List<String> publicIds) {
         try {
             cloundService.removeUrlOnChapterDelete(publicIds);
         } catch (Exception e) {
             throw new AppException(ErrorCode.SERVER_ERROR, "Lỗi khi xóa file trên Cloud: " + e.getMessage());
         }
+    }
 
-        Story story = storyRepository.findById(chapter.getStory().getId())
+    private Story getStoryByChapter(Chapter chapter) {
+        return storyRepository.findById(chapter.getStory().getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found"));
+    }
 
+    private void updateStoryPrice(Chapter chapter, Story story) {
         if (chapter.getPrice() != null && story.getPrice() != null) {
             story.setPrice(story.getPrice().subtract(chapter.getPrice()));
         }
-
-        fileRepository.deleteAll(files);
-        chapterRepository.delete(chapter);
-        storyRepository.save(story);
     }
 
-
+    private void deleteRelatedEntities(Chapter chapter, List<File> files) {
+        readingHistoryRepository.deleteAllByChapterId(chapter.getId());
+        fileRepository.deleteAll(files);
+    }
 
 
 

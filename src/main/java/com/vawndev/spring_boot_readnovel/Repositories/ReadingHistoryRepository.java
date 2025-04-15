@@ -15,6 +15,13 @@ import java.util.Optional;
 
 public interface ReadingHistoryRepository extends JpaRepository<ReadingHistory, String> {
 
+    @Modifying
+    @Query("DELETE FROM ReadingHistory rh WHERE rh.chapter.id = :id_chapter")
+    void deleteAllByChapterId(String id_chapter);
+
+    @Query("SELECT rh FROM ReadingHistory rh WHERE rh.chapter.id =:id_chapter")
+    List<ReadingHistory> findByChapters(String id_chapter);
+
     Page<ReadingHistory> findByUser(User user, Pageable pageable);
 
     ReadingHistory findByUserAndChapter(User user, Chapter chapter);

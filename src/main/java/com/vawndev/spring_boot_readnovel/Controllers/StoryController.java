@@ -47,15 +47,13 @@ public class StoryController {
     }
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ApiResponse<String> createStory(@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
-        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-        String username = authentication.getName();
         StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
             storyService.addStory(storyRequests,image_cover);
             return ApiResponse.<String>builder().result("Success!").build();
     }
 
     @PatchMapping("/update")
-    public ApiResponse<String> updateStory( @RequestParam @Valid StoryRequests req, @RequestParam @NotBlank String id) {
+    public ApiResponse<String> updateStory( @RequestBody @Valid StoryRequests req, @RequestParam @NotBlank String id) {
         storyService.updateStoryByAuthor(req,id);
         return ApiResponse.<String>builder().result("Success!").build();
     }

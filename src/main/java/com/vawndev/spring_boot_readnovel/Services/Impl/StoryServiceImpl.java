@@ -295,7 +295,7 @@ public class StoryServiceImpl implements StoryService {
     public void updateStoryByAuthor(StoryRequests req,String id) {
         User author = getAuthenticatedUser();
         Story story = storyRepository.findByIdAndAuthor(id ,author)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY,"Invalid  story"));
         try {
             BeanUtils.copyProperties(req, story, getNullPropertyNames(req));
             storyRepository.save(story);
@@ -360,11 +360,10 @@ public class StoryServiceImpl implements StoryService {
     public void deleteStory(StoryCondition req) {
         User author = getAuthenticatedUser();
         Story story;
-
         if (author.getRoles().contains("AUTHOR")) {
             story = storyRepository.findByIdAndAuthor(req.getId(), author)
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
-        } else {
+        } else  {
             story = storyRepository.findById(req.getId())
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         }

@@ -54,8 +54,11 @@ public class SecurityConfig {
             "/story/detail/**",
             "/story",
             "/homepage",
-            "/chapter/detail/**",
-            "/search/**"
+            "/chapter/*",
+            "/chapter/*/proxy",
+            "/search/**",
+            "/category",
+
     };
 
     @Autowired
@@ -133,7 +136,7 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Thêm địa chỉ frontend cho phép
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000"));
+        corsConfiguration.setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000","http://192.168.*:3000"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true);  // Quan trọng để gửi cookie và header Authorization

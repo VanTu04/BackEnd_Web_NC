@@ -64,12 +64,12 @@ public class ChapterController {
                 .build();
     }
 
-    @GetMapping("/{chapter_id}/proxy")
-    public ApiResponse<Map<String, String>>getChapterProxy(@PathVariable String chapter_id,@RequestParam List<String> ids) {
-        Map<String,String> result = imageService.getFile(ids,chapter_id);
-        return ApiResponse.<Map<String, String>>builder()
-                .result(result)
-                .message("Successfully!!")
-                .build();
+        @GetMapping("/{chapter_id}/proxy")
+        public ApiResponse<Map<String, String>>getChapterProxy(@PathVariable String chapter_id,@RequestParam List<String> ids) {
+            Map<String,String> result = imageService.getFile(ids,chapter_id);
+            return ApiResponse.<Map<String, String>>builder()
+                    .result(result)
+                    .message("Successfully!!")
+                    .build();
+        }
     }
-}
