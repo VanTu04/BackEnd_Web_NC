@@ -5,14 +5,7 @@ import io.github.cdimascio.dotenv.Dotenv;
 import lombok.experimental.UtilityClass;
 import org.springframework.web.multipart.MultipartFile;
 import org.apache.commons.io.FilenameUtils;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
-import java.nio.charset.StandardCharsets;
-import java.security.InvalidKeyException;
-import java.security.NoSuchAlgorithmException;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @UtilityClass
 public class FileUpload {
@@ -88,7 +81,7 @@ public class FileUpload {
     }
 
     public static void validFormatImageCover(String fileName) {
-        Set<String> validExtensions = Set.of("jpg", "png", "jpeg" );
+        Set<String> validExtensions = Set.of("jpg", "png", "jpeg");
         String extension = getFileExtension(fileName);
         if (!validExtensions.contains(extension)) {
             throw new IllegalArgumentException("Invalid file type: " + extension +
@@ -97,8 +90,9 @@ public class FileUpload {
     }
 
     private static boolean isValidType(RESOURCE_TYPE type) {
-        return type == RESOURCE_TYPE.IMAGE || type == RESOURCE_TYPE.RAW ;
+        return type == RESOURCE_TYPE.IMAGE || type == RESOURCE_TYPE.RAW;
     }
+
     public static String extractPublicId(String url) {
         String regex = ".*/v\\d+/(.+)$";
         java.util.regex.Pattern pattern = java.util.regex.Pattern.compile(regex);
@@ -109,9 +103,5 @@ public class FileUpload {
         }
         return matcher.group(1);
     }
-
-
-
-
 
 }

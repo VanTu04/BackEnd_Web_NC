@@ -34,6 +34,7 @@ import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
 
 @Service
@@ -50,6 +51,12 @@ public class ChapterServiceImpl implements ChapterService {
     private final JwtUtils jwtUtils;
     private final ReadingHistoryRepository readingHistoryRepository;
 
+    public static String convertToImagePath(String cloudinaryUrl) {
+        String[] parts = cloudinaryUrl.split("/");
+        String fileName = parts[parts.length - 1];
+        return "/images/" + fileName;
+    }
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
@@ -62,7 +69,7 @@ public class ChapterServiceImpl implements ChapterService {
 
         List<MultipartFile> images = new ArrayList<>();
         List<MultipartFile> files = new ArrayList<>();
-        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(), Auth)
+        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(), Auth.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found"));
         if (uploadedFiles != null && !uploadedFiles.isEmpty()) {
             for (MultipartFile file : uploadedFiles) {
@@ -204,15 +211,19 @@ public class ChapterServiceImpl implements ChapterService {
         if (bearerToken != null && !bearerToken.isEmpty()) {
             user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
         }
+        User userfinal = user;
 
+        boolean isAuthor = userfinal != null && userfinal.getId().equals(chapter.getStory().getAuthor().getId());
         if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0) {
-            if (user == null || user.getSubscription() == null) {
-                throw new AppException(ErrorCode.CAPITAL, "You must upgrade your account or buy to read this chapter");
+            if (!isAuthor) {
+                if (userfinal == null || userfinal.getSubscription() == null) {
+                    throw new AppException(ErrorCode.CAPITAL,
+                            "You must upgrade your account or buy to read this chapter");
+                }
             }
         }
 
-        // Chỉ lưu lịch sử đọc nếu user hợp lệ
-        if (user != null) {
+        if (userfinal != null) {
             readingService.saveHistory(chapter.getId());
 
         }
@@ -231,7 +242,7 @@ public class ChapterServiceImpl implements ChapterService {
                 .content(chapter.getContent())
                 .price(UserHelper.getPriceByUser(chapter.getPrice(), user))
                 .transactionType(TransactionType.DEPOSIT)
-                .views(chapter.getViews())
+                .views(Objects.requireNonNullElse(chapter.getViews(), 0L))
                 .next(next)
                 .prev(prev)
                 .files(chapter.getFiles().stream()

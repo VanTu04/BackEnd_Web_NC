@@ -1,6 +1,5 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Story;
 
-import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponseDetail;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Chapter.ChapterResponsePurchase;
 import lombok.*;
 import lombok.experimental.SuperBuilder;

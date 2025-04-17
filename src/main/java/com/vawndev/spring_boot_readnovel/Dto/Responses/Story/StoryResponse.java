@@ -19,7 +19,8 @@ import java.util.List;
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
-@Getter @Setter
+@Getter
+@Setter
 @SuperBuilder
 public class StoryResponse {
     private String title;
