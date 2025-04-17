@@ -36,8 +36,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-
-
 @Service
 @RequiredArgsConstructor
 @Slf4j
@@ -58,17 +56,18 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
-    @Transactional
     public String addChapter(ChapterUploadRequest chapterUploadRequest, List<MultipartFile> uploadedFiles) {
         ChapterRequest creq = chapterUploadRequest.getChapter();
-        User Auth=getAuthenticatedUser();
+        User Auth = getAuthenticatedUser();
 
         List<MultipartFile> images = new ArrayList<>();
         List<MultipartFile> files = new ArrayList<>();
-        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(),Auth).orElseThrow(()->new AppException(ErrorCode.NOT_FOUND,"Story not found"));
+        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(), Auth)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found"));
         if (uploadedFiles != null && !uploadedFiles.isEmpty()) {
             for (MultipartFile file : uploadedFiles) {
-                if (file.getContentType() != null && file.getContentType().startsWith("image/") && story.getType().equals(StoryType.COMIC)) {
+                if (file.getContentType() != null && file.getContentType().startsWith("image/")
+                        && story.getType().equals(StoryType.COMIC)) {
                     images.add(file);
                 } else {
                     files.add(file);
@@ -87,46 +86,45 @@ public class ChapterServiceImpl implements ChapterService {
             chapterUploadRequest.setFile(imageUpload);
         }
 
+        List<String> listUrl;
+        try {
+            FileRequest freq = chapterUploadRequest.getFile();
+            listUrl = cloundService.getUrlChapterAfterUpload(freq);
+        } catch (IOException e) {
+            throw new AppException(ErrorCode.SERVER_ERROR);
+        }
+        Chapter chapter = Chapter.builder()
+                .title("Chương " + (storyRepository.countChapters(story.getId()) + 1))
+                .content(creq.getContent())
+                .views(0L)
+                .price(creq.getPrice())
+                .story(story)
+                .build();
+        story.setPrice(story.getPrice().add(chapter.getPrice()));
+        if (story.getStatus().equals(STORY_STATUS.UPDATING)) {
+            story.setStatus(STORY_STATUS.UPDATING);
+        }
+        story.setUpdatedAt(Instant.now());
+        Chapter savedChapter = chapterRepository.save(chapter);
+        storyRepository.save(story);
 
-           List<String> listUrl;
-            try {
-                FileRequest freq = chapterUploadRequest.getFile();
-                listUrl = cloundService.getUrlChapterAfterUpload(freq);
-            } catch (IOException e) {
-                throw new AppException(ErrorCode.SERVER_ERROR);
-            }
-            Chapter chapter = Chapter.builder()
-                    .title("Chương " + ( storyRepository.countChapters(story.getId()) + 1)  )
-                    .content(creq.getContent())
-                    .views(0L)
-                    .price(creq.getPrice())
-                    .story(story)
-                    .build();
-            story.setPrice(story.getPrice().add(chapter.getPrice()));
-            if(story.getStatus().equals(STORY_STATUS.UPDATING) ){
-                story.setStatus(STORY_STATUS.UPDATING );
-            }
-            story.setUpdatedAt(Instant.now());
-            Chapter savedChapter = chapterRepository.save(chapter);
-            storyRepository.save(story);
+        List<File> imageList = listUrl.stream()
+                .map(url -> File.builder()
+                        .url(url)
+                        .chapter(savedChapter)
+                        .build())
+                .collect(Collectors.toList());
 
-            List<File> imageList = listUrl.stream()
-                    .map(url -> File.builder()
-                            .url(url)
-                            .chapter(savedChapter)
-                            .build())
-                    .collect(Collectors.toList());
-
-            fileRepository.saveAll(imageList);
-            return chapter.getId();
-         }
+        fileRepository.saveAll(imageList);
+        return chapter.getId();
+    }
 
     @Override
     @PreAuthorize("hasAuthority('AUTHOR') or hasAuthority('ADMIN')")
     @Transactional
 
     public void deleteChapter(String id) {
-        try{
+        try {
             User user = getAuthenticatedUser();
             Chapter chapter = getChapterByIdAndPermissions(id, user);
 
@@ -154,10 +152,6 @@ public class ChapterServiceImpl implements ChapterService {
         }
 
     }
-
-
-
-
 
     private Chapter getChapterByIdAndPermissions(String id, User user) {
         if (user.getRoles().contains("ADMIN")) {
@@ -199,9 +193,6 @@ public class ChapterServiceImpl implements ChapterService {
         fileRepository.deleteAll(files);
     }
 
-
-
-
     @Override
     @Transactional
     public ChapterResponseDetail getChapterDetail(String id, String bearerToken) {
@@ -211,7 +202,7 @@ public class ChapterServiceImpl implements ChapterService {
         User user = null;
 
         if (bearerToken != null && !bearerToken.isEmpty()) {
-                user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+            user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
         }
 
         if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0) {
@@ -219,7 +210,6 @@ public class ChapterServiceImpl implements ChapterService {
                 throw new AppException(ErrorCode.CAPITAL, "You must upgrade your account or buy to read this chapter");
             }
         }
-
 
         // Chỉ lưu lịch sử đọc nếu user hợp lệ
         if (user != null) {
@@ -235,7 +225,6 @@ public class ChapterServiceImpl implements ChapterService {
                 .findFirst()
                 .orElse(null);
 
-
         return ChapterResponseDetail.builder()
                 .id(chapter.getId())
                 .title(chapter.getTitle())
@@ -250,7 +239,5 @@ public class ChapterServiceImpl implements ChapterService {
                         .collect(Collectors.toList()))
                 .build();
     }
-
-
 
 }

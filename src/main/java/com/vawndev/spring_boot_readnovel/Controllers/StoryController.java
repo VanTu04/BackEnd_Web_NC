@@ -45,12 +45,14 @@ public class StoryController {
         StoryDetailResponses result=storyService.getStoryById(bearerToken, id,req);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
-    @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
-    public ApiResponse<String> createStory(@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
-        StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
-            storyService.addStory(storyRequests,image_cover);
-            return ApiResponse.<String>builder().result("Success!").build();
-    }
+
+
+        @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+        public ApiResponse<String> createStory(@RequestPart @NotBlank String storyJson, @RequestPart MultipartFile image_cover)  {
+            StoryRequests storyRequests= JsonHelper.parseJson(storyJson, StoryRequests.class);
+                storyService.addStory(storyRequests,image_cover);
+                return ApiResponse.<String>builder().result("Success!").build();
+        }
 
     @PatchMapping("/update")
     public ApiResponse<String> updateStory( @RequestBody @Valid StoryRequests req, @RequestParam @NotBlank String id) {

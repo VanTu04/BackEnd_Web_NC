@@ -67,8 +67,6 @@ public class StoryServiceImpl implements StoryService {
         return tokenHelper.getUserO2Auth();
     }
 
-
-
     private String[] getNullPropertyNames(Object source) {
         final BeanWrapper wrappedSource = new BeanWrapperImpl(source);
         return Arrays.stream(wrappedSource.getPropertyDescriptors())
@@ -77,9 +75,7 @@ public class StoryServiceImpl implements StoryService {
                 .toArray(String[]::new);
     }
 
-
-
-    private User author(String email){
+    private User author(String email) {
         return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
     }
 
@@ -108,7 +104,7 @@ public class StoryServiceImpl implements StoryService {
                 .id(story.getId())
                 .title(story.getTitle())
                 .type(story.getType())
-                .categories(story.getCategories() != null ? story.getCategories().stream().map(cate-> CategoryResponse
+                .categories(story.getCategories() != null ? story.getCategories().stream().map(cate -> CategoryResponse
                         .builder()
                         .name(cate.getName())
                         .id(cate.getId())
@@ -119,7 +115,6 @@ public class StoryServiceImpl implements StoryService {
                 .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(story.getUpdatedAt()))
                 .build();
     }
-
 
     @Override
     public PageResponse<StoriesResponse> getStories(PageRequest req) {
@@ -138,10 +133,9 @@ public class StoryServiceImpl implements StoryService {
         List<STORY_STATUS> status = List.of(STORY_STATUS.UPDATING);
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         try {
-            Page<Story> stories=storyRepository.findUpdating(IS_AVAILBLE.ACCEPTED, status, pageable);
-            List<StoriesResponse> storyRepositories=stories.stream().map(
-                    this::convertToResponse
-            ).collect(Collectors.toList());
+            Page<Story> stories = storyRepository.findUpdating(IS_AVAILBLE.ACCEPTED, status, pageable);
+            List<StoriesResponse> storyRepositories = stories.stream().map(
+                    this::convertToResponse).collect(Collectors.toList());
 
             return PageResponse.<StoriesResponse>builder()
                     .data(storyRepositories)
@@ -153,7 +147,6 @@ public class StoryServiceImpl implements StoryService {
             throw new RuntimeException(e);
         }
     }
-
 
     @Override
     public PageResponse<StoriesResponse> recommendStories(PageRequest req, String BearerToken) {
@@ -176,11 +169,8 @@ public class StoryServiceImpl implements StoryService {
         Map<String, Integer> categoriesCount = new HashMap<>();
 
         // Đếm số lần đọc theo thể loại
-        storiesPage.getContent().forEach(readingHistory ->
-                readingHistory.getStory().getCategories().forEach(category ->
-                        categoriesCount.merge(category.getId(), 1, Integer::sum)
-                )
-        );
+        storiesPage.getContent().forEach(readingHistory -> readingHistory.getStory().getCategories()
+                .forEach(category -> categoriesCount.merge(category.getId(), 1, Integer::sum)));
 
         // Sắp xếp thể loại theo số lần đọc giảm dần
         List<String> mostCategories = categoriesCount.entrySet().stream()
@@ -188,7 +178,8 @@ public class StoryServiceImpl implements StoryService {
                 .map(Map.Entry::getKey)
                 .collect(Collectors.toList());
 
-        // Get stories list base the most category suggest or fallback to the most stories list
+        // Get stories list base the most category suggest or fallback to the most
+        // stories list
         Page<Story> storyList = !mostCategories.isEmpty()
                 ? storyRepository.findAllByCategoriesIn(mostCategories, pageable)
                 : storyRepository.findMostViews(IS_AVAILBLE.ACCEPTED, status, pageable);
@@ -198,10 +189,11 @@ public class StoryServiceImpl implements StoryService {
 
     @Override
     public PageResponse<StoriesResponse> getMyList(PageRequest req) {
-        User user =getAuthenticatedUser();
+        User user = getAuthenticatedUser();
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        Page<Story> story=storyRepository.findByAuthorId(user.getId(),pageable);
-        List<StoriesResponse> stories=story.getContent().stream().map(str->storyMapper.toStoriesResponse(str)).collect(Collectors.toList());
+        Page<Story> story = storyRepository.findByAuthorId(user.getId(), pageable);
+        List<StoriesResponse> stories = story.getContent().stream().map(str -> storyMapper.toStoriesResponse(str))
+                .collect(Collectors.toList());
         return PageResponse.<StoriesResponse>builder()
                 .data(stories)
                 .page(req.getPage())
@@ -222,14 +214,13 @@ public class StoryServiceImpl implements StoryService {
                 .build();
     }
 
-
-
     public List<StoriesResponse> getStoriesRank() {
         List<STORY_STATUS> status = List.of(STORY_STATUS.COMPLETED, STORY_STATUS.UPDATING);
-        Pageable pageable = PaginationUtil.createPageable(0,9);
+        Pageable pageable = PaginationUtil.createPageable(0, 9);
         try {
-            List<Story> stories=storyRepository.findTopStories(IS_AVAILBLE.ACCEPTED, status);
-            List<StoriesResponse> storyRepositories=stories.stream().map(story->storyMapper.toStoriesResponse(story)).collect(Collectors.toList());
+            List<Story> stories = storyRepository.findTopStories(IS_AVAILBLE.ACCEPTED, status);
+            List<StoriesResponse> storyRepositories = stories.stream()
+                    .map(story -> storyMapper.toStoriesResponse(story)).collect(Collectors.toList());
             return storyRepositories;
         } catch (Exception e) {
             throw new RuntimeException(e);
@@ -237,7 +228,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-//    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasRole('ADMIN')")
     public PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req) {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Story> storyPage = storyRepository.findAll(pageable);
@@ -250,22 +241,22 @@ public class StoryServiceImpl implements StoryService {
                 .build();
     }
 
-
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
-    public void addStory(StoryRequests req, MultipartFile image_cover ) {
+    public void addStory(StoryRequests req, MultipartFile image_cover) {
         User author = getAuthenticatedUser();
-        try{
-            ImageCoverRequest imageCoverRequest=new ImageCoverRequest();
+        try {
+            ImageCoverRequest imageCoverRequest = new ImageCoverRequest();
             imageCoverRequest.setImage_cover(image_cover);
             Set<String> seenIds = new HashSet<>();
             List<Category> uniqueCategories = req.getCategories().stream()
                     .map(categoryId -> categoryRepository.findById(categoryId.getId()).orElse(null))
                     .filter(Objects::nonNull) // remove element null
-                    .filter(category -> seenIds.add(category.getId())) // get only the first element with the previous id
+                    .filter(category -> seenIds.add(category.getId())) // get only the first element with the previous
+                                                                       // id
                     .collect(Collectors.toList());
 
-            String CoverImage=cloundService.getUrlCoverAfterUpload(imageCoverRequest);
+            String CoverImage = cloundService.getUrlCoverAfterUpload(imageCoverRequest);
             Story story = Story
                     .builder()
                     .author(author)
@@ -284,18 +275,18 @@ public class StoryServiceImpl implements StoryService {
                     .build();
             storyRepository.save(story);
         } catch (Exception e) {
-//            throw new AppException(ErrorCode.NOT_FOUND, "will be not be large than 2MB and only jpg,png,jpeg ");
+            // throw new AppException(ErrorCode.NOT_FOUND, "will be not be large than 2MB
+            // and only jpg,png,jpeg ");
             throw new RuntimeException(e.getMessage());
         }
     }
 
-
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
-    public void updateStoryByAuthor(StoryRequests req,String id) {
+    public void updateStoryByAuthor(StoryRequests req, String id) {
         User author = getAuthenticatedUser();
-        Story story = storyRepository.findByIdAndAuthor(id ,author)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY,"Invalid  story"));
+        Story story = storyRepository.findByIdAndAuthor(id, author)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY, "Invalid  story"));
         try {
             BeanUtils.copyProperties(req, story, getNullPropertyNames(req));
             storyRepository.save(story);
@@ -307,16 +298,16 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public void updateCoverImage(StoryCondition req, MultipartFile image) {
         User author = getAuthenticatedUser();
-        Story story = storyRepository.findByIdAndAuthor(req.getId() ,author)
+        Story story = storyRepository.findByIdAndAuthor(req.getId(), author)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
-        try{
-            ImageCoverRequest imageCoverRequest=new ImageCoverRequest();
+        try {
+            ImageCoverRequest imageCoverRequest = new ImageCoverRequest();
             imageCoverRequest.setImage_cover(image);
-            String publicId= FileUpload.extractPublicId(story.getCoverImage());
-            if(publicId!=null && !publicId.isEmpty()){
+            String publicId = FileUpload.extractPublicId(story.getCoverImage());
+            if (publicId != null && !publicId.isEmpty()) {
                 cloundService.removeUrlOnStory(story.getCoverImage());
             }
-            String coverUrl=cloundService.getUrlCoverAfterUpload(imageCoverRequest);
+            String coverUrl = cloundService.getUrlCoverAfterUpload(imageCoverRequest);
 
             story.setCoverImage(coverUrl);
             storyRepository.save(story);
@@ -325,33 +316,34 @@ public class StoryServiceImpl implements StoryService {
         }
     }
 
-
     @Override
     @PreAuthorize("hasRole('ADMIN')")
     public void ModeratedByAdmin(ModeratedByAdmin req) {
-            getAuthenticatedUser();
-            Story story=storyRepository.findById(req.getStory_id()).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
-            try {
-                if (req.getIsAvailable()!=null){
-                    story.setIsAvailable(req.getIsAvailable());
-                    storyRepository.save(story);
-                }
-            } catch (Exception e) {
-                throw new RuntimeException(e);
+        getAuthenticatedUser();
+        Story story = storyRepository.findById(req.getStory_id())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        try {
+            if (req.getIsAvailable() != null) {
+                story.setIsAvailable(req.getIsAvailable());
+                storyRepository.save(story);
             }
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
     }
 
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
     public void deleteSoftStory(StoryCondition req) {
         User author = getAuthenticatedUser();
-        Story story=storyRepository.findByIdAndAuthor(req.getId(),author).orElseThrow(()->new AppException(ErrorCode.INVALID_STORY));
-            try {
-                    story.setDeleteAt(Instant.now());
-                    storyRepository.save(story);
-            } catch (Exception e) {
-                throw new RuntimeException(e);
-            }
+        Story story = storyRepository.findByIdAndAuthor(req.getId(), author)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        try {
+            story.setDeleteAt(Instant.now());
+            storyRepository.save(story);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
 
     }
 
@@ -363,7 +355,7 @@ public class StoryServiceImpl implements StoryService {
         if (author.getRoles().contains("AUTHOR")) {
             story = storyRepository.findByIdAndAuthor(req.getId(), author)
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
-        } else  {
+        } else {
             story = storyRepository.findById(req.getId())
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         }
@@ -371,16 +363,15 @@ public class StoryServiceImpl implements StoryService {
         storyRepository.delete(story);
     }
 
-
     @Override
-    public StoryDetailResponses getStoryById(String bearerToken, String id,PageRequest req) {
+    public StoryDetailResponses getStoryById(String bearerToken, String id, PageRequest req) {
 
         Story story = storyRepository.findByAcceptId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
-        Pageable pageable=PaginationUtil.createPageable(req.getPage(),req.getLimit());
-        Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(),pageable);
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(), pageable);
 
-        User user=null;
+        User user = null;
         if (bearerToken != null && !bearerToken.isEmpty()) {
             try {
                 user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
@@ -392,7 +383,7 @@ public class StoryServiceImpl implements StoryService {
 
         StoryResponse storyRes = storyMapper.toStoryResponse(story);
 
-        Set<String> chapterIds=new HashSet<>(historyReadingService.getChaptersIdHistory(req, id, finalUser));
+        Set<String> chapterIds = new HashSet<>(historyReadingService.getChaptersIdHistory(req, id, finalUser));
         List<ChapterResponsePurchase> chaptersRes = chapters.getContent().stream()
                 .map(chapter -> ChapterResponseDetail.builder()
                         .content(chapter.getContent())
@@ -402,8 +393,8 @@ public class StoryServiceImpl implements StoryService {
                         .title(chapter.getTitle())
                         .views(chapter.getViews())
                         .transactionType(TransactionType.DEPOSIT)
-                        .build()
-                ).collect(Collectors.toList());
+                        .build())
+                .collect(Collectors.toList());
 
         BigDecimal bigPrice = chaptersRes.stream()
                 .map(ChapterResponsePurchase::getPrice)
@@ -428,5 +419,11 @@ public class StoryServiceImpl implements StoryService {
                 .build();
     }
 
+    @Override
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public StoryDetailResponses getMyStory(String id, PageRequest req) {
+
+        throw new UnsupportedOperationException("Unimplemented method 'getMyStory'");
+    }
 
 }

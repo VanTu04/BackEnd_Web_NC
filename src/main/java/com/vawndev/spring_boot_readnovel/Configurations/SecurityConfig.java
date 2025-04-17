@@ -58,6 +58,7 @@ public class SecurityConfig {
             "/chapter/*/proxy",
             "/search/**",
             "/category",
+            "/search",
 
     };
 
@@ -83,8 +84,7 @@ public class SecurityConfig {
         httpSecurity
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
-                        .anyRequest().authenticated()
-                )
+                        .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
                         .authenticationManagerResolver(request -> {
                             String path = request.getRequestURI();
@@ -98,26 +98,21 @@ public class SecurityConfig {
                             JwtAuthenticationProvider provider = new JwtAuthenticationProvider(jwtDecoder);
                             provider.setJwtAuthenticationConverter(jwtAuthenticationConverter());
                             return provider::authenticate;
-                        })
-                )
+                        }))
                 .oauth2Login(oauth2 -> oauth2
                         .userInfoEndpoint(userInfo -> userInfo
-                                .userService(customOAuth2UserService)
-                        )
+                                .userService(customOAuth2UserService))
                         .successHandler(oAuth2LoginSuccessHandler)
-                        .failureHandler(oAuth2LoginFailureHandler)
-                )
+                        .failureHandler(oAuth2LoginFailureHandler))
                 .exceptionHandling(exception -> exception
                         .authenticationEntryPoint(new CustomAuthenticationEntrypoint())
-                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler())
-                )
+                        .accessDeniedHandler(new BearerTokenAccessDeniedHandler()))
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .formLogin(AbstractHttpConfigurer::disable)
                 .csrf(AbstractHttpConfigurer::disable);
 
         return httpSecurity.build();
     }
-
 
     @Bean
     public JwtAuthenticationConverter jwtAuthenticationConverter() {
@@ -136,10 +131,12 @@ public class SecurityConfig {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Thêm địa chỉ frontend cho phép
-        corsConfiguration.setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000","http://192.168.*:3000"));
+        corsConfiguration
+                .setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000", "http://192.168.*:3000",
+                        "http://172.20.*:3000"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-        corsConfiguration.setAllowCredentials(true);  // Quan trọng để gửi cookie và header Authorization
+        corsConfiguration.setAllowCredentials(true); // Quan trọng để gửi cookie và header Authorization
         corsConfiguration.setExposedHeaders(List.of("Authorization", "Set-Cookie", "X-Requested-With"));
 
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();

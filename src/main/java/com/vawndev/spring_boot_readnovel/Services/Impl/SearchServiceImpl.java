@@ -22,8 +22,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
-
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -35,12 +35,12 @@ public class SearchServiceImpl implements SearchService {
     private final StoryRepository storyRepository;
 
     @Override
-    public PageResponse<StoriesResponse> searchStory(String keyword, int page, int limit, Set<String> filterFields) {
+    public PageResponse<StoriesResponse> searchStory(int page, int limit,
+            Map<String, String> filterFields) {
         try {
             Pageable pageable = PaginationUtil.createPageable(page, limit);
 
-            // Gọi Specification với keyword và các trường lọc
-            Specification<Story> spec = StorySpecification.searchAndFilter(keyword, filterFields);
+            Specification<Story> spec = StorySpecification.searchAndFilter(filterFields);
 
             Page<Story> storyPage = searchRepository.findAll(spec, pageable);
 
@@ -72,7 +72,7 @@ public class SearchServiceImpl implements SearchService {
             storyPage = storyRepository.findAcceptedByCate(keyword, pageable);
         } else {
             List<STORY_STATUS> status = List.of(STORY_STATUS.COMPLETED, STORY_STATUS.UPDATING);
-            storyPage = storyRepository.findAccepted(IS_AVAILBLE.ACCEPTED,status,pageable);
+            storyPage = storyRepository.findAccepted(IS_AVAILBLE.ACCEPTED, status, pageable);
         }
 
         List<StoriesResponse> storiesList = storyPage.getContent().stream()
@@ -86,6 +86,5 @@ public class SearchServiceImpl implements SearchService {
                 .total(storyPage.getTotalPages())
                 .build();
     }
-
 
 }

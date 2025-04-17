@@ -105,7 +105,7 @@ public class CloundServiceImpl implements CloundService {
         if (cover == null || cover.getImage_cover() == null) {
             throw new IllegalArgumentException("Không có ảnh để upload");
         }
-        CheckRadioImage(cover.getImage_cover(),700,1000);
+//        CheckRadioImage(cover.getImage_cover(),700,1000);
         FileUpload.validFormatImageCover(cover.getImage_cover().getOriginalFilename());
 
         FileUpload.assertAllowed(cover.getImage_cover(), ".*\\.(jpg|jpeg|png)$");
