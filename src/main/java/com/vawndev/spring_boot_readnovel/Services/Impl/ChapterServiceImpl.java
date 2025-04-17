@@ -188,7 +188,7 @@ public class ChapterServiceImpl implements ChapterService {
         }
     }
 
-    private void deleteRelatedEntities(Chapter chapter, List<File> files) {
+    public void deleteRelatedEntities(Chapter chapter, List<File> files) {
         readingHistoryRepository.deleteAllByChapterId(chapter.getId());
         fileRepository.deleteAll(files);
     }

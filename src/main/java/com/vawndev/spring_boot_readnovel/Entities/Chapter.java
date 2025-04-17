@@ -6,6 +6,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Getter
 @Setter
@@ -17,6 +20,7 @@ public class Chapter extends BaseEntity {
     private String title;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Story story;
 
     @Column(columnDefinition = "TEXT")

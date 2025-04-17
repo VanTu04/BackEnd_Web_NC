@@ -21,6 +21,7 @@ import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.*;
+import com.vawndev.spring_boot_readnovel.Services.ChapterService;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
@@ -57,6 +58,7 @@ public class StoryServiceImpl implements StoryService {
     private final ChapterRepository chapterRepository;
     private final StoryMapper storyMapper;
     private final CloundService cloundService;
+    private final ChapterService chapterService;
     private final HistoryReadingService historyReadingService;
     private final CategoryRepository categoryRepository;
     private final TokenHelper tokenHelper;
@@ -336,15 +338,14 @@ public class StoryServiceImpl implements StoryService {
     @PreAuthorize("hasAuthority('AUTHOR')")
     public void deleteSoftStory(StoryCondition req) {
         User author = getAuthenticatedUser();
-        Story story = storyRepository.findByIdAndAuthor(req.getId(), author)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
-        try {
-            story.setDeleteAt(Instant.now());
-            storyRepository.save(story);
-        } catch (Exception e) {
-            throw new RuntimeException(e);
-        }
+        storyRepository.toggleDeleteStory(req.getId(), author.getId(), Instant.now());
+    }
 
+    @Override
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public void restoreSoftStory(StoryCondition req) {
+        User author = getAuthenticatedUser();
+        storyRepository.toggleDeleteStory(req.getId(), author.getId(), null);
     }
 
     @Override
@@ -352,6 +353,7 @@ public class StoryServiceImpl implements StoryService {
     public void deleteStory(StoryCondition req) {
         User author = getAuthenticatedUser();
         Story story;
+
         if (author.getRoles().contains("AUTHOR")) {
             story = storyRepository.findByIdAndAuthor(req.getId(), author)
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
@@ -360,6 +362,8 @@ public class StoryServiceImpl implements StoryService {
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         }
 
+        List<String> chapterIds = chapterRepository.findChapterIdByStory(req.getId());
+        chapterIds.forEach(chapterId -> chapterService.deleteChapter(chapterId));
         storyRepository.delete(story);
     }
 
@@ -424,6 +428,12 @@ public class StoryServiceImpl implements StoryService {
     public StoryDetailResponses getMyStory(String id, PageRequest req) {
 
         throw new UnsupportedOperationException("Unimplemented method 'getMyStory'");
+    }
+
+    @Override
+    public PageResponse<StoriesResponse> getStoriesTrash(PageRequest req, String id_story) {
+        // TODO Auto-generated method stub
+        throw new UnsupportedOperationException("Unimplemented method 'getStoriesTrash'");
     }
 
 }

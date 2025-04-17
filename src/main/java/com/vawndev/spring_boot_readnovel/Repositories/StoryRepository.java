@@ -1,6 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Repositories;
 
-import com.vawndev.spring_boot_readnovel.Entities.Category;
+import com.vawndev.spring_boot_readnovel.Entities.Chapter;
 import com.vawndev.spring_boot_readnovel.Entities.Story;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
@@ -8,101 +8,132 @@ import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
-import java.util.Collection;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
 @Repository
 public interface StoryRepository extends JpaRepository<Story, String> {
     @Query("""
-    SELECT s FROM Story s 
-    JOIN s.categories c 
-    WHERE c.id = :idCate 
-    ORDER BY s.createdAt DESC
-""")
-    Page<Story> findAcceptedByCate( String idCate, Pageable pageable);
-
-
-    @Query("""
-    SELECT s FROM Story s 
-    WHERE s.author.id=:authorId
-    ORDER BY s.createdAt DESC   
-    """)
-    Page<Story>findByAuthorId(String authorId, Pageable pageable);
+                SELECT s FROM Story s
+                JOIN s.categories c
+                WHERE c.id = :idCate
+                ORDER BY s.createdAt DESC
+            """)
+    Page<Story> findAcceptedByCate(String idCate, Pageable pageable);
 
     @Query("""
-    SELECT s FROM Story s 
-    WHERE s.isVisibility = TRUE 
-    AND s.isBanned = FALSE      
-    AND s.id =:id    
-    """)
+                SELECT s FROM Story s
+                WHERE s.author.id = :id
+                AND s.deleteAt IS NULL
+                ORDER BY s.createdAt DESC
+            """)
+    Page<Story> findAllByAuthor(String id, Pageable pageable);
+
+    @Query("""
+                SELECT s FROM Story s
+                WHERE s.author.id = :id
+                AND s.deleteAt IS NOT NULL
+                ORDER BY s.deleteAt DESC
+            """)
+    Page<Story> findAllTrashByAuthor(String id, Pageable pageable);
+
+    @Modifying
+    @Query("""
+                UPDATE Story s
+                SET s.deleteAt = :deleteAt
+                WHERE s.id = :id_story
+                AND s.author.id = :id_author
+            """)
+    void toggleDeleteStory(
+            @Param("id_story") String idStory,
+            @Param("id_author") String idAuthor,
+            @Param("deleteAt") Instant deleteAt);
+
+    @Query("""
+            SELECT s FROM Story s
+            WHERE s.author.id=:authorId
+            ORDER BY s.createdAt DESC
+            """)
+    Page<Story> findByAuthorId(String authorId, Pageable pageable);
+
+    @Query("""
+            SELECT s FROM Story s
+            WHERE s.isVisibility = TRUE
+            AND s.isBanned = FALSE
+            AND s.id =:id
+            """)
     Optional<Story> findByAcceptId(@Param("id") String id);
 
     Optional<Story> findByIdAndAuthor(String id, User author);
+
     @Query("""
-    SELECT s FROM Story s 
-    WHERE s.isVisibility = TRUE 
-    AND  s.isAvailable = :available 
-    AND s.status IN :statusList
-    AND s.isBanned = FALSE    
-    ORDER BY s.createdAt ASC
-    """)
+            SELECT s FROM Story s
+            WHERE s.isVisibility = TRUE
+            AND  s.isAvailable = :available
+            AND s.status IN :statusList
+            AND s.isBanned = FALSE
+            ORDER BY s.createdAt ASC
+            """)
     Page<Story> findAccepted(
             IS_AVAILBLE available,
             List<STORY_STATUS> statusList,
-            Pageable pageable
-    );
-@Query("""
-    SELECT s FROM Story s 
-    WHERE s.isVisibility = TRUE 
-    AND  s.isAvailable = :available 
-    AND s.status IN :statusList
-    AND s.isBanned = FALSE    
-    AND s.id=:storyId    
-    """)
+            Pageable pageable);
+
+    @Query("""
+            SELECT s FROM Story s
+            WHERE s.isVisibility = TRUE
+            AND  s.isAvailable = :available
+            AND s.status IN :statusList
+            AND s.isBanned = FALSE
+            AND s.id=:storyId
+            """)
     Optional<Story> findAcceptedId(
             IS_AVAILBLE available,
             List<STORY_STATUS> statusList,
-            String storyId
-    );
+            String storyId);
 
     @Query("""
-        SELECT s FROM Story s
-        WHERE s.isVisibility = TRUE 
-        AND  s.isAvailable = :available 
-        AND s.status IN :statusList     
-        AND s.isBanned = FALSE            
-        ORDER BY s.views DESC, s.rate DESC
-        """)
+            SELECT s FROM Story s
+            WHERE s.isVisibility = TRUE
+            AND  s.isAvailable = :available
+            AND s.status IN :statusList
+            AND s.isBanned = FALSE
+            ORDER BY s.views DESC, s.rate DESC
+            """)
     List<Story> findTopStories(IS_AVAILBLE available,
-                               List<STORY_STATUS> statusList);
+            List<STORY_STATUS> statusList);
 
     @Query("""
-        SELECT s FROM Story s
-        WHERE s.isVisibility = TRUE 
-        AND  s.isAvailable = :available 
-        AND s.status IN :statusList     
-        AND s.isBanned = FALSE            
-        ORDER BY s.views DESC
-        """)
+            SELECT s FROM Story s
+            WHERE s.isVisibility = TRUE
+            AND  s.isAvailable = :available
+            AND s.status IN :statusList
+            AND s.isBanned = FALSE
+            ORDER BY s.views DESC
+            """)
     Page<Story> findMostViews(IS_AVAILBLE available,
-                               List<STORY_STATUS> statusList,
-                               Pageable pageable);
+            List<STORY_STATUS> statusList,
+            Pageable pageable);
+
     @Query("""
-    SELECT s FROM Story s 
-    WHERE s.isVisibility = TRUE 
-    AND  s.isAvailable = :available 
-    AND s.status IN :statusList
-    AND s.isBanned = FALSE        
-    ORDER BY s.updatedAt ASC 
-    """)
+            SELECT s FROM Story s
+            WHERE s.isVisibility = TRUE
+            AND  s.isAvailable = :available
+            AND s.status IN :statusList
+            AND s.isBanned = FALSE
+            ORDER BY s.updatedAt ASC
+            """)
     Page<Story> findUpdating(IS_AVAILBLE available,
-                               List<STORY_STATUS> statusList,
-                               Pageable pageable);
+            List<STORY_STATUS> statusList,
+            Pageable pageable);
+
     Page<Story> findAll(Pageable pageable);
 
     @Query("select count(*) from Story s where s.isAvailable = 'ACCEPTED' and month(s.updatedAt) = :month and year(s.updatedAt) = :year")
@@ -112,8 +143,8 @@ public interface StoryRepository extends JpaRepository<Story, String> {
     Long countRejectedStories(@Param("month") int month, @Param("year") int year);
 
     @Query("SELECT s FROM Story s JOIN s.categories c WHERE c.id IN :categoryIds ORDER BY s.id DESC")
-    Page<Story> findAllByCategoriesIn(List<String> categoryIds ,Pageable pageable);
+    Page<Story> findAllByCategoriesIn(List<String> categoryIds, Pageable pageable);
 
     @Query("SELECT COUNT(c) FROM Chapter c JOIN c.story s WHERE s.id = :storyId")
-    Long countChapters( String storyId);
+    Long countChapters(String storyId);
 }

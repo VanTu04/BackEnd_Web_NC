@@ -36,10 +36,14 @@ public interface StoryService {
 
     void deleteSoftStory(StoryCondition req);
 
+    void restoreSoftStory(StoryCondition req);
+
     void deleteStory(StoryCondition req);
 
     StoryDetailResponses getStoryById(String bearerToken, String id, PageRequest req);
 
     StoryDetailResponses getMyStory(String id, PageRequest req);
+
+    PageResponse<StoriesResponse> getStoriesTrash(PageRequest req, String id_story);
 
 }
