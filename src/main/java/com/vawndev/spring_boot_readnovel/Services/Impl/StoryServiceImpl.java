@@ -190,10 +190,10 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public PageResponse<StoriesResponse> getMyList(PageRequest req) {
+    public PageResponse<StoriesResponse> getMyList(PageRequest req, boolean isVisibility) {
         User user = getAuthenticatedUser();
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        Page<Story> story = storyRepository.findByAuthorId(user.getId(), pageable);
+        Page<Story> story = storyRepository.findByAuthorId(user.getId(), isVisibility, pageable);
         List<StoriesResponse> stories = story.getContent().stream().map(str -> storyMapper.toStoriesResponse(str))
                 .collect(Collectors.toList());
         return PageResponse.<StoriesResponse>builder()
@@ -287,7 +287,7 @@ public class StoryServiceImpl implements StoryService {
     @PreAuthorize("hasAuthority('AUTHOR')")
     public void updateStoryByAuthor(StoryRequests req, String id) {
         User author = getAuthenticatedUser();
-        Story story = storyRepository.findByIdAndAuthor(id, author)
+        Story story = storyRepository.findByIdAndAuthor(id, author.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY, "Invalid  story"));
         try {
             BeanUtils.copyProperties(req, story, getNullPropertyNames(req));
@@ -300,7 +300,7 @@ public class StoryServiceImpl implements StoryService {
     @Override
     public void updateCoverImage(StoryCondition req, MultipartFile image) {
         User author = getAuthenticatedUser();
-        Story story = storyRepository.findByIdAndAuthor(req.getId(), author)
+        Story story = storyRepository.findByIdAndAuthor(req.getId(), author.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         try {
             ImageCoverRequest imageCoverRequest = new ImageCoverRequest();
@@ -355,7 +355,7 @@ public class StoryServiceImpl implements StoryService {
         Story story;
 
         if (author.getRoles().contains("AUTHOR")) {
-            story = storyRepository.findByIdAndAuthor(req.getId(), author)
+            story = storyRepository.findByIdAndAuthor(req.getId(), author.getId())
                     .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
         } else {
             story = storyRepository.findById(req.getId())
@@ -384,6 +384,7 @@ public class StoryServiceImpl implements StoryService {
             }
         }
         User finalUser = user;
+        boolean isAuthor = user != null && user.getId().equals(story.getAuthor().getId());
 
         StoryResponse storyRes = storyMapper.toStoryResponse(story);
 
@@ -392,7 +393,7 @@ public class StoryServiceImpl implements StoryService {
                 .map(chapter -> ChapterResponseDetail.builder()
                         .content(chapter.getContent())
                         .id(chapter.getId())
-                        .price(UserHelper.getPriceByUser(chapter.getPrice(), finalUser))
+                        .price(isAuthor ? BigDecimal.ZERO : UserHelper.getPriceByUser(chapter.getPrice(), finalUser))
                         .isRead(chapterIds.contains(chapter.getId()))
                         .title(chapter.getTitle())
                         .views(chapter.getViews())
@@ -426,14 +427,63 @@ public class StoryServiceImpl implements StoryService {
     @Override
     @PreAuthorize("hasAuthority('AUTHOR')")
     public StoryDetailResponses getMyStory(String id, PageRequest req) {
+        User user = getAuthenticatedUser();
+        Story story = storyRepository.findByMyAcceptId(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(), pageable);
 
-        throw new UnsupportedOperationException("Unimplemented method 'getMyStory'");
+        StoryResponse storyRes = storyMapper.toStoryResponse(story);
+        boolean isAuthor = user.getId().equals(story.getAuthor().getId());
+
+        List<ChapterResponsePurchase> chaptersRes = chapters.getContent().stream()
+                .map(chapter -> ChapterResponseDetail.builder()
+                        .content(chapter.getContent())
+                        .id(chapter.getId())
+                        .price(isAuthor ? BigDecimal.ZERO : chapter.getPrice())
+                        .isRead(false)
+                        .title(chapter.getTitle())
+                        .views(chapter.getViews())
+                        .transactionType(isAuthor ? null : TransactionType.DEPOSIT)
+                        .build())
+                .collect(Collectors.toList());
+
+        BigDecimal bigPrice = chaptersRes.stream()
+                .map(ChapterResponsePurchase::getPrice)
+                .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+        // Trả về Response
+        return StoryDetailResponses.builder()
+                .chapter(chaptersRes)
+                .author(storyRes.getAuthor())
+                .price(bigPrice)
+                .title(storyRes.getTitle())
+                .createdAt(storyRes.getCreatedAt())
+                .updatedAt(storyRes.getUpdatedAt())
+                .categories(storyRes.getCategories())
+                .coverImage(storyRes.getCoverImage())
+                .isAvailable(storyRes.getIsAvailable())
+                .rate(storyRes.getRate())
+                .views(storyRes.getViews())
+                .type(storyRes.getType())
+                .description(storyRes.getDescription())
+                .status(storyRes.getStatus())
+                .build();
     }
 
     @Override
-    public PageResponse<StoriesResponse> getStoriesTrash(PageRequest req, String id_story) {
-        // TODO Auto-generated method stub
-        throw new UnsupportedOperationException("Unimplemented method 'getStoriesTrash'");
+    @PreAuthorize("hasAuthority('AUTHOR')")
+    public PageResponse<StoriesResponse> getStoriesTrash(PageRequest req) {
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        User user = getAuthenticatedUser();
+        Page<Story> storyPage = storyRepository.findAllTrashByAuthor(user.getId(), pageable);
+        List<StoriesResponse> stories = storyPage.getContent().stream().map(this::convertToResponse).toList();
+        return PageResponse.<StoriesResponse>builder()
+                .data(stories)
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .total(storyPage.getTotalPages())
+                .build();
     }
 
 }

@@ -20,7 +20,7 @@ public interface StoryService {
 
     PageResponse<StoriesResponse> recommendStories(PageRequest req, String BearerToken);
 
-    PageResponse<StoriesResponse> getMyList(PageRequest req);
+    PageResponse<StoriesResponse> getMyList(PageRequest req, boolean isVisibility);
 
     List<StoriesResponse> getStoriesRank();
 
@@ -44,6 +44,6 @@ public interface StoryService {
 
     StoryDetailResponses getMyStory(String id, PageRequest req);
 
-    PageResponse<StoriesResponse> getStoriesTrash(PageRequest req, String id_story);
+    PageResponse<StoriesResponse> getStoriesTrash(PageRequest req);
 
 }

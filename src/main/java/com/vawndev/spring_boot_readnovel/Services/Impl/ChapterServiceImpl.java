@@ -62,7 +62,7 @@ public class ChapterServiceImpl implements ChapterService {
 
         List<MultipartFile> images = new ArrayList<>();
         List<MultipartFile> files = new ArrayList<>();
-        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(), Auth)
+        Story story = storyRepository.findByIdAndAuthor(chapterUploadRequest.getChapter().getStory_id(), Auth.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found"));
         if (uploadedFiles != null && !uploadedFiles.isEmpty()) {
             for (MultipartFile file : uploadedFiles) {
