@@ -19,7 +19,6 @@ public class StoryRequests {
 
     private StoryType type;
 
-
     private List<CategoryRequests> categories;
 
 

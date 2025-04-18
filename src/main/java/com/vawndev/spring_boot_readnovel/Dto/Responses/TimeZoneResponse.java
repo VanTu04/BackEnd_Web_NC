@@ -13,9 +13,10 @@ import lombok.experimental.SuperBuilder;
 @SuperBuilder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class TimeZoneResponse {
-    private String createdAt ;
+    private String createdAt;
 
-    private String updatedAt ;
+    private String updatedAt;
 
-    private String deleteAt = null;
+    private String deleteAt;
+
 }

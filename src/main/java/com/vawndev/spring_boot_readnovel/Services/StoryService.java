@@ -11,20 +11,39 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
-
 public interface StoryService {
     PageResponse<StoriesResponse> getStories(PageRequest req);
+
     PageResponse<StoriesResponse> getStoriesComingSoon(PageRequest req);
+
     PageResponse<StoriesResponse> getStoriesUpdating(PageRequest req);
-    PageResponse<StoriesResponse> recommendStories(PageRequest req,String BearerToken);
+
+    PageResponse<StoriesResponse> recommendStories(PageRequest req, String BearerToken);
+
+    PageResponse<StoriesResponse> getMyList(PageRequest req, boolean isVisibility);
+
     List<StoriesResponse> getStoriesRank();
+
     PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req);
+
     void addStory(StoryRequests req, MultipartFile image);
-    void updateStoryByAuthor(StoryRequests req,String id);
+
+    void updateStoryByAuthor(StoryRequests req, String id);
+
     void updateCoverImage(StoryCondition req, MultipartFile image);
+
     void ModeratedByAdmin(ModeratedByAdmin moderatedByAdmin);
+
     void deleteSoftStory(StoryCondition req);
+
+    void restoreSoftStory(StoryCondition req);
+
     void deleteStory(StoryCondition req);
-    StoryDetailResponses getStoryById(String bearerToken, String id,PageRequest req);
+
+    StoryDetailResponses getStoryById(String bearerToken, String id, PageRequest req);
+
+    StoryDetailResponses getMyStory(String id, PageRequest req);
+
+    PageResponse<StoriesResponse> getStoriesTrash(PageRequest req);
 
 }

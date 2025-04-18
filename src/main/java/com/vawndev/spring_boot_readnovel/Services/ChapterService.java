@@ -10,4 +10,6 @@ public interface ChapterService {
     ChapterResponseDetail getChapterDetail(String id,String bearerToken);
     String addChapter(ChapterUploadRequest chapterUploadRequest, List<MultipartFile> files) ;
     void deleteChapter(String id );
+
+
 }

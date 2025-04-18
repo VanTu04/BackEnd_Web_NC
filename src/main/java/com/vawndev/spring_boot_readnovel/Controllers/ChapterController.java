@@ -19,11 +19,9 @@ import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-
 
 @RestController
 @RequestMapping("/chapter")
@@ -32,21 +30,17 @@ public class ChapterController {
     private final ChapterService chapterService;
     private final ImageService imageService;
 
-
-
     @PostMapping(value = "/add", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public ApiResponse<String> addChapter(
             @RequestPart("chapterJson") String chapterJson,
-            @RequestPart(value = "files", required = false) List<MultipartFile> uploadedFiles
-    ) {
+            @RequestPart(value = "files", required = false) List<MultipartFile> uploadedFiles) {
         ChapterRequest chapterRequest = JsonHelper.parseJson(chapterJson, ChapterRequest.class);
         ChapterUploadRequest uploadRequest = new ChapterUploadRequest();
         uploadRequest.setChapter(chapterRequest);
 
-        String result = chapterService.addChapter(uploadRequest,uploadedFiles);
+        String result = chapterService.addChapter(uploadRequest, uploadedFiles);
         return ApiResponse.<String>builder().message("Successfully!").result(result).build();
     }
-
 
     @DeleteMapping("/delete")
     public ApiResponse<String> deleteChapter(
@@ -56,8 +50,9 @@ public class ChapterController {
     }
 
     @GetMapping("/{chapter_id}")
-    public ApiResponse<ChapterResponseDetail> getChapter(@PathVariable String chapter_id ,@RequestHeader(value = "Authorization",required = false) String bearerToken) {
-        ChapterResponseDetail result = chapterService.getChapterDetail(chapter_id,bearerToken);
+    public ApiResponse<ChapterResponseDetail> getChapter(@PathVariable String chapter_id,
+            @RequestHeader(value = "Authorization", required = false) String bearerToken) {
+        ChapterResponseDetail result = chapterService.getChapterDetail(chapter_id, bearerToken);
         return ApiResponse.<ChapterResponseDetail>builder()
                 .message("Successfully")
                 .result(result)
@@ -65,11 +60,13 @@ public class ChapterController {
     }
 
     @GetMapping("/{chapter_id}/proxy")
-    public ApiResponse<Map<String, String>>getChapterProxy(@PathVariable String chapter_id,@RequestParam List<String> ids) {
-        Map<String,String> result = imageService.getFile(ids,chapter_id);
+    public ApiResponse<Map<String, String>> getChapterProxy(@PathVariable String chapter_id,
+            @RequestParam List<String> ids) {
+        Map<String, String> result = imageService.getFile(ids, chapter_id);
         return ApiResponse.<Map<String, String>>builder()
                 .result(result)
                 .message("Successfully!!")
                 .build();
     }
+
 }
