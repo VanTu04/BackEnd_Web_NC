@@ -4,6 +4,7 @@ import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 

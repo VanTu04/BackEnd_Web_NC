@@ -1,12 +1,11 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter;
 
-import com.vawndev.spring_boot_readnovel.Entities.Image;
-import com.vawndev.spring_boot_readnovel.Entities.Story;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
 import lombok.*;
 
 
 import java.math.BigDecimal;
-import java.util.List;
 
 @Builder
 @NoArgsConstructor
@@ -14,12 +13,11 @@ import java.util.List;
 @Getter @Setter
 public class ChapterRequest {
 
-    private String title;
-
+    @NotBlank(message = "id story must be not blank")
     private String story_id;
-
+    @NotBlank(message = "id cotent must be not blank")
     private String content;
-
+    @NotNull(message = "price must be not blank")
     private BigDecimal price;
 
 }

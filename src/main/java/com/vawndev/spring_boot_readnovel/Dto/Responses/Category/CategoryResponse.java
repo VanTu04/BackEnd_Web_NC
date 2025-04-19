@@ -10,5 +10,6 @@ import lombok.*;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoryResponse {
+    private String id;
     private String name;
 }

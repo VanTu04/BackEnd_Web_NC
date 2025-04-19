@@ -6,6 +6,9 @@ import lombok.*;
 import java.math.BigDecimal;
 import java.util.List;
 
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
+
 @Entity
 @Getter
 @Setter
@@ -17,13 +20,17 @@ public class Chapter extends BaseEntity {
     private String title;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     private Story story;
 
     @Column(columnDefinition = "TEXT")
     private String content;
 
+    @Column(name = "views")
+    private Long views;
+
     private BigDecimal price;
 
     @OneToMany(mappedBy = "chapter", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<Image> images;
+    private List<File> files;
 }

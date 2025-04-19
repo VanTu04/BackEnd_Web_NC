@@ -1,18 +1,16 @@
 package com.vawndev.spring_boot_readnovel.Dto.Requests.Story;
 
-import com.vawndev.spring_boot_readnovel.Entities.Category;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.Category.CategoryRequests;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import lombok.*;
-
-import java.math.BigDecimal;
 import java.util.List;
 
-@Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Getter
 @Setter
 @Builder
+
 public class StoryRequests {
 
     private String title;
@@ -21,12 +19,7 @@ public class StoryRequests {
 
     private StoryType type;
 
-    private String emailAuthor;
+    private List<CategoryRequests> categories;
 
-    private BigDecimal price;
-
-    private boolean isAvailable;
-
-    private List<Category> categories;
 
 }

@@ -3,6 +3,7 @@ package com.vawndev.spring_boot_readnovel.Entities;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
 
@@ -34,6 +35,22 @@ public class User extends BaseEntity{
     @Column(name = "refresh_token", columnDefinition = "TEXT")
     private String refreshToken;
 
+    @Column(name = "google_id")
+    private String googleId;
+
+    @Column(nullable = false)
+    private BigDecimal balance = BigDecimal.ZERO;
+
     @ManyToMany(fetch = FetchType.EAGER)
     Set<Role> roles;
+
+    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
+    private Subscription subscription;
+
+    @PrePersist
+    public void prePersist() {
+        if (balance == null) {
+            balance = BigDecimal.ZERO;
+        }
+    }
 }
