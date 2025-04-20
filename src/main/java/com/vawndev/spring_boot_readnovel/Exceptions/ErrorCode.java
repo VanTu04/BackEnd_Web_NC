@@ -36,6 +36,7 @@ public enum ErrorCode {
     CONFLICT_SUBSCRIPTION(2023, "Your subscription has not expired. Please wait until {0} to upgrade.", HttpStatus.CONFLICT),
     OBJECT_INVAILD(1027, "{0} must be a value", HttpStatus.BAD_REQUEST),
     CAPITAL(2028,"{0}", HttpStatus.LOCKED),
+    ACCOUNT_FAILE(2030, "{0}", HttpStatus.BAD_REQUEST),
     INVALID(1028, "Invalid: ", HttpStatus.BAD_REQUEST),
     BLANK_NAME(1029,"Name must be fill",HttpStatus.BAD_REQUEST),
     PASSWORD_MISMATCH(1030,"Password must match",HttpStatus.BAD_REQUEST),
