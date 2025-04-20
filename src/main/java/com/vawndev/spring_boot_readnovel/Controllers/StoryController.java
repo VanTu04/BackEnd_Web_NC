@@ -39,6 +39,15 @@ public class StoryController {
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
 
+    @GetMapping("/author/{id}")
+    public ApiResponse<PageResponse<StoriesResponse>> getStoriesByAuthorId(
+            @ModelAttribute PageRequest req,
+            @PathVariable @NotBlank String id
+    ){
+        PageResponse<StoriesResponse> res = storyService.getStoriesByAuthorId(req, id);
+        return ApiResponse.<PageResponse<StoriesResponse>>builder().result(res).build();
+    }
+
     @PostMapping(value = "/create", consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
     public ApiResponse<String> createStory(@RequestPart @NotBlank String storyJson,
             @RequestPart MultipartFile image_cover) {

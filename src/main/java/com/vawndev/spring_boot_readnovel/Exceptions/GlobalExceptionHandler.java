@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Exceptions;
 
+import ch.qos.logback.core.util.StringUtil;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import jakarta.validation.ConstraintViolation;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
+import org.springframework.util.StringUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
@@ -61,7 +63,12 @@ public class GlobalExceptionHandler {
         ApiResponse apiResponse = new ApiResponse();
 
         apiResponse.setCode(errorCode.getCode());
-        apiResponse.setMessage(exception.getMessage());
+        if(!StringUtils.hasText(exception.getMessage())){
+            apiResponse.setMessage(errorCode.getMessage());
+        }
+        else {
+            apiResponse.setMessage(exception.getMessage());
+        }
 
         return ResponseEntity.status(errorCode.getStatusCode()).body(apiResponse);
     }

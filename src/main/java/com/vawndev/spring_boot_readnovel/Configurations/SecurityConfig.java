@@ -52,6 +52,7 @@ public class SecurityConfig {
             "/auth/google/callback",
             "auth/google",
             "/story/detail/**",
+            "/story/author/**",
             "/story",
             "/homepage",
             "/chapter/*",
@@ -86,6 +87,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(new CustomAuthenticationEntrypoint())
                         .authenticationManagerResolver(request -> {
                             String path = request.getRequestURI();
                             for (String publicEndpoint : PUBLIC_ENDPOINTS) {
