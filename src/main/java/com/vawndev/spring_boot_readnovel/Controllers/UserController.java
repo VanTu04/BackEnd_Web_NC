@@ -71,20 +71,22 @@ public class UserController {
         return ApiResponse.<Void>builder().message("OTP sent to registered email").build();
     }
 
+    @PostMapping("/forgot-password/validate")
+    public String validateOtp(@RequestParam String email, @RequestParam String otp) {
+        if (otpService.validateOtp(email, otp)) {
+            return "OTP is valid!";
+        } else {
+            return "Invalid OTP!";
+        }
+    }
     // Forgot Password - Reset Password
     @PostMapping("/forgot-password/reset")
     public ApiResponse<Void> resetPassword(@RequestParam String email,
-                                           @RequestParam String otp,
                                            @RequestParam String newPassword,
                                            @RequestParam String confirmPassword) {
         // Check if passwords match
         if (!newPassword.equals(confirmPassword)) {
             throw new AppException(ErrorCode.PASSWORD_MISMATCH, "Passwords do not match");
-        }
-
-        // Validate OTP
-        if (!otpService.validateOtp(email, otp)) {
-            throw new AppException(ErrorCode.INVALID, "Invalid OTP");
         }
 
         // Reset password
