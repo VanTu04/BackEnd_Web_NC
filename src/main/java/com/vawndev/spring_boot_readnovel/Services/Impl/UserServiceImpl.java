@@ -79,6 +79,7 @@ public class UserServiceImpl implements UserService {
         roleRepository.findByName(PredefinedRole.CUSTOMER_ROLE).ifPresent(roles::add);
 
         user.setRoles(roles);
+        user.setImageUrl("https://asset.cloudinary.com/dxpyuj1mm/c02c925226fde0b82166c3080dc15e05");
 
         try {
             user = userRepository.save(user);
