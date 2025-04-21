@@ -26,6 +26,9 @@ public class User extends BaseEntity{
     @Column(name = "date_of_birth")
     private LocalDate dateOfBirth;
 
+    @Column(name = "image_url")
+    private String imageUrl;
+
     @Column(name = "is_active", nullable = false)
     private boolean isActive;
 

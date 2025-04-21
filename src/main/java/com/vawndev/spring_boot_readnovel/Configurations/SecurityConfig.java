@@ -62,8 +62,8 @@ public class SecurityConfig {
             "/search",
             "/users/forgot-password/request-otp",
             "/users/forgot-password/reset",
-            "/users/forgot-password/validate"
-
+            "/users/forgot-password/validate",
+            "comment/**",
     };
 
     @Autowired
