@@ -7,6 +7,7 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.CustomOAuth2UserService;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginFailureHandler;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginSuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
@@ -66,17 +68,13 @@ public class SecurityConfig {
             "comment/**",
     };
 
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    @Autowired
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-    @Autowired
-    private OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    private final JwtDecoder jwtDecoder;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
