@@ -4,6 +4,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
@@ -14,6 +15,7 @@ import com.vawndev.spring_boot_readnovel.Utils.AesEncryptionUtil;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -94,4 +96,11 @@ public class UserController {
 
         return ApiResponse.<Void>builder().message("Password reset successfully").build();
     }
+
+    @PutMapping("/update-profile")
+    public ResponseEntity<ApiResponse<Void>> updateUserProfile(@RequestBody @Valid UserUpdateRequest request) {
+        userService.updateUser(request);
+        return ResponseEntity.ok(ApiResponse.<Void>builder().message("Profile updated successfully").build());
+    }
+
 }

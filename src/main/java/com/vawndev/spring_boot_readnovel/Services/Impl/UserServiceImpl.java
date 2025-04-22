@@ -33,6 +33,7 @@ import com.vawndev.spring_boot_readnovel.Services.UserService;
 import com.vawndev.spring_boot_readnovel.Utils.AesEncryptionUtil;
 import com.vawndev.spring_boot_readnovel.Utils.PaginationUtil;
 import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
+import com.vawndev.spring_boot_readnovel.Utils.Help.TokenHelper;
 
 import lombok.RequiredArgsConstructor;
 
@@ -47,7 +48,7 @@ public class UserServiceImpl implements UserService {
     private final OtpService otpService;
     private final ObjectMapper objectMapper;
     private final AesEncryptionUtil aesEncryptionUtil;
-
+    private final TokenHelper tokenHelper;
         @Override
         @PreAuthorize("hasAuthority('ADMIN')")
         public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
@@ -92,10 +93,6 @@ public class UserServiceImpl implements UserService {
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
 
-    @Override
-    public UserResponse updateUser(String userId, UserUpdateRequest request) {
-        return null;
-    }
 
     @Override
     public void deleteUser(String userId) {
@@ -165,6 +162,34 @@ public class UserServiceImpl implements UserService {
             throw new AppException(ErrorCode.INVALID, "OTP is invalid");
         }
         return this.createUser(request);
+    }
+
+    @Override
+    public UserResponse updateUser(UserUpdateRequest request) {
+        // Lấy thông tin người dùng hiện tại từ TokenHelper
+        User user = tokenHelper.getUserO2Auth();
+
+        // Kiểm tra mật khẩu hiện tại
+        if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
+            throw new AppException(ErrorCode.INVALID_PASSWORD, "Current password is incorrect.");
+        }
+
+        // Cập nhật thông tin cá nhân
+        if (request.getFullName() != null) {
+            user.setFullName(request.getFullName());
+        }
+        if (request.getDateOfBirth() != null) {
+            user.setDateOfBirth(request.getDateOfBirth());
+        }
+        if (request.getImageUrl() != null) {
+            user.setImageUrl(request.getImageUrl());
+        }
+
+        // Lưu thông tin người dùng đã cập nhật
+        userRepository.save(user);
+
+        // Trả về thông tin người dùng đã cập nhật
+        return userMapper.toUserResponse(user);
     }
 
 }
