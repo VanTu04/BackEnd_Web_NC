@@ -37,6 +37,8 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = oAuth2User.getAttribute("email");
         String name = oAuth2User.getAttribute("name");
         String googleId = oAuth2User.getAttribute("sub"); // "sub" là Google user ID
+        String picture = oAuth2User.getAttribute("picture");
+
 
         if (email == null || googleId == null) {
             throw new OAuth2AuthenticationException(
@@ -69,6 +71,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         User newUser = User.builder()
                 .email(email)
                 .googleId(googleId)
+                .imageUrl(picture)
                 .fullName(name)
                 .isActive(true)
                 .roles(roles)
