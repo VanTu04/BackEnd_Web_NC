@@ -64,8 +64,12 @@ public class SecurityConfig {
             "/search",
             "/users/forgot-password/request-otp",
             "/users/forgot-password/reset",
+<<<<<<< Updated upstream
             "/users/forgot-password/validate",
             "comment/**",
+=======
+            "/users/forgot-password/validate"
+>>>>>>> Stashed changes
     };
 
     private final CustomOAuth2UserService customOAuth2UserService;
