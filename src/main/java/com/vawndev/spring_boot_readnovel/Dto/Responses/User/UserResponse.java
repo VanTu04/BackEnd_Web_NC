@@ -10,6 +10,7 @@ import java.util.Set;
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder
+@Builder
 public class UserResponse {
     private String fullName;
     private String email;

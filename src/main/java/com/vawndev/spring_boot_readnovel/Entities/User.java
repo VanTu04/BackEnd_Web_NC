@@ -2,17 +2,20 @@ package com.vawndev.spring_boot_readnovel.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Set;
+
+import lombok.experimental.SuperBuilder;
 
 @Entity
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
-@Builder
+@SuperBuilder
 @Table(name = "users")
 public class User extends BaseEntity{
     @Column(name = "full_name", nullable = false)
