@@ -46,4 +46,5 @@ public interface StoryService {
 
     PageResponse<StoriesResponse> getStoriesTrash(PageRequest req);
 
+    PageResponse<StoriesResponse> getStoriesByAuthorId(PageRequest req, String authorId);
 }

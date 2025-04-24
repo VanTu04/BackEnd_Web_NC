@@ -26,6 +26,7 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.oauth2.jose.jws.MacAlgorithm;
 import org.springframework.security.oauth2.jwt.*;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
@@ -51,6 +52,9 @@ public class AuthenticationServiceImpl implements AuthenticationService {
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         // kiem tra user co trong db khong
         var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        if(StringUtils.hasText(user.getGoogleId())) {
+            throw new AppException(ErrorCode.ACCOUNT_FAILE, "Account already exists but created by google account");
+        }
         // kiem tra mat khau
             boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
             if(!valid) {

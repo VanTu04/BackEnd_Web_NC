@@ -7,6 +7,7 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Services.CustomOAuth2UserService;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginFailureHandler;
 import com.vawndev.spring_boot_readnovel.Services.OAuth2LoginSuccessHandler;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
@@ -40,6 +41,7 @@ import java.util.List;
 @Configuration
 @EnableWebSecurity
 @EnableMethodSecurity
+@RequiredArgsConstructor
 public class SecurityConfig {
 
     private final String[] PUBLIC_ENDPOINTS = {
@@ -52,6 +54,7 @@ public class SecurityConfig {
             "/auth/google/callback",
             "auth/google",
             "/story/detail/**",
+            "/story/author/**",
             "/story",
             "/homepage",
             "/chapter/*",
@@ -59,20 +62,19 @@ public class SecurityConfig {
             "/search/**",
             "/category",
             "/search",
-
+            "/users/forgot-password/request-otp",
+            "/users/forgot-password/reset",
+            "/users/forgot-password/validate",
+            "comment/**",
     };
 
-    @Autowired
-    private CustomOAuth2UserService customOAuth2UserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
 
-    @Autowired
-    private OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
+    private final OAuth2LoginSuccessHandler oAuth2LoginSuccessHandler;
 
-    @Autowired
-    private OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
+    private final OAuth2LoginFailureHandler oAuth2LoginFailureHandler;
 
-    @Autowired
-    private JwtDecoder jwtDecoder;
+    private final JwtDecoder jwtDecoder;
 
     @Bean
     public PasswordEncoder passwordEncoder() {
@@ -86,6 +88,7 @@ public class SecurityConfig {
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())
                 .oauth2ResourceServer(oauth2 -> oauth2
+                        .authenticationEntryPoint(new CustomAuthenticationEntrypoint())
                         .authenticationManagerResolver(request -> {
                             String path = request.getRequestURI();
                             for (String publicEndpoint : PUBLIC_ENDPOINTS) {

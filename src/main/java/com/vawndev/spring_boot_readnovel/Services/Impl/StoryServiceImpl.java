@@ -371,7 +371,7 @@ public class StoryServiceImpl implements StoryService {
     public StoryDetailResponses getStoryById(String bearerToken, String id, PageRequest req) {
 
         Story story = storyRepository.findByAcceptId(id)
-                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story"));
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(), pageable);
 
@@ -477,6 +477,21 @@ public class StoryServiceImpl implements StoryService {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         User user = getAuthenticatedUser();
         Page<Story> storyPage = storyRepository.findAllTrashByAuthor(user.getId(), pageable);
+        List<StoriesResponse> stories = storyPage.getContent().stream().map(this::convertToResponse).toList();
+        return PageResponse.<StoriesResponse>builder()
+                .data(stories)
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .total(storyPage.getTotalPages())
+                .build();
+    }
+
+    @Override
+    public PageResponse<StoriesResponse> getStoriesByAuthorId(PageRequest req, String idStory) {
+        Story s = storyRepository.findByAcceptId(idStory).orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        User user = s.getAuthor();
+        Page<Story> storyPage = storyRepository.findAllByAuthor(user.getId(), pageable);
         List<StoriesResponse> stories = storyPage.getContent().stream().map(this::convertToResponse).toList();
         return PageResponse.<StoriesResponse>builder()
                 .data(stories)

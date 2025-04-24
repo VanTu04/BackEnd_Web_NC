@@ -5,6 +5,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.MappedSuperclass;
 import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -12,11 +13,14 @@ import lombok.Setter;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
+import lombok.experimental.SuperBuilder;
+
 @MappedSuperclass
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
+@SuperBuilder
 abstract class BaseEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -11,8 +11,9 @@ import java.util.List;
 @NoArgsConstructor
 @Builder
 public class UserUpdateRequest {
-    private String password;
-    private String fullName;
-    private LocalDate dateOfBirth;
-    private List<String> roles;
+    private String password;       // Mật khẩu hiện tại để xác thực
+    private String fullName;       // Tên đầy đủ
+    private LocalDate dateOfBirth; // Ngày tháng năm sinh
+    private String imageUrl;       // URL ảnh đại diện
+    //private List<String> roles;
 }

@@ -10,24 +10,28 @@ import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
+import java.time.Instant;
+import java.util.List;
+
 @Data
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CommentResponse {
-
-    private User user;
-
-    private Story story;
-
-    private Chapter chapter;
-
-    private Comment parentComment;
-
+    private String id;
     private String content;
-
     private boolean isDeleted;
+    private String userId;
+    private String fullUserName;
+    private String imageUser;
+    private Instant createdAt;
+    private String deletedBy;
+    private String storyId;
+    private String storyTitle;
+    private String chapterId;
+    private String chapterTitle;
+    private String parentCommentId;
 
-    private User deletedBy;
+    private List<CommentResponse> replies;
 }

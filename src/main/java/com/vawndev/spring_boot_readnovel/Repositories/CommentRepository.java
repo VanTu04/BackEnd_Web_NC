@@ -11,7 +11,9 @@ import java.util.List;
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, String> {
 
-    Page<Comment> findByStoryIdAndIsDeletedFalse(String storyId, Pageable pageable); // Lấy comment theo truyện (chỉ comment chưa xoá)
+    Page<Comment> findByStoryIdAndParentCommentIsNullAndIsDeletedFalse(String storyId, Pageable pageable); // Lấy comment theo truyện (chỉ comment chưa xoá)
+
+    List<Comment> findByStoryIdAndParentCommentIsNotNullAndIsDeletedFalse(String storyId);
 
     Page<Comment> findByChapterIdAndIsDeletedFalse(String chapterId, Pageable pageable); // Lấy comment theo chương (chỉ comment chưa xoá)
 
@@ -19,5 +21,5 @@ public interface CommentRepository extends JpaRepository<Comment, String> {
 
     Page<Comment> findByChapterId(String chapterId, Pageable pageable);
 
-    Page<Comment> findByParentCommentId(String parentId, Pageable pageable);
+    Page<Comment> findByParentCommentIdAndDeletedFalse(String parentId, Pageable pageable);
 }
