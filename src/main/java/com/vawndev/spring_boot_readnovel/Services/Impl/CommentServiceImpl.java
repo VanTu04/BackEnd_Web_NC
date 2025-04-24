@@ -131,13 +131,13 @@ public class CommentServiceImpl implements CommentService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Page<CommentResponse> getAllCommentByStory(String storyId, Pageable pageable) {
         return commentRepository.findByStoryId(storyId, pageable).map(this::toCommentResponse);
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAnyAuthority('ADMIN')")
     public Page<CommentResponse> getAllCommentByChapter(String chapterId, Pageable pageable) {
         return commentRepository.findByChapterId(
                 chapterId,

@@ -8,6 +8,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -167,8 +168,8 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public UserResponse updateUser(UserUpdateRequest request) {
-        // Lấy thông tin người dùng hiện tại từ TokenHelper
-        User user = tokenHelper.getUserO2Auth();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
         // Kiểm tra mật khẩu hiện tại
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -176,13 +177,13 @@ public class UserServiceImpl implements UserService {
         }
 
         // Cập nhật thông tin cá nhân
-        if (request.getFullName() != null) {
+        if (!request.getFullName().equals(user.getFullName())) {
             user.setFullName(request.getFullName());
         }
-        if (request.getDateOfBirth() != null) {
+        if (!request.getDateOfBirth().equals(user.getDateOfBirth())) {
             user.setDateOfBirth(request.getDateOfBirth());
         }
-        if (request.getImageUrl() != null) {
+        if (!request.getImageUrl().equals(user.getImageUrl())) {
             user.setImageUrl(request.getImageUrl());
         }
 
