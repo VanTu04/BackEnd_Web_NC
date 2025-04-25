@@ -6,6 +6,7 @@ import com.vawndev.spring_boot_readnovel.Services.FavoriteStoryService;
 import jakarta.validation.constraints.Min;
 import jakarta.validation.constraints.Positive;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -18,8 +19,7 @@ public class FavoriteStoryController {
 
     @PostMapping("/{storyId}")
     public ApiResponse<?> toggleFavorite(@PathVariable String storyId) {
-        favoriteStoryService.toggleFavorite(storyId);
-        return ApiResponse.<String>builder().message("Toggle success").build();
+        return ApiResponse.<Boolean>builder().message("Toggle success").result(favoriteStoryService.toggleFavorite(storyId)).build();
     }
 
     @GetMapping
@@ -27,8 +27,7 @@ public class FavoriteStoryController {
             @RequestParam(defaultValue = "0") @Min(0) int page,
             @RequestParam(defaultValue = "5") @Positive int size
     ) {
-        List<StoriesResponse> favorites = favoriteStoryService.getFavoriteStories(page, size);
-        return ApiResponse.<List<StoriesResponse>>builder().message("Successfully").result(favorites).build();
+        return ApiResponse.<Page<StoriesResponse>>builder().message("Successfully").result(favoriteStoryService.getFavoriteStories(page, size)).build();
     }
 
     @GetMapping("/stories/{id}")

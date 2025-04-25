@@ -12,6 +12,7 @@ import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.FavoriteStoryService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -32,7 +33,7 @@ public class FavoriteStoryServiceImpl implements FavoriteStoryService {
 
     @Override
 //    @PreAuthorize("hasAnyRole('ADMIN', 'AUTHOR', 'ADMIN')")
-    public void toggleFavorite(String storyId) {
+    public boolean toggleFavorite(String storyId) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -44,17 +45,19 @@ public class FavoriteStoryServiceImpl implements FavoriteStoryService {
 
         if (existingFavorite.isPresent()) {
             favoriteStoryRepository.delete(existingFavorite.get()); // Bỏ yêu thích
+            return false;
         } else {
             FavoriteStory favorite = FavoriteStory.builder()
                     .user(user)
                     .story(story)
                     .build();
             favoriteStoryRepository.save(favorite); // Thêm yêu thích
+            return true;
         }
     }
 
     @Override
-    public List<StoriesResponse> getFavoriteStories(int page, int size) {
+    public Page<StoriesResponse> getFavoriteStories(int page, int size) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
@@ -62,9 +65,7 @@ public class FavoriteStoryServiceImpl implements FavoriteStoryService {
         Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
 
         return favoriteStoryRepository.findAllByUserOrderByCreatedAtDesc(user, pageable)
-                .stream()
-                .map(favorite -> mapToStoriesResponse(favorite.getStory()))
-                .toList();
+                .map(favorite -> mapToStoriesResponse(favorite.getStory()));
     }
 
     @Override
