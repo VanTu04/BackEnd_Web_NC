@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -8,6 +9,7 @@ import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
@@ -15,6 +17,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageCoverRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
@@ -28,6 +31,7 @@ import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.RoleRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
+import com.vawndev.spring_boot_readnovel.Services.CloundService;
 import com.vawndev.spring_boot_readnovel.Services.OtpService;
 import com.vawndev.spring_boot_readnovel.Services.UserService;
 import com.vawndev.spring_boot_readnovel.Utils.AesEncryptionUtil;
@@ -79,6 +83,7 @@ public class UserServiceImpl implements UserService {
         roleRepository.findByName(PredefinedRole.CUSTOMER_ROLE).ifPresent(roles::add);
 
         user.setRoles(roles);
+        user.setImageUrl("https://res.cloudinary.com/dxpyuj1mm/image/upload/v1745306533/covers/ghblsj9e1exvmcozoewf.png");
 
         try {
             user = userRepository.save(user);
@@ -164,10 +169,13 @@ public class UserServiceImpl implements UserService {
         return this.createUser(request);
     }
 
+    private final CloundService cloundService;
+
     @Override
     public UserResponse updateUser(UserUpdateRequest request) {
-        // Lấy thông tin người dùng hiện tại từ TokenHelper
-        User user = tokenHelper.getUserO2Auth();
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
         // Kiểm tra mật khẩu hiện tại
         if (!passwordEncoder.matches(request.getPassword(), user.getPassword())) {
@@ -175,14 +183,11 @@ public class UserServiceImpl implements UserService {
         }
 
         // Cập nhật thông tin cá nhân
-        if (request.getFullName() != null) {
+        if (!request.getFullName().equals(user.getFullName())) {
             user.setFullName(request.getFullName());
         }
-        if (request.getDateOfBirth() != null) {
-            user.setDateOfBirth(request.getDateOfBirth());
-        }
-        if (request.getImageUrl() != null) {
-            user.setImageUrl(request.getImageUrl());
+        if (!request.getDateOfBirth().equals(user.getDateOfBirth())) {
+            user.setDateOfBirth(request.getDateOfBirth()); // Đảm bảo ngày sinh được cập nhật
         }
 
         // Lưu thông tin người dùng đã cập nhật

@@ -98,7 +98,7 @@ public class UserController {
     }
 
     @PutMapping("/update-profile")
-    public ResponseEntity<ApiResponse<Void>> updateUserProfile(@RequestBody @Valid UserUpdateRequest request) {
+    public ResponseEntity<ApiResponse<Void>> updateUserProfile(@ModelAttribute @Valid UserUpdateRequest request) {
         userService.updateUser(request);
         return ResponseEntity.ok(ApiResponse.<Void>builder().message("Profile updated successfully").build());
     }

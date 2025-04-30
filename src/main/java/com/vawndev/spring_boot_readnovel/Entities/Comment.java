@@ -1,6 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 import jakarta.persistence.*;
 import lombok.*;
+import lombok.experimental.SuperBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -11,7 +12,7 @@ import java.util.List;
 @Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
+@SuperBuilder
 public class Comment extends BaseEntity{
 
     @ManyToOne
