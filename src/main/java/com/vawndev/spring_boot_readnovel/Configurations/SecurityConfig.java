@@ -137,7 +137,7 @@ public class SecurityConfig {
         corsConfiguration
                 .setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000", "http://192.168.*:3000",
                         "http://172.20.*:3000"));
-        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true); // Quan trọng để gửi cookie và header Authorization
         corsConfiguration.setExposedHeaders(List.of("Authorization", "Set-Cookie", "X-Requested-With"));

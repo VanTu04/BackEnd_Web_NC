@@ -111,6 +111,7 @@ public class StoryServiceImpl implements StoryService {
                         .name(cate.getName())
                         .id(cate.getId())
                         .build()).collect(Collectors.toList()) : null)
+                .email(story.getAuthor().getEmail())
                 .status(story.getStatus())
                 .view(story.getViews())
                 .coverImage(story.getCoverImage())
@@ -128,6 +129,22 @@ public class StoryServiceImpl implements StoryService {
     public PageResponse<StoriesResponse> getStoriesComingSoon(PageRequest req) {
         List<STORY_STATUS> status = List.of(STORY_STATUS.COMING_SOON);
         return fetchStories(req, status);
+    }
+
+    @Override
+    public PageResponse<StoriesResponse> getAuthorStories(PageRequest req, String email) {
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<Story> storyPage = storyRepository.findByAuthor(email, pageable);
+        List<StoriesResponse> stories = storyPage.getContent().stream()
+                .map(this::convertToResponse)
+                .collect(Collectors.toList());
+
+        return PageResponse.<StoriesResponse>builder()
+                .data(stories)
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .total(storyPage.getTotalPages())
+                .build();
     }
 
     @Override
@@ -193,8 +210,24 @@ public class StoryServiceImpl implements StoryService {
     public PageResponse<StoriesResponse> getMyList(PageRequest req, boolean isVisibility) {
         User user = getAuthenticatedUser();
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        Page<Story> story = storyRepository.findByAuthorId(user.getId(), isVisibility, pageable);
-        List<StoriesResponse> stories = story.getContent().stream().map(str -> storyMapper.toStoriesResponse(str))
+        Page<Story> story = storyRepository.findByAuthorId(user.getId(), pageable);
+        List<StoriesResponse> stories = story.getContent().stream().map(str -> StoriesResponse.builder()
+                .id(str.getId())
+                .title(str.getTitle())
+                .type(str.getType())
+                .categories(str.getCategories() != null ? str.getCategories().stream().map(cate -> CategoryResponse
+                        .builder()
+                        .name(cate.getName())
+                        .id(cate.getId())
+                        .build()).collect(Collectors.toList()) : null)
+                .status(str.getStatus())
+                .view(str.getViews())
+                .coverImage(str.getCoverImage())
+                .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(str.getUpdatedAt()))
+                .isVisibility(str.isVisibility())
+                .isAvailble(str.getIsAvailable())
+                .build())
+
                 .collect(Collectors.toList());
         return PageResponse.<StoriesResponse>builder()
                 .data(stories)
@@ -306,9 +339,7 @@ public class StoryServiceImpl implements StoryService {
             ImageCoverRequest imageCoverRequest = new ImageCoverRequest();
             imageCoverRequest.setImage_cover(image);
             String publicId = FileUpload.extractPublicId(story.getCoverImage());
-            if (publicId != null && !publicId.isEmpty()) {
-                cloundService.removeUrlOnStory(story.getCoverImage());
-            }
+            cloundService.removeUrlOnStory(story.getCoverImage());
             String coverUrl = cloundService.getUrlCoverAfterUpload(imageCoverRequest);
 
             story.setCoverImage(coverUrl);
@@ -499,6 +530,15 @@ public class StoryServiceImpl implements StoryService {
                 .limit(req.getLimit())
                 .total(storyPage.getTotalPages())
                 .build();
+    }
+
+    @Override
+    public void toggleVisibilityStory(Boolean isVisibility, String id) {
+        User user = getAuthenticatedUser();
+        Story story = storyRepository.findByIdAndAuthor(id, user.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
+        story.setVisibility(isVisibility);
+        storyRepository.save(story);
     }
 
 }

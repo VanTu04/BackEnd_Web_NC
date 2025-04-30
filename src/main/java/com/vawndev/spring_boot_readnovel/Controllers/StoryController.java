@@ -31,6 +31,20 @@ public class StoryController {
         return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
     }
 
+    @GetMapping("/author")
+    public ApiResponse<PageResponse<StoriesResponse>> getStoryAuthor(
+            @ModelAttribute PageRequest req) {
+        PageResponse<StoriesResponse> result = storyService.getStories(req);
+        return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
+    }
+
+    @GetMapping("/author/{email}")
+    public ApiResponse<PageResponse<StoriesResponse>> getStoriesAuthor(
+            @ModelAttribute PageRequest req, @PathVariable String email) {
+        PageResponse<StoriesResponse> result = storyService.getAuthorStories(req, email);
+        return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
+    }
+
     @GetMapping("/detail/{id}")
     public ApiResponse<StoryDetailResponses> getStoryDetail(
             @RequestHeader(value = "Authorization", required = false) String bearerToken,
@@ -42,8 +56,7 @@ public class StoryController {
     @GetMapping("/author/{id}")
     public ApiResponse<PageResponse<StoriesResponse>> getStoriesByAuthorId(
             @ModelAttribute PageRequest req,
-            @PathVariable @NotBlank String id
-    ){
+            @PathVariable @NotBlank String id) {
         PageResponse<StoriesResponse> res = storyService.getStoriesByAuthorId(req, id);
         return ApiResponse.<PageResponse<StoriesResponse>>builder().result(res).build();
     }
@@ -59,6 +72,13 @@ public class StoryController {
     @PatchMapping("/update")
     public ApiResponse<String> updateStory(@RequestBody @Valid StoryRequests req, @RequestParam @NotBlank String id) {
         storyService.updateStoryByAuthor(req, id);
+        return ApiResponse.<String>builder().result("Success!").build();
+    }
+
+    @PatchMapping("/visibility")
+    public ApiResponse<String> toggleVisibilityStory(@RequestParam @Valid Boolean isVisibility,
+            @RequestParam @NotBlank String id) {
+        storyService.toggleVisibilityStory(isVisibility, id);
         return ApiResponse.<String>builder().result("Success!").build();
     }
 

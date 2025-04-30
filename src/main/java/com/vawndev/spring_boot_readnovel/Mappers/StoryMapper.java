@@ -12,9 +12,9 @@ import java.util.List;
 @Mapper(componentModel = "spring")
 public interface StoryMapper {
     StoryResponse toStoryResponse(Story story);
+
     StoriesResponse toStoriesResponse(Story story);
+
     StoryDetailResponses toStoryDetailResponses(StoryResponse story, List<ChapterResponseDetail> chapter);
-
-
 
 }

@@ -7,12 +7,18 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Story.StoryRequests;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
+
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface StoryService {
     PageResponse<StoriesResponse> getStories(PageRequest req);
+
+    PageResponse<StoriesResponse> getAuthorStories(PageRequest req, String email);
 
     PageResponse<StoriesResponse> getStoriesComingSoon(PageRequest req);
 
@@ -47,4 +53,6 @@ public interface StoryService {
     PageResponse<StoriesResponse> getStoriesTrash(PageRequest req);
 
     PageResponse<StoriesResponse> getStoriesByAuthorId(PageRequest req, String authorId);
+
+    void toggleVisibilityStory(Boolean isVisibility, String id);
 }

@@ -17,7 +17,6 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
@@ -38,6 +37,16 @@ public interface StoryRepository extends JpaRepository<Story, String> {
                             ORDER BY s.createdAt DESC
                         """)
         Page<Story> findAllByAuthor(String id, Pageable pageable);
+
+        @Query("""
+                            SELECT s FROM Story s
+                            WHERE s.author.email = :email
+                            AND s.deleteAt IS NULL
+                            AND s.isBanned = FALSE
+                            AND s.isVisibility = TRUE
+                            ORDER BY s.createdAt DESC
+                        """)
+        Page<Story> findByAuthor(String email, Pageable pageable);
 
         @Query("""
                             SELECT s FROM Story s
@@ -64,10 +73,9 @@ public interface StoryRepository extends JpaRepository<Story, String> {
                         SELECT s FROM Story s
                         WHERE s.author.id=:authorId
                         AND s.deleteAt IS NULL
-                        AND s.isVisibility=:isVisibility
                         ORDER BY s.createdAt DESC
                         """)
-        Page<Story> findByAuthorId(String authorId, boolean isVisibility, Pageable pageable);
+        Page<Story> findByAuthorId(String authorId, Pageable pageable);
 
         @Query("""
                         SELECT s FROM Story s
@@ -152,7 +160,7 @@ public interface StoryRepository extends JpaRepository<Story, String> {
                         WHERE s.isVisibility = TRUE
                         AND  s.isAvailable = :available
                         AND s.status IN :statusList
-                            AND s.deleteAt IS NULL
+                        AND s.deleteAt IS NULL
 
                         AND s.isBanned = FALSE
                         ORDER BY s.updatedAt ASC
@@ -169,7 +177,7 @@ public interface StoryRepository extends JpaRepository<Story, String> {
         @Query("SELECT COUNT(s) FROM Story s WHERE s.isAvailable = 'REJECTED' AND MONTH(s.createdAt) = :month AND YEAR(s.createdAt) = :year")
         Long countRejectedStories(@Param("month") int month, @Param("year") int year);
 
-        @Query("SELECT s FROM Story s JOIN s.categories c WHERE c.id IN :categoryIds ORDER BY s.id DESC")
+        @Query("SELECT s FROM Story s JOIN s.categories c WHERE  s.isAvailable = 'ACCEPTED' AND s.isVisibility = TRUE AND s.isBanned = FALSE AND s.deleteAt IS NULL AND c.id IN :categoryIds ORDER BY s.id DESC")
         Page<Story> findAllByCategoriesIn(List<String> categoryIds, Pageable pageable);
 
         @Query("SELECT COUNT(c) FROM Chapter c JOIN c.story s WHERE s.id = :storyId")
