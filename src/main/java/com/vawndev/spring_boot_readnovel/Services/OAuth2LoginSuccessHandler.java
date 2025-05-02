@@ -48,7 +48,7 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         String refreshToken = jwtUtils.generateRefreshToken(existingUser);
 
         existingUser.setRefreshToken(refreshToken);
-        var save = userRepository.save(existingUser);
+        userRepository.save(existingUser);
 
         // Tạo cookie chứa refreshToken
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken, refreshDuration);

@@ -3,7 +3,6 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 import com.vawndev.spring_boot_readnovel.Configurations.VNPayConfig;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.PaymentResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
-import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Entities.WalletTransaction;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
@@ -16,7 +15,6 @@ import com.vawndev.spring_boot_readnovel.Utils.VNPayUtil;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
