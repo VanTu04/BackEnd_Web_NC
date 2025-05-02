@@ -75,3 +75,4 @@ encryption:
 
 url:
   frontend: ${URL_FRONTEND:http://localhost:3000}
+  admin-frontend: ${URL_FRONTEND:http://localhost:3001}

@@ -80,6 +80,12 @@ public class SecurityConfig {
 
     private final JwtDecoder jwtDecoder;
 
+    @Value("${url.frontend}")
+    private String frontendUrl;
+
+    @Value("${url.admin-frontend}")
+    private String adminFrontendUrl;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
@@ -144,7 +150,7 @@ public class SecurityConfig {
 
         // Thêm địa chỉ frontend cho phép
         corsConfiguration
-                .setAllowedOrigins(List.of("http://localhost:2185", "http://localhost:3000", "http://192.168.*:3000",
+                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl, "http://192.168.*:3000",
                         "http://172.20.*:3000"));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
