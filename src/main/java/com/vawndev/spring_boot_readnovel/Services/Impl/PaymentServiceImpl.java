@@ -34,8 +34,6 @@ public class PaymentServiceImpl implements PaymentService {
     public PaymentResponse createVNPayPayment(HttpServletRequest request) {
         long amount = Integer.parseInt(request.getParameter("amount")) * 100L;
         String bankCode = request.getParameter("bankCode");
-        String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
         Map<String, String> vnpParamsMap = payConfig.getVNPayConfig(amount/100L);
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
