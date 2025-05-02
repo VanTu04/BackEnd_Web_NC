@@ -171,8 +171,8 @@ public interface StoryRepository extends JpaRepository<Story, String> {
 
         Page<Story> findAll(Pageable pageable);
 
-        @Query("select count(*) from Story s where s.isAvailable = 'ACCEPTED' and month(s.updatedAt) = :month and year(s.updatedAt) = :year")
-        Long countApprovedStories(@Param("month") int month, @Param("year") int year);
+        @Query("select count(*) from Story s where s.isAvailable = 'ACCEPTED' and s.updatedAt between :start and :end")
+        Long countApprovedStories(@Param("start") Instant start, @Param("end") Instant end);
 
         @Query("SELECT COUNT(s) FROM Story s WHERE s.isAvailable = 'REJECTED' AND MONTH(s.createdAt) = :month AND YEAR(s.createdAt) = :year")
         Long countRejectedStories(@Param("month") int month, @Param("year") int year);

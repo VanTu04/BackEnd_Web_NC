@@ -51,19 +51,19 @@ public class AuthenticationServiceImpl implements AuthenticationService {
 
         PasswordEncoder passwordEncoder = new BCryptPasswordEncoder(10);
         // kiem tra user co trong db khong
-        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(request.getEmail()).orElseThrow(() -> new AppException(ErrorCode.OBJECT, "Email or Password is incorrect"));
         if(StringUtils.hasText(user.getGoogleId())) {
             throw new AppException(ErrorCode.ACCOUNT_FAILE, "Account already exists but created by google account");
         }
         // kiem tra mat khau
             boolean valid = passwordEncoder.matches(request.getPassword(), user.getPassword());
             if(!valid) {
-                throw new AppException(ErrorCode.UNAUTHENTICATED);
+                throw new AppException(ErrorCode.OBJECT, "Email or Password is incorrect");
             }
 
         // kiem tra tinh trang tai khoan
         if(!user.isActive()) {
-            throw new AppException(ErrorCode.UNAUTHENTICATED);
+            throw new AppException(ErrorCode.OBJECT, "Account is inactive");
         }
 
         // nạp username và password vào security để tạo một authentication object

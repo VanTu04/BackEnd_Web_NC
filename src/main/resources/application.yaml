@@ -72,3 +72,6 @@ encryption:
   aes:
     password: eL8/8q4qcxBL+hLn1d/YwQ==
     salt: c1185cc206e23482
+
+url:
+  frontend: ${URL_FRONTEND:http://localhost:3000}
