@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Configurations;
 
+import com.vawndev.spring_boot_readnovel.Utils.VNPayUtil;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
@@ -30,15 +31,14 @@ public class VNPayConfig {
     /**
      * Tạo Map chứa các tham số cho thanh toán VNPAY
      */
-    public Map<String, String> getVNPayConfig(String walletTransId, long amount) {
+    public Map<String, String> getVNPayConfig(long amount) {
         Map<String, String> vnpParamsMap = new HashMap<>();
         vnpParamsMap.put("vnp_Version", vnp_Version);
         vnpParamsMap.put("vnp_Command", vnp_Command);
         vnpParamsMap.put("vnp_TmnCode", vnp_TmnCode);
         vnpParamsMap.put("vnp_CurrCode", "VND");
 
-        // Tạo mã giao dịch và thông tin đơn hàng với UUID
-        vnpParamsMap.put("vnp_TxnRef", walletTransId);
+        vnpParamsMap.put("vnp_TxnRef",  VNPayUtil.getRandomNumber(8));
         vnpParamsMap.put("vnp_OrderInfo", "Thanh toán số tiền: " + amount + " VNĐ");
         vnpParamsMap.put("vnp_OrderType", orderType);
         vnpParamsMap.put("vnp_Locale", "vn");

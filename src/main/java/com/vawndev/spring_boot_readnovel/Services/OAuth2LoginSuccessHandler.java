@@ -8,6 +8,7 @@ import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseCookie;
 import org.springframework.security.core.Authentication;
@@ -20,22 +21,17 @@ import org.springframework.web.util.UriComponentsBuilder;
 import java.io.IOException;
 
 @Service
+@RequiredArgsConstructor
 public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
 
     private final UserRepository userRepository;
     private final JwtUtils jwtUtils;
-    private final long refreshDuration;
+
+    @Value("${jwt.refreshable-duration}")
+    private long refreshDuration;
 
     @Value("${url.frontend}")
     private String frontend;
-
-    public OAuth2LoginSuccessHandler(UserRepository userRepository,
-                                     JwtUtils jwtUtils,
-                                     @Value("${jwt.refreshable-duration}") long refreshDuration) {
-        this.userRepository = userRepository;
-        this.jwtUtils = jwtUtils;
-        this.refreshDuration = refreshDuration;
-    }
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
@@ -50,6 +46,9 @@ public class OAuth2LoginSuccessHandler implements AuthenticationSuccessHandler {
         // Tạo accessToken & refreshToken
         String accessToken = jwtUtils.generateToken(existingUser);
         String refreshToken = jwtUtils.generateRefreshToken(existingUser);
+
+        existingUser.setRefreshToken(refreshToken);
+        var save = userRepository.save(existingUser);
 
         // Tạo cookie chứa refreshToken
         ResponseCookie refreshTokenCookie = jwtUtils.createRefreshTokenCookie(refreshToken, refreshDuration);

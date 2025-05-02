@@ -8,5 +8,5 @@ import jakarta.servlet.http.HttpServletRequest;
 public interface PaymentService {
     PaymentResponse createVNPayPayment(HttpServletRequest request);
 
-    WalletTransactionResponse createWalletTransaction(String vnp_TxnRef);
+    WalletTransactionResponse createWalletTransaction(long amount);
 }

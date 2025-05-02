@@ -37,18 +37,9 @@ public class PaymentServiceImpl implements PaymentService {
         long amount = Integer.parseInt(request.getParameter("amount")) * 100L;
         String bankCode = request.getParameter("bankCode");
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
-        WalletTransaction walletTransaction = walletTransactionRepository.save(
-                WalletTransaction.builder()
-                        .status(TransactionStatus.PENDING)
-                        .user(user).description("VNPay Transaction deposit")
-                        .transactionType(TransactionType.DEPOSIT)
-                        .amount(new BigDecimal(amount / 100L)
-                        ).build()
-        );
-
-        Map<String, String> vnpParamsMap = payConfig.getVNPayConfig(walletTransaction.getId(), amount/100L);
+        Map<String, String> vnpParamsMap = payConfig.getVNPayConfig(amount/100L);
         vnpParamsMap.put("vnp_Amount", String.valueOf(amount));
         if (bankCode != null && !bankCode.isEmpty()) {
             vnpParamsMap.put("vnp_BankCode", bankCode);
@@ -71,14 +62,21 @@ public class PaymentServiceImpl implements PaymentService {
 
 
     @Override
-    public WalletTransactionResponse createWalletTransaction(String vnp_TxnRef) {
+    public WalletTransactionResponse createWalletTransaction(long amount) {
+        String email = SecurityContextHolder.getContext().getAuthentication().getName();
+        var user = userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User"));
 
-        WalletTransaction walletTransaction = walletTransactionRepository.findById(vnp_TxnRef).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
-        walletTransaction.setStatus(TransactionStatus.COMPLETED);
-
-        User user = userRepository.findById(walletTransaction.getUser().getId()).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        user.setBalance(user.getBalance().add(walletTransaction.getAmount()));
+        user.setBalance(user.getBalance().add(BigDecimal.valueOf(amount)));
         userRepository.save(user);
+
+        WalletTransaction walletTransaction = walletTransactionRepository.save(
+                WalletTransaction.builder()
+                        .status(TransactionStatus.COMPLETED)
+                        .user(user).description("VNPay Transaction deposit")
+                        .transactionType(TransactionType.DEPOSIT)
+                        .amount(new BigDecimal(amount)
+                        ).build()
+        );
 
         walletTransactionRepository.save(walletTransaction);
 

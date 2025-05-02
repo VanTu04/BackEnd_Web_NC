@@ -133,7 +133,7 @@ public class AuthenticationServiceImpl implements AuthenticationService {
             throw new AppException(ErrorCode.MISS_TOKEN);
         }
         User user = jwtUtils.validToken(refreshToken);
-        if(!user.getRefreshToken().equals(refreshToken)) {
+        if(user.getRefreshToken() == null || !user.getRefreshToken().equals(refreshToken)) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
         user.setRefreshToken(null);

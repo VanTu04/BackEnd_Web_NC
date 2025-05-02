@@ -26,8 +26,8 @@ payment:
   vnPay:
     url: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
     tmnCode: WXBCTBAJ
-    secretKey: SECRET_KEY:OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO
-    returnUrl: RETURN_URL:http://localhost:8080/payment/vn-pay-callback
+    secretKey: OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO
+    returnUrl: http://localhost:3000/payment/vnpay-return
     version: 2.1.0
     command: pay
     orderType: other

@@ -6,10 +6,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransaction
 import com.vawndev.spring_boot_readnovel.Services.PaymentService;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -28,21 +25,11 @@ public class PaymentController {
                 .build();
     }
 
-    @GetMapping("/vn-pay-callback")
-    public ApiResponse<?> payCallbackHandler(@RequestParam Map<String, String> params) {
-        String status = params.get("vnp_ResponseCode");
-        if (status.equals("00")) {
-            return ApiResponse.<WalletTransactionResponse>builder()
-                    .message("ok")
-                    .result(paymentService.createWalletTransaction(params.get("vnp_TxnRef")))
-                    .build();
-        } else {
-            return ApiResponse.<PaymentResponse>builder()
-                    .code(Integer.parseInt(status))
-                    .message("failed")
-                    .build();
-        }
+    @PostMapping("/confirm/{amount}")
+    public ApiResponse<?> payCallbackHandler(@PathVariable long amount) {
+        return ApiResponse.<WalletTransactionResponse>builder()
+                .result(paymentService.createWalletTransaction(amount))
+                .message("failed")
+                .build();
     }
-
-  
 }

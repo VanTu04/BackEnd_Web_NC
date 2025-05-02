@@ -23,6 +23,7 @@ import org.springframework.security.oauth2.server.resource.authentication.JwtGra
 import org.springframework.security.oauth2.server.resource.web.access.BearerTokenAccessDeniedHandler;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
 import org.springframework.web.filter.CorsFilter;
 
@@ -42,6 +43,7 @@ public class SecurityConfig {
             "/auth/refresh",
             "/oauth2/authorization/google",
             "/auth/google/callback",
+            "/payment/vn-pay-callback/**",
             "auth/google",
             "/story/detail/**",
             "/story/author/**",
@@ -82,6 +84,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .cors(c -> c.configurationSource(corsFilter()))
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())
@@ -133,13 +136,12 @@ public class SecurityConfig {
     }
 
     @Bean
-    public CorsFilter corsFilter() {
+    public CorsConfigurationSource corsFilter() {
         CorsConfiguration corsConfiguration = new CorsConfiguration();
 
         // Thêm địa chỉ frontend cho phép
         corsConfiguration
-                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl, "http://192.168.*:3000",
-                        "http://172.20.*:3000"));
+                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true); // Quan trọng để gửi cookie và header Authorization
@@ -148,7 +150,7 @@ public class SecurityConfig {
         UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
         urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
 
-        return new CorsFilter(urlBasedCorsConfigurationSource);
+        return urlBasedCorsConfigurationSource;
     }
 
 }

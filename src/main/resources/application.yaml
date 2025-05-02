@@ -32,8 +32,8 @@ spring:
   mail:
     host: smtp.gmail.com
     port: 587
-    username: ${USERNAME_MAIL}
-    password: ${PASSWORD_MAIL}
+    username: ${USERNAME_MAIL:mlanhem28@gmail.com}
+    password: ${PASSWORD_MAIL:tdxdniynteyvvojr}
     properties:
       mail:
         smtp:
@@ -57,16 +57,16 @@ logging:
 
 payment:
   vnPay:
-    url: ${PAY_URL}
-    tmnCode: ${TMN_CODE}
-    secretKey: ${SECRET_KEY}
-    returnUrl: ${RETURN_URL}
-    version: ${VERSION}
-    command: ${COMMAND}
-    orderType: ${ORDER_TYPE}
+    url: ${PAY_URL:https://sandbox.vnpayment.vn/paymentv2/vpcpay.html}
+    tmnCode: ${TMN_CODE:WXBCTBAJ}
+    secretKey: ${SECRET_KEY:OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO}
+    returnUrl: ${RETURN_URL:http://localhost:3000/payment/vnpay-return}
+    version: ${VERSION:2.1.0}
+    command: ${COMMAND:pay}
+    orderType: ${ORDER_TYPE:other}
 
 cloudinary:
-  url: ${CLOUDINARY_URL}
+  url: ${CLOUDINARY_URL:cloudinary://569898377162755:X820dhqTuh4BR-6Fc9-tnts6RF0@dxpyuj1mm}
 
 encryption:
   aes:
