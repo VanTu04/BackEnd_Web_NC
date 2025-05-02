@@ -5,7 +5,6 @@ import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Utils.JwtUtils;
-import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
