@@ -25,9 +25,11 @@ public class AdminReportController {
     @GetMapping
     public ApiResponse<List<StatisticsResponse>> getStatistics(
             @RequestParam String filter,
-            @RequestParam(required = false) Integer selectedYear) {
+            @RequestParam Integer selectedYear) {
 
         List<StatisticsResponse> response = reportService.getStatistics(filter, selectedYear);
-        return ApiResponse.<List<StatisticsResponse>>builder().build();
+        return ApiResponse.<List<StatisticsResponse>>builder()
+                .result(response)
+                .build();
     }
 }

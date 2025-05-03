@@ -33,11 +33,6 @@ public class ReportServiceImpl implements ReportService {
 
         switch (filter.toLowerCase()) {
             case "month" -> {
-                // selectedYear phải được cung cấp khi filter là "month"
-                if (selectedYear == null) {
-                    throw new IllegalArgumentException("selectedYear is required for month filter");
-                }
-
                 // Lặp qua các tháng trong năm selectedYear
                 for (int month = 1; month <= 12; month++) {
                     Instant periodStart = LocalDate.of(selectedYear, month, 1)
@@ -50,11 +45,6 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             case "quarter" -> {
-                // selectedYear phải được cung cấp khi filter là "quarter"
-                if (selectedYear == null) {
-                    throw new IllegalArgumentException("selectedYear is required for quarter filter");
-                }
-
                 // Lặp qua các quý trong năm selectedYear
                 for (int quarter = 1; quarter <= 4; quarter++) {
                     int startMonth = (quarter - 1) * 3 + 1;
@@ -69,11 +59,6 @@ public class ReportServiceImpl implements ReportService {
                 }
             }
             case "year" -> {
-                // selectedYear phải được cung cấp khi filter là "year"
-                if (selectedYear == null) {
-                    throw new IllegalArgumentException("selectedYear is required for year filter");
-                }
-
                 // Lặp qua các năm từ selectedYear đến năm hiện tại
                 for (int year = selectedYear; year <= currentYear; year++) {
                     LocalDate yearStart = LocalDate.of(year, 1, 1);
