@@ -13,5 +13,6 @@ public class SubscriptionPlansResponse {
     private String id;
     private String type;
     private BigDecimal price;
+    private boolean isActive = false;
     private Long expired;
 }

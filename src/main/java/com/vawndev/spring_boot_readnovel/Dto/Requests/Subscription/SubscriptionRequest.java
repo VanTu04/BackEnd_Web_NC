@@ -7,6 +7,4 @@ import lombok.Data;
 public class SubscriptionRequest {
     @NotBlank(message = "id plan must not be blank")
     private String id_plan;
-
-
 }

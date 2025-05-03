@@ -1,6 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Specification;
 
 import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
+
 import jakarta.persistence.criteria.Join;
 import jakarta.persistence.criteria.JoinType;
 import jakarta.persistence.criteria.Predicate;
@@ -15,6 +17,10 @@ public class StorySpecification {
         return (root, query, criteriaBuilder) -> {
 
             List<Predicate> predicates = new ArrayList<>();
+
+            predicates.add(criteriaBuilder.equal(root.get("isAvailable"), IS_AVAILBLE.ACCEPTED));
+            predicates.add(criteriaBuilder.isTrue(root.get("isVisibility")));
+            predicates.add(criteriaBuilder.isFalse(root.get("isBanned")));
 
             Map<String, BiFunction<String, Predicate[], Predicate>> filterMap = Map.of(
                     "keyword",

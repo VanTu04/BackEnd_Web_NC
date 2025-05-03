@@ -34,16 +34,16 @@ import java.util.Set;
 @RequiredArgsConstructor
 public class SubscriptionServiceImpl implements SubscriptionService {
     private final TokenHelper tokenHelper;
-    private final SubscriptionRepository subscriptionRepository ;
+    private final SubscriptionRepository subscriptionRepository;
     private final SubscriptionPlansRepository subscriptionPlansRepository;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final WalletTransactionRepository transactionRepository;
     private final JwtUtils jwtUtils;
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
-
 
     @Scheduled(cron = "0 0 0 * * ?") // Auto run to check expired of account subscription at 12:00 PM every day
     @Transactional
@@ -66,13 +66,14 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         // ✅ Kiểm tra nếu user đã có subscription còn hạn
         if (subscription != null && subscription.getExpiredAt() != null
                 && subscription.getExpiredAt().isAfter(Instant.now())) {
-            throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION, TimeZoneConvert.convertUtcToUserTimezone(subscription.getExpiredAt()));
+            throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION,
+                    TimeZoneConvert.convertUtcToUserTimezone(subscription.getExpiredAt()));
         }
 
         // ✅ Kiểm tra số dư
         BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
         SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
-                .orElseThrow(() -> new AppException(ErrorCode.FAILED_PAYMENT,"Your balance is insufficient"));
+                .orElseThrow(() -> new AppException(ErrorCode.FAILED_PAYMENT, "Your balance is insufficient"));
 
         if (balance.compareTo(subscriptionPlan.getPrice()) < 0) {
             throw new AppException(ErrorCode.FAILED_PAYMENT);
@@ -98,41 +99,41 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscriptionRepository.save(subscription);
     }
 
-
     @Override
     @PreAuthorize("hasAuthority('AUTHOR') or hasAuthority('USER')")
-        public SubscriptionResponse getSubscription() {
-            User user = getAuthenticatedUser();
-            Subscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
+    public SubscriptionResponse getSubscription() {
+        User user = getAuthenticatedUser();
+        Subscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
 
-            if (subscription == null) {
-                return SubscriptionResponse.builder()
-                        .type(null)
-                        .expiredAt(null)
-                        .build();
-            }
-
+        if (subscription == null) {
             return SubscriptionResponse.builder()
-                    .type(subscription.getPlan().getType())
-                    .expiredAt(TimeZoneConvert.convertUtcToUserTimezone(subscription.getExpiredAt()))
-                    .expired(subscription.getPlan().getExpired())
+                    .type(null)
+                    .expiredAt(null)
                     .build();
+        }
+
+        return SubscriptionResponse.builder()
+                .type(subscription.getPlan().getType())
+                .expiredAt(TimeZoneConvert.convertUtcToUserTimezone(subscription.getExpiredAt()))
+                .expired(subscription.getPlan().getExpired())
+                .build();
     }
+
     @Override
     @Transactional
-    @PreAuthorize("hasRole('USER')")
-        public void upgradeRole() {
-        User user =getAuthenticatedUser();
+    @PreAuthorize("hasAuthority('USER')")
+    public void upgradeRole() {
+        User user = getAuthenticatedUser();
 
         user.getRoles().forEach(role -> {
             if (role.getName().equals("AUTHOR")) {
-                throw new AppException(ErrorCode.CONFLICT,"This role");
+                throw new AppException(ErrorCode.CONFLICT, "This role");
             }
         });
 
         Role newRole = roleRepository.getRoles().stream()
-                .filter(role->role.getName().equals("AUTHOR"))
-                .findFirst().orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND,"AUTHOR"));
+                .filter(role -> role.getName().equals("AUTHOR"))
+                .findFirst().orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "AUTHOR"));
 
         BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
 
@@ -144,7 +145,5 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         user.getRoles().add(newRole);
         userRepository.save(user);
     }
-
-
 
 }

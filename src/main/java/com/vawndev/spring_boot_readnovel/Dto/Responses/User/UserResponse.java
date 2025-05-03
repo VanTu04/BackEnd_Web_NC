@@ -1,12 +1,14 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.User;
 
 import java.time.LocalDate;
+import java.util.List;
 
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import lombok.experimental.SuperBuilder;
+
 @Data
 @AllArgsConstructor
 @NoArgsConstructor
@@ -18,4 +20,5 @@ public class UserResponse {
     private String email;
     private LocalDate dateOfBirth;
     private String imageUrl;
+    private List<String> role;
 }

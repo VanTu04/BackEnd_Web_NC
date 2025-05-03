@@ -53,24 +53,25 @@ public class UserServiceImpl implements UserService {
     private final ObjectMapper objectMapper;
     private final AesEncryptionUtil aesEncryptionUtil;
     private final TokenHelper tokenHelper;
-        @Override
-        @PreAuthorize("hasAuthority('ADMIN')")
-        public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
-            Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
-            Page<User> users=userRepository.findAll(pageable);
-            List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user->
-                    UserDetailReponse
-                            .builder()
-                            .email(user.getEmail())
-                            .fullName(user.getFullName())
-                            .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
-                            .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
-                            .deleteAt(user.getDeleteAt() != null  ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt()) : null )
-                            .build()
-                    ).collect(Collectors.toList());
-            return PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit()).data(userDetailReponseList).total(users.getTotalPages()).build();
 
-        }
+    @Override
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<User> users = userRepository.findAll(pageable);
+        List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user -> UserDetailReponse
+                .builder()
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
+                .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
+                .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt())
+                        : null)
+                .build()).collect(Collectors.toList());
+        return PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit())
+                .data(userDetailReponseList).total(users.getTotalPages()).build();
+
+    }
 
     @Override
     public UserResponse createUser(UserCreationRequest userRequest) {
@@ -78,12 +79,12 @@ public class UserServiceImpl implements UserService {
 
         user.setPassword(passwordEncoder.encode(userRequest.getPassword()));
 
-
         HashSet<Role> roles = new HashSet<>();
         roleRepository.findByName(PredefinedRole.CUSTOMER_ROLE).ifPresent(roles::add);
 
         user.setRoles(roles);
-        user.setImageUrl("https://res.cloudinary.com/dxpyuj1mm/image/upload/v1745306533/covers/ghblsj9e1exvmcozoewf.png");
+        user.setImageUrl(
+                "https://res.cloudinary.com/dxpyuj1mm/image/upload/v1745306533/covers/ghblsj9e1exvmcozoewf.png");
 
         try {
             user = userRepository.save(user);
@@ -97,7 +98,6 @@ public class UserServiceImpl implements UserService {
     private User findUserById(String id) {
         return userRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
-
 
     @Override
     public void deleteUser(String userId) {
@@ -141,7 +141,7 @@ public class UserServiceImpl implements UserService {
 
     @Override
     public String handlePreRegister(UserCreationRequest request) throws JsonProcessingException {
-        if(userRepository.findByEmail(request.getEmail()).isPresent()){
+        if (userRepository.findByEmail(request.getEmail()).isPresent()) {
             throw new AppException(ErrorCode.USER_EXISTED);
         }
         if (!request.isPasswordMatching()) {
@@ -195,6 +195,18 @@ public class UserServiceImpl implements UserService {
 
         // Trả về thông tin người dùng đã cập nhật
         return userMapper.toUserResponse(user);
+    }
+
+    @Override
+    public UserResponse getProfile() {
+        User user = tokenHelper.getUserO2Auth();
+        return UserResponse.builder()
+                .email(user.getEmail())
+                .fullName(user.getFullName())
+                .imageUrl(user.getImageUrl())
+                .dateOfBirth(user.getDateOfBirth())
+                .role(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                .build();
     }
 
 }

@@ -207,7 +207,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public PageResponse<StoriesResponse> getMyList(PageRequest req, boolean isVisibility) {
+    public PageResponse<StoriesResponse> getMyList(PageRequest req) {
         User user = getAuthenticatedUser();
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Story> story = storyRepository.findByAuthorId(user.getId(), pageable);
@@ -263,7 +263,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public PageResponse<StoriesResponse> getStoriesByAdmin(PageRequest req) {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Story> storyPage = storyRepository.findAll(pageable);
@@ -304,6 +304,8 @@ public class StoryServiceImpl implements StoryService {
                     .rate(0)
                     .views(0L)
                     .type(req.getType())
+                    .createdAt(Instant.now())
+                    .updatedAt(Instant.now())
                     .coverImage(CoverImage)
                     .price(BigDecimal.ZERO)
                     .title(req.getTitle())
@@ -350,7 +352,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void ModeratedByAdmin(ModeratedByAdmin req) {
         getAuthenticatedUser();
         Story story = storyRepository.findById(req.getStory_id())
@@ -380,7 +382,7 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('AUTHOR')")
+    @PreAuthorize("hasAuthority('ADMIN') or hasAuthority('AUTHOR')")
     public void deleteStory(StoryCondition req) {
         User author = getAuthenticatedUser();
         Story story;

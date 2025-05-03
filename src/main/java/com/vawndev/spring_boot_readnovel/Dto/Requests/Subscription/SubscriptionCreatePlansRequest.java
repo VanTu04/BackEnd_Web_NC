@@ -8,7 +8,7 @@ import lombok.Data;
 import java.math.BigDecimal;
 
 @Data
-public class SubscriptionCreatePlansRequest  {
+public class SubscriptionCreatePlansRequest {
     @NotNull(message = "Type cannot be null")
     @NotBlank(message = "Type cannot be blank")
     private String type;

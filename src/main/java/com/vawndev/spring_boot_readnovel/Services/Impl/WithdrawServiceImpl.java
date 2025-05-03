@@ -39,14 +39,16 @@ public class WithdrawServiceImpl implements WithdrawService {
     private final TokenHelper tokenHelper;
     private final WithdrawTransactionRepository withdrawTransactionRepository;
     private final UserRepository userRepository;
+
     private User getAuthenticatedUser() {
         return tokenHelper.getUserO2Auth();
     }
 
     @Override
-    public WithdrawResponse withdraw( WithdrawRequest withdrawRequest) {
+    public WithdrawResponse withdraw(WithdrawRequest withdrawRequest) {
 
-        User user = getAuthenticatedUser();;
+        User user = getAuthenticatedUser();
+        ;
         BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
 
         if (balance.compareTo(withdrawRequest.getAmountRequest()) < 0) {
@@ -91,11 +93,11 @@ public class WithdrawServiceImpl implements WithdrawService {
                 .build();
     }
 
-
     @Override
     @Transactional
-    public WithdrawResponse editWithdraw( String withdrawId, TransactionStatus status) {
-        User user = getAuthenticatedUser();;
+    public WithdrawResponse editWithdraw(String withdrawId, TransactionStatus status) {
+        User user = getAuthenticatedUser();
+        ;
 
         WithdrawTransaction withdrawTransaction = withdrawTransactionRepository
                 .findByIdAndUser(withdrawId, user)
@@ -139,12 +141,12 @@ public class WithdrawServiceImpl implements WithdrawService {
                 .build();
     }
 
-
     @Override
     @Transactional
-//    @PreAuthorize("hasRole('ADMIN')")
-    public WithdrawResponse approvedByAdmin( String withdrawId, TransactionStatus status) {
-        getAuthenticatedUser();;
+    // @PreAuthorize("hasAuthority('ADMIN')")
+    public WithdrawResponse approvedByAdmin(String withdrawId, TransactionStatus status) {
+        getAuthenticatedUser();
+        ;
 
         WithdrawTransaction withdrawTransaction = withdrawTransactionRepository
                 .findById(withdrawId)
@@ -176,30 +178,32 @@ public class WithdrawServiceImpl implements WithdrawService {
     }
 
     @Override
-    public PageResponse<WithdrawResponse> getWithdraws( TransactionStatus status,PageRequest req) {
-        User user = getAuthenticatedUser();;
-        Pageable pageable= PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        Page<WithdrawTransaction> withdrawTransaction = withdrawTransactionRepository.findAllByUserAndStatus(user, status ,pageable);
-        List <WithdrawResponse> withdrawResponses = withdrawTransaction.getContent().stream().map(withdraw->WithdrawResponse
-                .builder()
-                .status(withdraw.getStatus())
-                .createdAt(TimeZoneConvert.convertUtcToUserTimezone(withdraw.getCreatedAt()))
-                .type(withdraw.getTransactionType())
-                .AmountWithdrawn(withdraw.getAmountRequest())
-                .Bankname(withdraw.getBankName())
-                .type(withdraw.getTransactionType())
-                .content(withdraw.getDescription())
-                .RemainingAmount(withdraw.getAmount())
-                .CommissionAmount(withdraw.getConversionMoney() + " VND")
-                .build()
-        ).collect(Collectors.toList());
-        return  PageResponse.<WithdrawResponse>builder()
-                                .data(withdrawResponses)
-                                .total(withdrawTransaction.getTotalPages())
-                                .limit(withdrawTransaction.getSize())
-                                .page(withdrawTransaction.getNumber())
-                                .build();
-
+    public PageResponse<WithdrawResponse> getWithdraws(TransactionStatus status, PageRequest req) {
+        User user = getAuthenticatedUser();
+        ;
+        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
+        Page<WithdrawTransaction> withdrawTransaction = withdrawTransactionRepository.findAllByUserAndStatus(user,
+                status, pageable);
+        List<WithdrawResponse> withdrawResponses = withdrawTransaction.getContent().stream()
+                .map(withdraw -> WithdrawResponse
+                        .builder()
+                        .status(withdraw.getStatus())
+                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(withdraw.getCreatedAt()))
+                        .type(withdraw.getTransactionType())
+                        .AmountWithdrawn(withdraw.getAmountRequest())
+                        .Bankname(withdraw.getBankName())
+                        .type(withdraw.getTransactionType())
+                        .content(withdraw.getDescription())
+                        .RemainingAmount(withdraw.getAmount())
+                        .CommissionAmount(withdraw.getConversionMoney() + " VND")
+                        .build())
+                .collect(Collectors.toList());
+        return PageResponse.<WithdrawResponse>builder()
+                .data(withdrawResponses)
+                .total(withdrawTransaction.getTotalPages())
+                .limit(withdrawTransaction.getSize())
+                .page(withdrawTransaction.getNumber())
+                .build();
 
     }
 

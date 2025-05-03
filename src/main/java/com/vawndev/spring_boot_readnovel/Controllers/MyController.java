@@ -8,9 +8,12 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.My.ReadingHistoryResponse
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Services.HistoryReadingService;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionService;
+import com.vawndev.spring_boot_readnovel.Services.UserService;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
 
@@ -23,11 +26,11 @@ public class MyController {
     private final HistoryReadingService historyReadingService;
     private final StoryService storyService;
     private final SubscriptionService subscriptionService;
+    private final UserService userService;
 
     @GetMapping("/list")
-    public ApiResponse<PageResponse<StoriesResponse>> getList(@ModelAttribute PageRequest pageRequest,
-            @RequestParam(defaultValue = "true") boolean isVisibility) {
-        PageResponse<StoriesResponse> result = storyService.getMyList(pageRequest, isVisibility);
+    public ApiResponse<PageResponse<StoriesResponse>> getList(@ModelAttribute PageRequest pageRequest) {
+        PageResponse<StoriesResponse> result = storyService.getMyList(pageRequest);
         return ApiResponse.<PageResponse<StoriesResponse>>builder()
                 .result(result)
                 .message("Successfully")
@@ -78,6 +81,12 @@ public class MyController {
     public ApiResponse<SubscriptionResponse> getSubscriptions() {
         SubscriptionResponse response = subscriptionService.getSubscription();
         return ApiResponse.<SubscriptionResponse>builder().message("successfully").result(response).build();
+    }
+
+    @GetMapping("/profile")
+    public ApiResponse<UserResponse> getProfile() {
+        UserResponse response = userService.getProfile();
+        return ApiResponse.<UserResponse>builder().message("successfully").result(response).build();
     }
 
     // @PostMapping("/money/withdraw")

@@ -26,7 +26,7 @@ public interface StoryService {
 
     PageResponse<StoriesResponse> recommendStories(PageRequest req, String BearerToken);
 
-    PageResponse<StoriesResponse> getMyList(PageRequest req, boolean isVisibility);
+    PageResponse<StoriesResponse> getMyList(PageRequest req);
 
     List<StoriesResponse> getStoriesRank();
 

@@ -28,13 +28,16 @@ public class CategoryServiceImpl implements CategoryService {
     @Override
     public CategoriesResponse getCategories() {
         List<Category> categories = categoryRepository.findAll();
-        CategoriesResponse categoriesResponse = CategoriesResponse.builder().categories(categories.stream().map(category -> CategoryResponse
-                .builder()
-                .id(category.getId())
-                .name(category.getName())
-                .build()).collect(Collectors.toList())).build();
+        CategoriesResponse categoriesResponse = CategoriesResponse.builder()
+                .categories(categories.stream().map(category -> CategoryResponse
+                        .builder()
+                        .id(category.getId())
+                        .name(category.getName())
+                        .build()).collect(Collectors.toList()))
+                .build();
         return categoriesResponse;
     }
+
     @Override
     @PreAuthorize("hasAuthority('ADMIN')")
     public void addCategory(String name) {
@@ -46,11 +49,11 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(category);
     }
 
-
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void RemoveCategory(String id) {
-        Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
+        Category exstingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
 
@@ -59,11 +62,11 @@ public class CategoryServiceImpl implements CategoryService {
         categoryRepository.save(exstingCategory);
     }
 
-
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public void DeleteCategory(String id) {
-        Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
+        Category exstingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
             throw new AppException(ErrorCode.USER_NOT_EXISTED);
         }
@@ -71,17 +74,17 @@ public class CategoryServiceImpl implements CategoryService {
     }
 
     @Override
-    @PreAuthorize("hasRole('ADMIN')")
-    public void UpdateCategory(CategoryRequests req,String id) {
-        Category exstingCategory = categoryRepository.findById(id).orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
-        if (exstingCategory == null ) {
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public void UpdateCategory(CategoryRequests req, String id) {
+        Category exstingCategory = categoryRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
+        if (exstingCategory == null) {
             throw new AppException(ErrorCode.INVALID_DOB);
         }
-        if (req.getName() != null){
+        if (req.getName() != null) {
             exstingCategory.setName(req.getName());
             categoryRepository.save(exstingCategory);
         }
     }
-
 
 }

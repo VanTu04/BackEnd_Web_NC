@@ -15,18 +15,25 @@ import java.util.List;
 
 public interface UserService {
     PageResponse<UserDetailReponse> getAllUser(PageRequest req);
-    UserResponse createUser(UserCreationRequest userRequest);
-//    UserResponse getMyInfor();
 
+    UserResponse createUser(UserCreationRequest userRequest);
+    // UserResponse getMyInfor();
 
     UserResponse updateUser(UserUpdateRequest request);
+
     void deleteUser(String userId);
+
     List<UserResponse> getAllUsers();
+
     UserResponse getUser(String userId);
+
     User getUserByEmail(String email);
+
     void resetPassword(String email, String newPassword);
 
     String handlePreRegister(@Valid UserCreationRequest request) throws JsonProcessingException;
 
     UserResponse handleConfirmRegister(@Valid ConfirmOtpRequest confirmRequest) throws JsonProcessingException;
+
+    UserResponse getProfile();
 }
