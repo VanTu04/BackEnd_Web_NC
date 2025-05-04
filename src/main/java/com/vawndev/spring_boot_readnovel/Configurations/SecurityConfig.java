@@ -75,6 +75,9 @@ public class SecurityConfig {
     @Value("${url.admin-frontend}")
     private String adminFrontendUrl;
 
+    @Value("${url.app-frontend}")
+    private String appFrontendUrl;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder(10);
@@ -140,7 +143,7 @@ public class SecurityConfig {
 
         // Thêm địa chỉ frontend cho phép
         corsConfiguration
-                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl));
+                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl, appFrontendUrl));
         corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
         corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
         corsConfiguration.setAllowCredentials(true); // Quan trọng để gửi cookie và header Authorization
