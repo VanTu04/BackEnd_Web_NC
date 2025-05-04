@@ -22,5 +22,7 @@ public class ChaptersResponse {
 
     private String next;
 
-    private boolean isRead = false;
+    private String createdAt;
+
+    private boolean isRead;
 }

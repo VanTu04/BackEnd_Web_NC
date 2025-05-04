@@ -61,6 +61,8 @@ public class UserServiceImpl implements UserService {
         Page<User> users = userRepository.findAll(pageable);
         List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user -> UserDetailReponse
                 .builder()
+                .id(user.getId())
+                .dateOfBirth(user.getDateOfBirth())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
                 .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))

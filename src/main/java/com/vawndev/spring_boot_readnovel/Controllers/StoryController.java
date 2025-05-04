@@ -47,9 +47,8 @@ public class StoryController {
 
     @GetMapping("/detail/{id}")
     public ApiResponse<StoryDetailResponses> getStoryDetail(
-            @RequestHeader(value = "Authorization", required = false) String bearerToken,
             @PathVariable @NotBlank String id, @ModelAttribute PageRequest req) {
-        StoryDetailResponses result = storyService.getStoryById(bearerToken, id, req);
+        StoryDetailResponses result = storyService.getStoryById(id, req);
         return ApiResponse.<StoryDetailResponses>builder().result(result).build();
     }
 

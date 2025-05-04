@@ -17,6 +17,21 @@ public class TokenHelper {
     private final JwtUtils jwtUtils;
     private final UserRepository userRepository;
 
+    public String getUserEmail() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        if (authentication == null || !authentication.isAuthenticated()) {
+            return null;
+        }
+        String email = null;
+        if (authentication.getPrincipal() instanceof Jwt jwt) {
+            email = jwt.getClaim("sub");
+            return email;
+        }
+
+        return email;
+
+    }
+
     public String getTokenInfo(String bearerToken) {
         if (bearerToken == null || !bearerToken.startsWith("Bearer ")) {
             throw new AppException(ErrorCode.MISS_TOKEN);
@@ -37,7 +52,7 @@ public class TokenHelper {
             }
 
             return author;
-        }catch (Exception e) {
+        } catch (Exception e) {
             throw new AppException(ErrorCode.INVALID_TOKEN);
         }
     }
@@ -45,7 +60,8 @@ public class TokenHelper {
     public User getUserO2Auth() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
 
-        if (authentication == null || !authentication.isAuthenticated() || authentication.getPrincipal().equals("anonymousUser")) {
+        if (authentication == null || !authentication.isAuthenticated()
+                || authentication.getPrincipal().equals("anonymousUser")) {
             throw new AppException(ErrorCode.UNAUTHORIZED, "You do not have permission to access this resource");
         }
         String email = null;
@@ -60,6 +76,5 @@ public class TokenHelper {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
     }
-
 
 }

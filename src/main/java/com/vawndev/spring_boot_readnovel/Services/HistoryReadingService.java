@@ -12,10 +12,15 @@ import java.util.List;
 import java.util.Set;
 
 public interface HistoryReadingService {
-    PageResponse<ReadingHistoryResponse> getHistory( PageRequest req);
-    Set<String> getChaptersIdHistory(PageRequest req, String storyId, User currentUser);
+    PageResponse<ReadingHistoryResponse> getHistory(PageRequest req);
+
+    Set<String> getChaptersIdHistory(String storyId, User currentUser);
+
     void saveHistory(String chapter_id);
+
     void deleteHistory(String story_id);
+
     void deleteAllHistory();
+
     ChaptersResponse getLatestChapter(String story_id);
 }

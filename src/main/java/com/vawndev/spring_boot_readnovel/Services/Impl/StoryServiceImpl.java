@@ -60,6 +60,7 @@ public class StoryServiceImpl implements StoryService {
     private final CloundService cloundService;
     private final ChapterService chapterService;
     private final HistoryReadingService historyReadingService;
+
     private final CategoryRepository categoryRepository;
     private final TokenHelper tokenHelper;
     private final JwtUtils jwtUtils;
@@ -75,10 +76,6 @@ public class StoryServiceImpl implements StoryService {
                 .map(FeatureDescriptor::getName)
                 .filter(propertyName -> wrappedSource.getPropertyValue(propertyName) == null)
                 .toArray(String[]::new);
-    }
-
-    private User author(String email) {
-        return userRepository.findByEmail(email).orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
     }
 
     private PageResponse<StoriesResponse> fetchStories(PageRequest req, List<STORY_STATUS> status) {
@@ -401,17 +398,19 @@ public class StoryServiceImpl implements StoryService {
     }
 
     @Override
-    public StoryDetailResponses getStoryById(String bearerToken, String id, PageRequest req) {
+    public StoryDetailResponses getStoryById(String id, PageRequest req) {
 
         Story story = storyRepository.findByAcceptId(id)
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story"));
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<Chapter> chapters = chapterRepository.findAllByStoryId(story.getId(), pageable);
-
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         User user = null;
-        if (bearerToken != null && !bearerToken.isEmpty()) {
+        if (authentication != null) {
+            String email = tokenHelper.getUserEmail();
             try {
-                user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+                user = userRepository.findByEmail(email)
+                        .orElseThrow(() -> new AppException(ErrorCode.USER_EXISTED));
             } catch (AppException e) {
                 user = null;
             }
@@ -421,15 +420,23 @@ public class StoryServiceImpl implements StoryService {
 
         StoryResponse storyRes = storyMapper.toStoryResponse(story);
 
-        Set<String> chapterIds = new HashSet<>(historyReadingService.getChaptersIdHistory(req, id, finalUser));
+        List<String> chapterIds = finalUser != null
+                ? readingHistoryRepository.findReadingChapters(story.getId(), finalUser.getId())
+                        .stream()
+                        .map(Chapter::getId)
+                        .collect(Collectors.toList())
+                : new ArrayList<>();
         List<ChapterResponsePurchase> chaptersRes = chapters.getContent().stream()
-                .map(chapter -> ChapterResponseDetail.builder()
-                        .content(chapter.getContent())
-                        .id(chapter.getId())
-                        .price(isAuthor ? BigDecimal.ZERO : UserHelper.getPriceByUser(chapter.getPrice(), finalUser))
-                        .isRead(chapterIds.contains(chapter.getId()))
-                        .title(chapter.getTitle())
-                        .views(chapter.getViews())
+                .map(ch -> ChapterResponseDetail.builder()
+                        .content(ch.getContent())
+                        .id(ch.getId())
+                        .price(isAuthor ? BigDecimal.ZERO
+                                : finalUser != null && finalUser.getSubscription() != null ? ch.getPrice()
+                                        : BigDecimal.ZERO)
+                        .isRead(chapterIds.contains(ch.getId()))
+                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(ch.getCreatedAt()))
+                        .title(ch.getTitle())
+                        .views(ch.getViews())
                         .transactionType(TransactionType.DEPOSIT)
                         .build())
                 .collect(Collectors.toList());
@@ -442,6 +449,7 @@ public class StoryServiceImpl implements StoryService {
         return StoryDetailResponses.builder()
                 .chapter(chaptersRes)
                 .author(storyRes.getAuthor())
+                .continueReading(!chapterIds.isEmpty() ? chapterIds.get(0) : null)
                 .price(bigPrice)
                 .title(storyRes.getTitle())
                 .createdAt(storyRes.getCreatedAt())
@@ -472,6 +480,7 @@ public class StoryServiceImpl implements StoryService {
         List<ChapterResponsePurchase> chaptersRes = chapters.getContent().stream()
                 .map(chapter -> ChapterResponseDetail.builder()
                         .content(chapter.getContent())
+                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(chapter.getCreatedAt()))
                         .id(chapter.getId())
                         .price(isAuthor ? BigDecimal.ZERO : chapter.getPrice())
                         .isRead(false)

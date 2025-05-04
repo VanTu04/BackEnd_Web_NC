@@ -26,11 +26,14 @@ import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.math.BigDecimal;
+import java.net.Authenticator;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
@@ -50,6 +53,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final HistoryReadingService readingService;
     private final JwtUtils jwtUtils;
     private final ReadingHistoryRepository readingHistoryRepository;
+    private final UserRepository userRepository;
 
     public static String convertToImagePath(String cloudinaryUrl) {
         String[] parts = cloudinaryUrl.split("/");
@@ -206,13 +210,15 @@ public class ChapterServiceImpl implements ChapterService {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
 
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+
         User user = null;
 
-        if (bearerToken != null && !bearerToken.isEmpty()) {
-            user = jwtUtils.validToken(tokenHelper.getTokenInfo(bearerToken));
+        if (authentication != null) {
+            user = userRepository.findByEmail(authentication.getName())
+                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "User not found"));
         }
         User userfinal = user;
-
         boolean isAuthor = userfinal != null && userfinal.getId().equals(chapter.getStory().getAuthor().getId());
         if (chapter.getPrice().compareTo(BigDecimal.ZERO) > 0) {
             if (!isAuthor) {

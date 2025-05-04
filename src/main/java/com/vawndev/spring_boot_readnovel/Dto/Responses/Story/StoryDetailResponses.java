@@ -13,4 +13,5 @@ import java.util.List;
 @SuperBuilder
 public class StoryDetailResponses extends StoryResponse {
     private List<ChapterResponsePurchase> chapter;
+    private String continueReading;
 }

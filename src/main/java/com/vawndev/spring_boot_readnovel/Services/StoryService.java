@@ -46,7 +46,7 @@ public interface StoryService {
 
     void deleteStory(StoryCondition req);
 
-    StoryDetailResponses getStoryById(String bearerToken, String id, PageRequest req);
+    StoryDetailResponses getStoryById(String id, PageRequest req);
 
     StoryDetailResponses getMyStory(String id, PageRequest req);
 

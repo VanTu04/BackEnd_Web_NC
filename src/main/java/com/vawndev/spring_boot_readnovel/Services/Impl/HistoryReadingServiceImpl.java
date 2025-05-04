@@ -53,15 +53,14 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
                 .stream()
                 .collect(Collectors.groupingBy(
                         history -> history.getChapter().getStory().getId(),
-                        Collectors.mapping(history -> history.getChapter().getId(), Collectors.toSet())
-                ));
+                        Collectors.mapping(history -> history.getChapter().getId(), Collectors.toSet())));
 
         List<ReadingHistoryResponse> result = new ArrayList<>();
         storyChapterMap.forEach((storyId, chapterIds) -> {
             // Tìm story từ storyId
-            Story story = storyRepository.findById(storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
+            Story story = storyRepository.findById(storyId).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
             if (story != null) {
-                StoriesResponse storyResponse =StoriesResponse
+                StoriesResponse storyResponse = StoriesResponse
                         .builder()
                         .id(story.getId())
                         .title(story.getTitle())
@@ -70,22 +69,22 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
                         .build();
 
                 List<ChaptersResponse> chapterResponses = chapterIds.stream().map(
-                        chapterId->{
-                            Chapter chapter = chapterRepository.findById(chapterId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
+                        chapterId -> {
+                            Chapter chapter = chapterRepository.findById(chapterId)
+                                    .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
                             return ChaptersResponse
                                     .builder()
                                     .id(chapter.getId())
                                     .title(chapter.getTitle())
                                     .content(chapter.getContent())
                                     .build();
-                        }
-                ).collect(Collectors.toList());
+                        }).collect(Collectors.toList());
 
                 result.add(new ReadingHistoryResponse(storyResponse, chapterResponses));
             }
         });
 
-        return  PageResponse.<ReadingHistoryResponse>builder()
+        return PageResponse.<ReadingHistoryResponse>builder()
                 .limit(req.getLimit())
                 .page(req.getPage())
                 .data(result)
@@ -94,31 +93,31 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     }
 
     @Override
-    public Set<String> getChaptersIdHistory(PageRequest req, String storyId,User currentUser) {
+    public Set<String> getChaptersIdHistory(String storyId, User currentUser) {
         if (currentUser == null) {
             return Collections.emptySet();
         }
-        Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
-        storyRepository.findByAcceptId(storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story history not found"));
-        Page<Chapter> chapter = readingHistoryRepository
-                .findReadingChapters(storyId, currentUser.getId(),pageable);
+        storyRepository.findByAcceptId(storyId)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story history not found"));
+        List<Chapter> chapter = readingHistoryRepository
+                .findReadingChapters(storyId, currentUser.getId());
 
-        Set<String> chapterIds = chapter.getContent().stream().map(Chapter::getId).collect(Collectors.toSet());
+        Set<String> chapterIds = chapter.stream().map(Chapter::getId).collect(Collectors.toSet());
         return chapterIds;
 
     }
 
     @Override
-    public void saveHistory( String chapter_id) {
+    public void saveHistory(String chapter_id) {
         User user = getAuthenticatedUser();
-        Chapter chapter=chapterRepository.findById(chapter_id).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
-        ReadingHistory readingHistory=readingHistoryRepository.findByUserAndChapter(user, chapter);
+        Chapter chapter = chapterRepository.findById(chapter_id)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        ReadingHistory readingHistory = readingHistoryRepository.findByUserAndChapter(user, chapter);
         if (Objects.nonNull(readingHistory)) {
             return;
         }
         chapter.getStory().setViews(chapter.getStory().getViews() + 1);
         chapter.setViews(chapter.getViews() + 1);
-        chapter.setCreatedAt(Instant.now());
         readingHistory = ReadingHistory
                 .builder()
                 .chapter(chapter)
@@ -128,11 +127,11 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
     }
 
     @Override
-    public void deleteHistory( String story_id) {
+    public void deleteHistory(String story_id) {
         User user = getAuthenticatedUser();
 
-        Story story=storyRepository.findById(story_id).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND));
-        ReadingHistory readingHistory=readingHistoryRepository.findByUserAndStory(user,story);
+        Story story = storyRepository.findById(story_id).orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND));
+        ReadingHistory readingHistory = readingHistoryRepository.findByUserAndStory(user, story);
         readingHistoryRepository.delete(readingHistory);
     }
 
@@ -144,8 +143,9 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
 
     public ChaptersResponse getLatestChapter(String storyId) {
         User user = getAuthenticatedUser();
-        List<STORY_STATUS> statusList=List.of(STORY_STATUS.COMPLETED,STORY_STATUS.UPDATING);
-        storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED,statusList,storyId).orElseThrow(()-> new AppException(ErrorCode.NOT_FOUND,"Story"));
+        List<STORY_STATUS> statusList = List.of(STORY_STATUS.COMPLETED, STORY_STATUS.UPDATING);
+        storyRepository.findAcceptedId(IS_AVAILBLE.ACCEPTED, statusList, storyId)
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story"));
         Chapter chapter = readingHistoryRepository
                 .findLatestChapter(storyId, user.getId())
                 .orElseGet(() -> readingHistoryRepository
@@ -159,6 +159,5 @@ public class HistoryReadingServiceImpl implements HistoryReadingService {
                 .id(chapter.getId())
                 .build();
     }
-
 
 }

@@ -53,7 +53,6 @@ public class SecurityConfig {
             "/oauth2/authorization/google",
             "/auth/google/callback",
             "auth/google",
-            "/story/detail/**",
             "/story/author/**",
             "/story",
             "/homepage",
@@ -84,6 +83,7 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
+                .cors(Customizer.withDefaults())
                 .authorizeHttpRequests(request -> request
                         .requestMatchers(PUBLIC_ENDPOINTS).permitAll()
                         .anyRequest().authenticated())

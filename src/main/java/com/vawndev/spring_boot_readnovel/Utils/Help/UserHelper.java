@@ -8,9 +8,7 @@ import java.math.BigDecimal;
 @UtilityClass
 public class UserHelper {
     public BigDecimal getPriceByUser(BigDecimal price, User user) {
-        if (user != null && user.getSubscription() != null
-                && user.getSubscription().getPlan() != null
-                && user.getSubscription().getPlan().getType() != null) {
+        if (user != null && user.getSubscription() != null) {
             return BigDecimal.ZERO;
         }
         return price != null ? price : BigDecimal.ZERO;
