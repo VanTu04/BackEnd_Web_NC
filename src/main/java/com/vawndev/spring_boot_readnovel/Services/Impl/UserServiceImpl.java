@@ -61,6 +61,7 @@ public class UserServiceImpl implements UserService {
             List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user->
                     UserDetailReponse
                             .builder()
+                            .id(user.getId())
                             .email(user.getEmail())
                             .fullName(user.getFullName())
                             .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
