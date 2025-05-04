@@ -6,6 +6,8 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Repository
@@ -14,8 +16,5 @@ public interface UserRepository extends JpaRepository<User, String> {
     Optional<User> findByEmail(String email);
     Optional<User> existsUserByEmail(String email);
 
-
-    // đếm số lượng user đăng kí mới mới theo role trong tháng
-    @Query("select count(u) from User u where exists (select 1 from u.roles r where r.name = :role) and month(u.createdAt) = :month and year(u.createdAt) = :year")
-    Long CountNewUsersByRole(@Param("role") String role, @Param("month") int month, @Param("year") int year);
+    Long countByCreatedAtBetween(Instant start, Instant end);
 }

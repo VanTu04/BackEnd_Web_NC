@@ -11,6 +11,7 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
@@ -20,8 +21,6 @@ import java.util.*;
 @ControllerAdvice
 @Slf4j
 public class GlobalExceptionHandler {
-
-    private static final String MIN_ATTRIBUTE = "min";
 
     @ExceptionHandler(value = Exception.class)
     ResponseEntity<ApiResponse> handlingRuntimeException(Exception exception) {
@@ -75,8 +74,31 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(value = org.springframework.security.access.AccessDeniedException.class)
     ResponseEntity<ApiResponse> handlingAccessDeniedException(AccessDeniedException exception) {
-        ErrorCode errorCode = ErrorCode.UNAUTHORIZED;
+        ErrorCode errorCode = ErrorCode.INVALID;
 
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(exception.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(value = MissingServletRequestParameterException.class)
+    ResponseEntity<ApiResponse> handlingMissingFormat(MissingServletRequestParameterException exception) {
+        ErrorCode errorCode = ErrorCode.INVALID;
+
+        return ResponseEntity.status(errorCode.getStatusCode())
+                .body(ApiResponse.builder()
+                        .code(errorCode.getCode())
+                        .message(exception.getMessage())
+                        .build());
+    }
+
+    @ExceptionHandler(value = IllegalArgumentException.class)
+    ResponseEntity<ApiResponse> handlingIllegalArgument(IllegalArgumentException exception) {
+        ErrorCode errorCode = ErrorCode.INVALID;
+
+        System.out.println(exception.getMessage());
         return ResponseEntity.status(errorCode.getStatusCode())
                 .body(ApiResponse.builder()
                         .code(errorCode.getCode())
