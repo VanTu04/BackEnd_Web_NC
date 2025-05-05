@@ -83,6 +83,7 @@ public class CategoryServiceImpl implements CategoryService {
         }
         if (req.getName() != null) {
             exstingCategory.setName(req.getName());
+            exstingCategory.setUpdatedAt(Instant.now());
             categoryRepository.save(exstingCategory);
         }
     }
