@@ -12,6 +12,6 @@ import lombok.*;
 public class CategoryRequests {
     @NotBlank(message = "id category must be not blank")
     private String id;
-    @NotBlank(message = "id category must be not blank")
+    @NotBlank(message = "name category must be not blank")
     private String name;
 }

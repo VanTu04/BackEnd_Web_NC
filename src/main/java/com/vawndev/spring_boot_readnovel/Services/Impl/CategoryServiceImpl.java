@@ -12,6 +12,7 @@ import com.vawndev.spring_boot_readnovel.Services.CategoryService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import com.vawndev.spring_boot_readnovel.Utils.TimeZoneConvert;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
@@ -29,10 +30,12 @@ public class CategoryServiceImpl implements CategoryService {
     public CategoriesResponse getCategories() {
         List<Category> categories = categoryRepository.findAll();
         CategoriesResponse categoriesResponse = CategoriesResponse.builder()
-                .categories(categories.stream().map(category -> CategoryResponse
+                .data(categories.stream().map(category -> CategoryResponse
                         .builder()
                         .id(category.getId())
                         .name(category.getName())
+                        .createdAt(category.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(category.getCreatedAt()) : null)
+                        .updatedAt(category.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(category.getUpdatedAt()) : null)
                         .build()).collect(Collectors.toList()))
                 .build();
         return categoriesResponse;
