@@ -53,6 +53,8 @@ public class SecurityConfig {
             "/search/**",
             "/category",
             "/search",
+            "/users/pre-register",
+            "/users/confirm-register",
             "/users/forgot-password/request-otp",
             "/users/forgot-password/reset",
             "/users/forgot-password/validate",

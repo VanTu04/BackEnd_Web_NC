@@ -308,7 +308,8 @@ public class StoryServiceImpl implements StoryService {
                     .price(BigDecimal.ZERO)
                     .title(req.getTitle())
                     .build();
-            storyRepository.save(story);
+            Story a = storyRepository.save(story);
+            System.out.println(a);
         } catch (Exception e) {
             // throw new AppException(ErrorCode.NOT_FOUND, "will be not be large than 2MB
             // and only jpg,png,jpeg ");
