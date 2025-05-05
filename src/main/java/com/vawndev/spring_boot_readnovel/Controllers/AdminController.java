@@ -34,33 +34,34 @@ public class AdminController {
     private final UserService userService;
     private final SubscriptionPlansService subscriptionPlansService;
     private final WithdrawService withdrawService;
+
     // =================== CATEGORY MANAGEMENT ===================
     @GetMapping("/category")
-    public ApiResponse<CategoriesResponse> getCategories(){
+    public ApiResponse<CategoriesResponse> getCategories() {
         CategoriesResponse res = categoryService.getCategories();
         return ApiResponse.<CategoriesResponse>builder().result(res).message("Successfully!").build();
     }
 
     @PostMapping("/category/add")
-    public ApiResponse<String> addCategory(@RequestBody @NotBlank String name){
+    public ApiResponse<String> addCategory(@RequestBody @NotBlank String name) {
         categoryService.addCategory(JsonHelper.getValueFromJson(name, "name"));
         return ApiResponse.<String>builder().result("Successfully!").build();
     }
 
     @PutMapping("/category/update")
-    public ApiResponse<String> updateCategory(@RequestBody @Valid CategoryRequests req, @RequestParam @NotBlank String id){
-        categoryService.UpdateCategory(req, id);
+    public ApiResponse<String> updateCategory(@RequestBody @Valid CategoryRequests req) {
+        categoryService.UpdateCategory(req);
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 
     @PostMapping("/category/remove")
-    public ApiResponse<String> removeCategory(@RequestParam @NotBlank String id){
+    public ApiResponse<String> removeCategory(@RequestParam @NotBlank String id) {
         categoryService.RemoveCategory(id);
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 
     @PostMapping("/category/delete")
-    public ApiResponse<String> deleteCategory(@RequestParam @NotBlank String id){
+    public ApiResponse<String> deleteCategory(@RequestParam @NotBlank String id) {
         categoryService.DeleteCategory(id);
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
@@ -74,7 +75,7 @@ public class AdminController {
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
-    public ApiResponse<PageResponse<UserDetailReponse>> getUser(@ModelAttribute PageRequest req){
+    public ApiResponse<PageResponse<UserDetailReponse>> getUser(@ModelAttribute PageRequest req) {
 
         PageResponse<UserDetailReponse> users = userService.getAllUser(req);
         return ApiResponse.<PageResponse<UserDetailReponse>>builder().result(users).build();
@@ -82,40 +83,46 @@ public class AdminController {
 
     // =================== SUBSCRIPTION PLANS MANAGEMENT ===================
     @GetMapping("/subscription")
-    public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlans(){
+    public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlans() {
         List<SubscriptionPlansResponse> plans = subscriptionPlansService.getAllSubscriptionPlans();
         return ApiResponse.<List<SubscriptionPlansResponse>>builder().result(plans).message("Successfully!").build();
     }
 
     @PostMapping("/subscription/add")
-    public ApiResponse<String> createSubscriptionPlan(@RequestBody @Valid SubscriptionCreatePlansRequest req){
+    public ApiResponse<String> createSubscriptionPlan(@RequestBody @Valid SubscriptionCreatePlansRequest req) {
         subscriptionPlansService.createSubscriptionPlan(req);
         return ApiResponse.<String>builder().result("Subscription plan created successfully!").build();
     }
 
     @PatchMapping("/subscription/update")
-    public ApiResponse<String> updateSubscriptionPlan(@RequestBody @Valid SubscriptionPlansRequest req,@RequestParam @NotBlank String id_plan){
-        subscriptionPlansService.updateSubscriptionPlan(req,id_plan);
+    public ApiResponse<String> updateSubscriptionPlan(@RequestBody @Valid SubscriptionPlansRequest req,
+            @RequestParam @NotBlank String id_plan) {
+        subscriptionPlansService.updateSubscriptionPlan(req, id_plan);
         return ApiResponse.<String>builder().result("Subscription plan updated successfully!").build();
     }
 
     @PutMapping("/subscription/remove")
-    public ApiResponse<String> removeSubscriptionPlan(@RequestParam @NotBlank String id_plan){
+    public ApiResponse<String> removeSubscriptionPlan(@RequestParam @NotBlank String id_plan) {
         subscriptionPlansService.removeSubscriptionPlan(id_plan);
         return ApiResponse.<String>builder().result("Subscription plan removed successfully!").build();
     }
+
     @PutMapping("/subscription/edit")
-    public ApiResponse<String> editSubscriptionPlan(@RequestBody @Valid ConditionRequest req,@RequestParam @NotBlank String id_plan){
-        subscriptionPlansService.editSubscriptionPlan(req,id_plan);
+    public ApiResponse<String> editSubscriptionPlan(@RequestBody @Valid ConditionRequest req,
+            @RequestParam @NotBlank String id_plan) {
+        subscriptionPlansService.editSubscriptionPlan(req, id_plan);
         return ApiResponse.<String>builder().result("Subscription plan removed successfully!").build();
     }
+
     @GetMapping("/subscription/trash")
-    public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlansTrash(){
-        List<SubscriptionPlansResponse> subscriptionPlansResponses= subscriptionPlansService.getAllSubscriptionPlansTrash();
+    public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlansTrash() {
+        List<SubscriptionPlansResponse> subscriptionPlansResponses = subscriptionPlansService
+                .getAllSubscriptionPlansTrash();
         return ApiResponse.<List<SubscriptionPlansResponse>>builder().result(subscriptionPlansResponses).build();
     }
+
     @DeleteMapping("/subscription/delete")
-    public ApiResponse<String> deleteSubscriptionPlan(@RequestParam @NotBlank String id_plan){
+    public ApiResponse<String> deleteSubscriptionPlan(@RequestParam @NotBlank String id_plan) {
         subscriptionPlansService.deleteSubscriptionPlan(id_plan);
         return ApiResponse.<String>builder().result("Subscription plan deleted successfully!").build();
     }
@@ -126,13 +133,11 @@ public class AdminController {
             @RequestHeader("Authorization") String bearerToken,
             @PathVariable("id") String withdrawId,
             @RequestParam TransactionStatus status) {
-        WithdrawResponse response = withdrawService.approvedByAdmin( withdrawId, status);
-        return ApiResponse.<WithdrawResponse>
-                builder()
+        WithdrawResponse response = withdrawService.approvedByAdmin(withdrawId, status);
+        return ApiResponse.<WithdrawResponse>builder()
                 .result(response)
                 .message("Successfully!")
                 .build();
     }
-
 
 }

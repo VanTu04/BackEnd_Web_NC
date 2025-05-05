@@ -78,14 +78,15 @@ public class CategoryServiceImpl implements CategoryService {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN')")
-    public void UpdateCategory(CategoryRequests req, String id) {
-        Category exstingCategory = categoryRepository.findById(id)
+    public void UpdateCategory(CategoryRequests req) {
+        Category exstingCategory = categoryRepository.findById(req.getId())
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CATE));
         if (exstingCategory == null) {
             throw new AppException(ErrorCode.INVALID_DOB);
         }
         if (req.getName() != null) {
             exstingCategory.setName(req.getName());
+            exstingCategory.setUpdatedAt(Instant.now());
             categoryRepository.save(exstingCategory);
         }
     }

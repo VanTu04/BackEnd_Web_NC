@@ -250,7 +250,7 @@ public class StoryServiceImpl implements StoryService {
         List<STORY_STATUS> status = List.of(STORY_STATUS.COMPLETED, STORY_STATUS.UPDATING);
         Pageable pageable = PaginationUtil.createPageable(0, 9);
         try {
-            List<Story> stories = storyRepository.findTopStories(IS_AVAILBLE.ACCEPTED, status);
+            List<Story> stories = storyRepository.findTopStories(IS_AVAILBLE.ACCEPTED, status, pageable);
             List<StoriesResponse> storyRepositories = stories.stream()
                     .map(story -> storyMapper.toStoriesResponse(story)).collect(Collectors.toList());
             return storyRepositories;

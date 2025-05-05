@@ -208,6 +208,7 @@ public class UserServiceImpl implements UserService {
                 .imageUrl(user.getImageUrl())
                 .dateOfBirth(user.getDateOfBirth())
                 .role(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
+                .balance(user.getBalance())
                 .build();
     }
 

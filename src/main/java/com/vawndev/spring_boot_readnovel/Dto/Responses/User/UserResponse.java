@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.User;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -21,4 +22,5 @@ public class UserResponse {
     private LocalDate dateOfBirth;
     private String imageUrl;
     private List<String> role;
+    private BigDecimal balance;
 }
