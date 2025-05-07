@@ -8,6 +8,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionC
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionPlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
@@ -66,8 +67,15 @@ public class AdminController {
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 
-    // =================== STORY MODERATION ===================
-    @PostMapping("/moderated")
+    // =================== STORY MANAGEMENT ===================
+    @GetMapping("/story")
+    public ApiResponse<PageResponse<StoriesResponse>> getStory(
+            @ModelAttribute PageRequest req) {
+        PageResponse<StoriesResponse> result = storyService.getStoriesByAdmin(req);
+        return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
+    }
+
+    @PostMapping("/story/moderated")
     public ApiResponse<String> ModeratedByAdmin(@RequestBody @Valid ModeratedByAdmin req) {
         storyService.ModeratedByAdmin(req);
         return ApiResponse.<String>builder().result("Success!").build();
