@@ -13,5 +13,5 @@ import java.util.List;
 @Builder
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class CategoriesResponse {
-    private List<CategoryResponse> categories;
+    private List<CategoryResponse> data ;
 }

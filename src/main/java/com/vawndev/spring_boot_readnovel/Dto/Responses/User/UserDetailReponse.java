@@ -22,4 +22,8 @@ public class UserDetailReponse extends UserResponse{
     private String updatedAt ;
 
     private String deleteAt = null;
+
+    private boolean isActive;
+    private boolean isRequest;
+
 }

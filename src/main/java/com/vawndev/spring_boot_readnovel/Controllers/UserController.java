@@ -53,7 +53,6 @@ public class UserController {
                 .build();
     }
 
-
     @PostMapping("/upgrade")
     public ApiResponse<UserResponse> upgradeAccount(@RequestBody @Valid UserCreationRequest userCreationRequest) {
         return ApiResponse.<UserResponse>builder().result(userService.createUser(userCreationRequest)).build();
