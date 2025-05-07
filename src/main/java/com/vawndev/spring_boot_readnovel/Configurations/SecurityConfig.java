@@ -34,32 +34,32 @@ import java.util.List;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-        private final String[] PUBLIC_ENDPOINTS = {
-                "/users",
-                "/auth/token",
-                "/auth/introspect",
-                "/auth/logout",
-                "/auth/refresh",
-                "/oauth2/authorization/google",
-                "/auth/google/callback",
-                "/payment/vn-pay-callback/**",
-                "auth/google",
-                "/story/detail/**",
-                "/story/author/**",
-                "/story",
-                "/homepage",
-                "/chapter/*",
-                "/chapter/*/proxy",
-                "/search/**",
-                "/category",
-                "/search",
-                "/users/pre-register",
-                "/users/confirm-register",
-                "/users/forgot-password/request-otp",
-                "/users/forgot-password/reset",
-                "/users/forgot-password/validate",
-                "comment/**",
-        };
+    private final String[] PUBLIC_ENDPOINTS = {
+            "/users",
+            "/auth/token",
+            "/auth/introspect",
+            "/auth/logout",
+            "/auth/refresh",
+            "/oauth2/authorization/google",
+            "/auth/google/callback",
+            "/payment/vn-pay-callback/**",
+            "auth/google",
+            "/story/detail/**",
+            "/story/author/**",
+            "/story",
+            "/homepage",
+            "/chapter/*",
+            "/chapter/*/proxy",
+            "/search/**",
+            "/category",
+            "/search",
+            "/users/pre-register",
+            "/users/confirm-register",
+            "/users/forgot-password/request-otp",
+            "/users/forgot-password/reset",
+            "/users/forgot-password/validate",
+            "comment/**",
+    };
 
         private final CustomOAuth2UserService customOAuth2UserService;
 
@@ -77,10 +77,13 @@ public class SecurityConfig {
         @Value("${url.admin-frontend}")
         private String adminFrontendUrl;
 
-        @Bean
-        public PasswordEncoder passwordEncoder() {
-                return new BCryptPasswordEncoder(10);
-        }
+    @Value("${url.app-frontend}")
+    private String appFrontendUrl;
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder(10);
+    }
 
         @Bean
         public SecurityFilterChain securityFilterChain(HttpSecurity httpSecurity) throws Exception {
@@ -143,14 +146,13 @@ public class SecurityConfig {
         public CorsConfigurationSource corsFilter() {
                 CorsConfiguration corsConfiguration = new CorsConfiguration();
 
-                // Thêm địa chỉ frontend cho phép
-                corsConfiguration
-                                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl));
-                corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
-                corsConfiguration.setAllowedHeaders(
-                                List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
-                corsConfiguration.setAllowCredentials(true); // Quan trọng để gửi cookie và header Authorization
-                corsConfiguration.setExposedHeaders(List.of("Authorization", "Set-Cookie", "X-Requested-With"));
+        // Thêm địa chỉ frontend cho phép
+        corsConfiguration
+                .setAllowedOrigins(List.of("http://localhost:2185", adminFrontendUrl, frontendUrl, appFrontendUrl));
+        corsConfiguration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS", "PATCH"));
+        corsConfiguration.setAllowedHeaders(List.of("Authorization", "Content-Type", "Accept", "X-Requested-With"));
+        corsConfiguration.setAllowCredentials(true); // Quan trọng để gửi cookie và header Authorization
+        corsConfiguration.setExposedHeaders(List.of("Authorization", "Set-Cookie", "X-Requested-With"));
 
                 UrlBasedCorsConfigurationSource urlBasedCorsConfigurationSource = new UrlBasedCorsConfigurationSource();
                 urlBasedCorsConfigurationSource.registerCorsConfiguration("/**", corsConfiguration);
