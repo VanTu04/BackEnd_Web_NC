@@ -19,7 +19,7 @@ import java.util.List;
 @SuperBuilder
 @Table(name = "stories")
 @DynamicUpdate
-public class Story extends BaseEntity{
+public class Story extends BaseEntity {
     private String title;
 
     private String description;
@@ -32,8 +32,6 @@ public class Story extends BaseEntity{
     @ManyToOne
     private User author;
 
-    private BigDecimal price;
-
     @Enumerated(EnumType.STRING)
     @Column(name = "is_available")
     private IS_AVAILBLE isAvailable;
@@ -45,17 +43,13 @@ public class Story extends BaseEntity{
     @Column(name = "is_visibility")
     private boolean isVisibility;
 
-    @Column(name="is_banned")
+    @Column(name = "is_banned")
     private boolean isBanned;
 
     private double rate;
 
     @ManyToMany
-    @JoinTable(
-            name = "story_categories",
-            joinColumns = @JoinColumn(name = "story_id"),
-            inverseJoinColumns = @JoinColumn(name = "category_id")
-    )
+    @JoinTable(name = "story_categories", joinColumns = @JoinColumn(name = "story_id"), inverseJoinColumns = @JoinColumn(name = "category_id"))
     private List<Category> categories;
 
     @Column(name = "cover_image")

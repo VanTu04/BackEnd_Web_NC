@@ -2,6 +2,7 @@ package com.vawndev.spring_boot_readnovel.Dto.Responses.Story;
 
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoryResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoryResponse.CategoryResponseBuilder;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Entities.User;
