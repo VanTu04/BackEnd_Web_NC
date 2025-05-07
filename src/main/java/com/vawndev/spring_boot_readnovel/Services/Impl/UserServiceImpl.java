@@ -65,10 +65,12 @@ public class UserServiceImpl implements UserService {
                 .dateOfBirth(user.getDateOfBirth())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
-                .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
+                .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()): null)//user.getCreatedAt() != null ? 
+                .updatedAt(user.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()):null)//user.getUpdatedAt() != null ? 
                 .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt())
                         : null)
+                .isActive(user.isActive())
+                .isRequest(user.isRequest())
                 .build()).collect(Collectors.toList());
         return PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit())
                 .data(userDetailReponseList).total(users.getTotalPages()).build();
