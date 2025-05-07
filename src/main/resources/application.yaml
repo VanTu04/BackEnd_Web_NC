@@ -42,7 +42,7 @@ spring:
             enable: true
 
 server:
-  port: 8081
+  port: 8080
 
 jwt:
   signer-key: ${SIGNER_KEY_JWT}
@@ -75,5 +75,4 @@ encryption:
 
 url:
   frontend: ${URL_FRONTEND:http://localhost:3000}
-  admin-frontend: ${URL_ADMIN_FRONTEND:http://localhost:3001}
-  app-frontend: ${URL_APP_FRONTEND:http://localhost:19006}
+  admin-frontend: ${URL_FRONTEND:http://localhost:3001}
