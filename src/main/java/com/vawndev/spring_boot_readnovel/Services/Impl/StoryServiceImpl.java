@@ -137,6 +137,7 @@ public class StoryServiceImpl implements StoryService {
                                                                 .id(cate.getId())
                                                                 .build())
                                                 .collect(Collectors.toList()) : null)
+                                .isAvailble(story.getIsAvailable())
                                 .email(story.getAuthor().getEmail())
                                 .status(story.getStatus())
                                 .view(story.getViews())
@@ -486,14 +487,15 @@ public class StoryServiceImpl implements StoryService {
 
                 List<ChapterResponsePurchase> chaptersRes = chapters.getContent().stream()
                                 .map(ch -> {
-                                        Optional<PurchaseHistory> purchaseHistoryOptional = purchaseHistoryRepository
-                                                        .findByChapterAndUser(ch.getId(), finalUser.getId());
-
-                                        PurchaseHistory purchaseHistory = purchaseHistoryOptional.orElse(null);
+                                        Optional<PurchaseHistory> purchaseHistoryOptional = finalUser != null
+                                                        ? purchaseHistoryRepository
+                                                                        .findByChapterAndUser(ch.getId(),
+                                                                                        finalUser.getId())
+                                                        : null;
 
                                         BigDecimal priceForUser = isAuthor ? BigDecimal.ZERO
                                                         : finalUser != null && (finalUser.getSubscription() != null
-                                                                        || purchaseHistory != null)
+                                                                        || purchaseHistoryOptional.isPresent())
                                                                                         ? BigDecimal.ZERO
                                                                                         : ch.getPrice();
                                         return ChapterResponseDetail.builder()
@@ -505,7 +507,9 @@ public class StoryServiceImpl implements StoryService {
                                                                         .convertUtcToUserTimezone(ch.getCreatedAt()))
                                                         .title(ch.getTitle())
                                                         .views(ch.getViews())
-                                                        .transactionType(TransactionType.DEPOSIT)
+                                                        .transactionType(purchaseHistoryOptional != null
+                                                                        ? TransactionType.DEPOSIT
+                                                                        : TransactionType.PURCHASE)
                                                         .build();
                                 })
                                 .collect(Collectors.toList());
