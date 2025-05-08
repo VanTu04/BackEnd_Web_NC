@@ -31,6 +31,8 @@ public class StoriesResponse extends TimeZoneResponse {
 
     private boolean isVisibility;
 
+    private boolean isBanned;
+
     private IS_AVAILBLE isAvailble;
 
     private STORY_STATUS status;

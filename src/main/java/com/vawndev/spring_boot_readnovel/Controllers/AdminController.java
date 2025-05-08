@@ -82,7 +82,16 @@ public class AdminController {
         return ApiResponse.<String>builder().result("Success!").build();
     }
 
-
+    @PutMapping("/story/{id}/ban-status")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ApiResponse<String> updateStoryBanStatus(
+            @PathVariable String id,
+            @RequestParam boolean isBan) {
+        storyService.updateStoryBanStatus(id, isBan);
+        return ApiResponse.<String>builder()
+                .message(isBan ? "Story has been banned" : "Story has been unbanned")
+                .build();
+    }
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
