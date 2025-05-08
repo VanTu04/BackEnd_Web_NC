@@ -1,6 +1,6 @@
 spring:
   datasource:
-    url: jdbc:postgresql://localhost:5432/Read
+    url: ${DBMS_CONNECTION:jdbc:postgresql://14.225.205.171:5432/Read}
     username: postgres
     password: 123456
 
@@ -11,7 +11,7 @@ spring:
           google:
             client-id: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
             client-secret: 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
-            redirect-uri: http://localhost:8080/login/oauth2/code/google
+            redirect-uri: ${REDIRECT_URI:http://localhost:8080/login/oauth2/code/google}
 
   mail:
     username: mlanhem28@gmail.com

@@ -1,8 +1,31 @@
 services:
-  backendwebnc:
-    image: backendwebnc
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+  app:
+    build: .
+    container_name: spring-boot-app
+    environment:
+      SPRING_PROFILES_ACTIVE: dev
+      DBMS_CONNECTION: jdbc:postgresql://14.225.205.171:5432/Read
+      DBMS_USERNAME: postgres
+      DBMS_PASSWORD: 123456
+      ID_GOOGLE: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
+      SECRET_GOOGLE: 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
+      REDIRECT_URI: https://api.vawndev.site/login/oauth2/code/google
+      USERNAME_MAIL: mlanhem28@gmail.com
+      PASSWORD_MAIL: tdxdniynteyvvojr
+      SIGNER_KEY_JWT: yYwQxlBVCRKhVM7gtymmF4AikjlcEom+DcyVjkvY4HFHcGAaiolb7IT+kDE6ucgFcyc2LflaNJfJS3PIoSZmYQ==
+      ACCESS_TIME_JWT: 3600
+      REFRESH_TIME_JWT: 36000
+      PAY_URL: https://sandbox.vnpayment.vn/paymentv2/vpcpay.html
+      TMN_CODE: WXBCTBAJ
+      SECRET_KEY: OCRHYF0O3K3IRW2T7A66ZNCT1PFRNOAO
+      RETURN_URL: https://vawndev.site/payment/vnpay-return
+      VERSION: 2.1.0
+      COMMAND: pay
+      ORDER_TYPE: other
+      CLOUDINARY_URL: cloudinary://569898377162755:X820dhqTuh4BR-6Fc9-tnts6RF0@dxpyuj1mm
+      URL_FRONTEND: https://vawndev.site
+      URL_ADMIN_FRONTEND: https://admin.vawndev.site
+      URL_APP_FRONTEND: http://localhost:19006
     ports:
-      - 8000:8000
+      - "8081:8081"
+    restart: always

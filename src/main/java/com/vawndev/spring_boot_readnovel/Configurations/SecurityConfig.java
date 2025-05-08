@@ -53,6 +53,7 @@ public class SecurityConfig {
                 "/search/**",
                 "/category",
                 "/search",
+                "/search/elastic",
                 "/users/pre-register",
                 "/users/confirm-register",
                 "/users/forgot-password/request-otp",

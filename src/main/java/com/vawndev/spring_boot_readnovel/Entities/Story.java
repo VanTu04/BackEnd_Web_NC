@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
+import com.vawndev.spring_boot_readnovel.Configurations.StoryEventListener;
 import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
 import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
@@ -18,6 +19,7 @@ import java.util.List;
 @NoArgsConstructor
 @SuperBuilder
 @Table(name = "stories")
+@EntityListeners(StoryEventListener.class)
 @DynamicUpdate
 public class Story extends BaseEntity {
     private String title;

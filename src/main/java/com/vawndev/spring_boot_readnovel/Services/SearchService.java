@@ -9,4 +9,6 @@ public interface SearchService {
     PageResponse<StoriesResponse> searchStory(int page, int limit, Map<String, String> filterFields);
 
     PageResponse<StoriesResponse> cateStory(String keyword, int page, int limit);
+
+    PageResponse<StoriesResponse> elasticSearchStory(String keyword, int page, int limit);
 }
