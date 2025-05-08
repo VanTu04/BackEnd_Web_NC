@@ -1,10 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import co.elastic.clients.elasticsearch._types.query_dsl.MultiMatchQuery;
-import co.elastic.clients.elasticsearch._types.query_dsl.Query;
 import co.elastic.clients.elasticsearch._types.query_dsl.QueryBuilders;
-import co.elastic.clients.elasticsearch.core.SearchRequest;
-import co.elastic.clients.elasticsearch.core.SearchResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoryResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;

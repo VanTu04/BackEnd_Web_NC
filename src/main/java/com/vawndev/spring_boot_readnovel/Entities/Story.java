@@ -9,7 +9,6 @@ import lombok.*;
 import lombok.experimental.SuperBuilder;
 import org.hibernate.annotations.DynamicUpdate;
 
-import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
