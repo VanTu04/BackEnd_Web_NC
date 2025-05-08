@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -81,6 +82,20 @@ public class AdminController {
         return ApiResponse.<String>builder().result("Success!").build();
     }
 
+<<<<<<< HEAD
+=======
+    @PutMapping("/story/{id}/ban-status")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    public ApiResponse<String> updateStoryBanStatus(
+            @PathVariable String id,
+            @RequestParam boolean isBan) {
+        storyService.updateStoryBanStatus(id, isBan);
+        return ApiResponse.<String>builder()
+                .message(isBan ? "Story has been banned" : "Story has been unbanned")
+                .build();
+    }
+
+>>>>>>> 9cf924d3c0b6737e98819500638051428978846d
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
     public ApiResponse<PageResponse<UserDetailReponse>> getUser(@ModelAttribute PageRequest req) {
@@ -89,6 +104,13 @@ public class AdminController {
         return ApiResponse.<PageResponse<UserDetailReponse>>builder().result(users).build();
     }
 
+    @PutMapping("/user/{id}/deactivate")
+    public ApiResponse<String> deactivateUser(@PathVariable String id) {
+        userService.deactivateUser(id);
+        return ApiResponse.<String>builder()
+                .message("User deactivated successfully")
+                .build();
+    }
     // =================== SUBSCRIPTION PLANS MANAGEMENT ===================
     @GetMapping("/subscription")
     public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlans() {

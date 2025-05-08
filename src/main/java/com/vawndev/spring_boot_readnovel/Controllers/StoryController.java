@@ -7,6 +7,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoryDetailResponses;
+import com.vawndev.spring_boot_readnovel.Entities.Story;
+import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
 import com.vawndev.spring_boot_readnovel.Services.StoryService;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import jakarta.validation.Valid;

@@ -55,4 +55,6 @@ public interface StoryService {
     PageResponse<StoriesResponse> getStoriesByAuthorId(PageRequest req, String authorId);
 
     void toggleVisibilityStory(Boolean isVisibility, String id);
+
+    void updateStoryBanStatus(String id, boolean isBan);
 }

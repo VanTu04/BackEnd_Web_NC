@@ -140,9 +140,11 @@ public class StoryServiceImpl implements StoryService {
                                 .isAvailble(story.getIsAvailable())
                                 .email(story.getAuthor().getEmail())
                                 .status(story.getStatus())
+                                .isAvailble(story.getIsAvailable())
                                 .view(story.getViews())
                                 .coverImage(story.getCoverImage())
                                 .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(story.getUpdatedAt()))
+                                .isBanned(story.isBanned())
                                 .build();
         }
 
@@ -624,6 +626,15 @@ public class StoryServiceImpl implements StoryService {
                 Story story = storyRepository.findByIdAndAuthor(id, user.getId())
                                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_STORY));
                 story.setVisibility(isVisibility);
+                storyRepository.save(story);
+        }
+
+        @Override
+        public void updateStoryBanStatus(String id, boolean isBan) {
+                Story story = storyRepository.findById(id)
+                                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story"));
+                
+                story.setBanned(isBan);
                 storyRepository.save(story);
         }
 
