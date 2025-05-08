@@ -36,4 +36,6 @@ public interface UserService {
     UserResponse handleConfirmRegister(@Valid ConfirmOtpRequest confirmRequest) throws JsonProcessingException;
 
     UserResponse getProfile();
+
+    void deactivateUser(String id);
 }

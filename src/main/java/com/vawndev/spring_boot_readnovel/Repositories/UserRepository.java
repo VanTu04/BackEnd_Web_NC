@@ -1,6 +1,10 @@
 package com.vawndev.spring_boot_readnovel.Repositories;
 
+import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import com.vawndev.spring_boot_readnovel.Entities.User;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

@@ -21,6 +21,7 @@ import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
@@ -89,6 +90,13 @@ public class AdminController {
         return ApiResponse.<PageResponse<UserDetailReponse>>builder().result(users).build();
     }
 
+    @PutMapping("/user/{id}/deactivate")
+    public ApiResponse<String> deactivateUser(@PathVariable String id) {
+        userService.deactivateUser(id);
+        return ApiResponse.<String>builder()
+                .message("User deactivated successfully")
+                .build();
+    }
     // =================== SUBSCRIPTION PLANS MANAGEMENT ===================
     @GetMapping("/subscription")
     public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlans() {

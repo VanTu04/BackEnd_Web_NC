@@ -12,6 +12,7 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -65,8 +66,8 @@ public class UserServiceImpl implements UserService {
                 .dateOfBirth(user.getDateOfBirth())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()): null)//user.getCreatedAt() != null ? 
-                .updatedAt(user.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()):null)//user.getUpdatedAt() != null ? 
+                .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()): null)
+                .updatedAt(user.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()):null)
                 .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt())
                         : null)
                 .isActive(user.isActive())
@@ -212,6 +213,16 @@ public class UserServiceImpl implements UserService {
                 .role(user.getRoles().stream().map(Role::getName).collect(Collectors.toList()))
                 .balance(user.getBalance())
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void deactivateUser(String id) {
+        User user = userRepository.findById(id)
+                .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
+        
+        user.setActive(user.isActive() ? false : true);
+        userRepository.save(user);
     }
 
 }
