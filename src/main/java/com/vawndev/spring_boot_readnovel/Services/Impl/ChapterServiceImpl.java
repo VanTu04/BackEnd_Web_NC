@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.FileRequest;
@@ -38,6 +39,7 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
@@ -54,6 +56,7 @@ public class ChapterServiceImpl implements ChapterService {
     private final JwtUtils jwtUtils;
     private final ReadingHistoryRepository readingHistoryRepository;
     private final UserRepository userRepository;
+    private final PurchaseHistoryRepository purchaseHistoryRepository;
 
     public static String convertToImagePath(String cloudinaryUrl) {
         String[] parts = cloudinaryUrl.split("/");
@@ -111,7 +114,6 @@ public class ChapterServiceImpl implements ChapterService {
                 .price(creq.getPrice())
                 .story(story)
                 .build();
-        story.setPrice(story.getPrice().add(chapter.getPrice()));
         if (story.getStatus().equals(STORY_STATUS.UPDATING)) {
             story.setStatus(STORY_STATUS.UPDATING);
         }
@@ -149,8 +151,6 @@ public class ChapterServiceImpl implements ChapterService {
             }
 
             Story story = getStoryByChapter(chapter);
-
-            updateStoryPrice(chapter, story);
 
             deleteRelatedEntities(chapter, files);
 
@@ -193,12 +193,6 @@ public class ChapterServiceImpl implements ChapterService {
                 .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Story not found"));
     }
 
-    private void updateStoryPrice(Chapter chapter, Story story) {
-        if (chapter.getPrice() != null && story.getPrice() != null) {
-            story.setPrice(story.getPrice().subtract(chapter.getPrice()));
-        }
-    }
-
     public void deleteRelatedEntities(Chapter chapter, List<File> files) {
         readingHistoryRepository.deleteAllByChapterId(chapter.getId());
         fileRepository.deleteAll(files);
@@ -206,7 +200,7 @@ public class ChapterServiceImpl implements ChapterService {
 
     @Override
     @Transactional
-    public ChapterResponseDetail getChapterDetail(String id, String bearerToken) {
+    public ChapterResponseDetail getChapterDetail(String id) {
         Chapter chapter = chapterRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.INVALID_CHAPTER));
 
@@ -255,6 +249,40 @@ public class ChapterServiceImpl implements ChapterService {
                         .map(file -> FileResponse.builder().id(file.getId()).build())
                         .collect(Collectors.toList()))
                 .build();
+    }
+
+    @Override
+    public void buyChapter(ConditionRequest req) {
+        User user = getAuthenticatedUser();
+        Chapter chapter = chapterRepository.findById(req.getId())
+                .orElseThrow(() -> new AppException(ErrorCode.NOT_FOUND, "Chapter"));
+
+        Optional<PurchaseHistory> existingPurchase = purchaseHistoryRepository.findByChapterAndUser(chapter.getId(),
+                user.getId());
+        if (existingPurchase.isPresent()) {
+            throw new AppException(ErrorCode.CONFLICT, "You already buy this!!");
+        }
+
+        // Tạo mới PurchaseHistory nếu chưa mua
+        PurchaseHistory purchaseHistory = PurchaseHistory.builder()
+                .chapter(chapter)
+                .user(user)
+                .build();
+
+        if (user.getId().equals(chapter.getStory().getAuthor().getId())) {
+            throw new AppException(ErrorCode.CONFLICT, "You are author!!");
+        }
+
+        if (user.getBalance().subtract(chapter.getPrice()).compareTo(BigDecimal.ZERO) < 0) {
+            throw new AppException(ErrorCode.FAILED_PAYMENT, "Your balance is not sufficient to use this method");
+        }
+
+        BigDecimal result = user.getBalance().subtract(chapter.getPrice());
+        user.setBalance(result);
+        userRepository.save(user);
+
+        // Lưu PurchaseHistory
+        purchaseHistoryRepository.save(purchaseHistory);
     }
 
 }

@@ -1,5 +1,6 @@
 package com.vawndev.spring_boot_readnovel.Controllers;
 
+import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Chapter.ChapterUploadRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageFileRequest;
@@ -42,6 +43,12 @@ public class ChapterController {
         return ApiResponse.<String>builder().message("Successfully!").result(result).build();
     }
 
+    @PostMapping("/buy")
+    public ApiResponse<String> buyChapter(@RequestBody ConditionRequest req) {
+        chapterService.buyChapter(req);
+        return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+
     @DeleteMapping("/delete")
     public ApiResponse<String> deleteChapter(
             @RequestParam String id) {
@@ -50,9 +57,8 @@ public class ChapterController {
     }
 
     @GetMapping("/{chapter_id}")
-    public ApiResponse<ChapterResponseDetail> getChapter(@PathVariable String chapter_id,
-            @RequestHeader(value = "Authorization", required = false) String bearerToken) {
-        ChapterResponseDetail result = chapterService.getChapterDetail(chapter_id, bearerToken);
+    public ApiResponse<ChapterResponseDetail> getChapter(@PathVariable String chapter_id) {
+        ChapterResponseDetail result = chapterService.getChapterDetail(chapter_id);
         return ApiResponse.<ChapterResponseDetail>builder()
                 .message("Successfully")
                 .result(result)

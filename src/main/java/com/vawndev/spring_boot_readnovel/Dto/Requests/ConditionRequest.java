@@ -6,7 +6,6 @@ import lombok.Data;
 
 @Data
 public class ConditionRequest {
-    @NotNull(message = "id cannot be null")
     @NotBlank(message = "id cannot be blank")
     private String id;
 

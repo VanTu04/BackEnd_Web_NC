@@ -9,6 +9,7 @@ import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import lombok.*;
 import lombok.experimental.SuperBuilder;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 @Getter
@@ -35,6 +36,8 @@ public class StoriesResponse extends TimeZoneResponse {
     private STORY_STATUS status;
 
     private List<CategoryResponse> categories;
+
+    private BigDecimal price;
 
     private String coverImage;
 

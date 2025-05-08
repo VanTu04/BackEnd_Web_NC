@@ -1,6 +1,8 @@
 package com.vawndev.spring_boot_readnovel.Repositories;
 
 import com.vawndev.spring_boot_readnovel.Entities.Chapter;
+import com.vawndev.spring_boot_readnovel.Entities.Story;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -8,6 +10,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,6 +22,13 @@ public interface ChapterRepository extends JpaRepository<Chapter, String> {
             """)
 
     List<String> findChapterIdByStory(@Param("storyId") String storyId);
+
+    @Query("""
+                SELECT c.price FROM Chapter c
+                WHERE c.story.id = :storyId
+            """)
+
+    List<BigDecimal> findChaptersByStory(@Param("storyId") String storyId);
 
     @Query("SELECT c FROM Chapter c WHERE c.story.id = :storyId ORDER BY c.createdAt DESC")
     Page<Chapter> findAllByStoryId(String storyId, Pageable pageable);
@@ -50,5 +60,8 @@ public interface ChapterRepository extends JpaRepository<Chapter, String> {
                 ORDER BY c.createdAt DESC
             """)
     List<String> findPrevChapter(@Param("chapterId") String chapterId, Pageable pageable);
+
+    @Query("SELECT c FROM Chapter c WHERE c.id =:id")
+    Optional<Chapter> findByIdChapter(String id);
 
 }

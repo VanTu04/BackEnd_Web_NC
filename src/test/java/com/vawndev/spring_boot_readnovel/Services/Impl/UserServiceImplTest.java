@@ -26,7 +26,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
-import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;    
+import com.vawndev.spring_boot_readnovel.Mappers.UserMapper;
+import com.vawndev.spring_boot_readnovel.Repositories.ChapterRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.UserRepository;
 import com.vawndev.spring_boot_readnovel.Services.CloundService;
 
@@ -227,6 +228,9 @@ class UserServiceImplTest {
         verify(userRepository).save(any(User.class));
         verify(userMapper).toUserResponse(any(User.class));
     }
+
+    private ChapterRepository chapterRepository;
+    
 }
 
 
