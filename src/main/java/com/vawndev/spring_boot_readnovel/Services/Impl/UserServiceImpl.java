@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.Comparator;
 
 import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.data.domain.Page;
@@ -72,7 +73,9 @@ public class UserServiceImpl implements UserService {
                         : null)
                 .isActive(user.isActive())
                 .isRequest(user.isRequest())
-                .build()).collect(Collectors.toList());
+                .build())
+                .sorted(Comparator.comparing(UserDetailReponse::isRequest).reversed())
+                .collect(Collectors.toList());
         return PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit())
                 .data(userDetailReponseList).total(users.getTotalPages()).build();
 

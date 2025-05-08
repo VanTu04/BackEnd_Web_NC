@@ -82,12 +82,7 @@ public class AdminController {
         return ApiResponse.<String>builder().result("Success!").build();
     }
 
-    @GetMapping("")
-    public ApiResponse<PageResponse<StoriesResponse>> getStory(
-            @ModelAttribute PageRequest req) {
-        PageResponse<StoriesResponse> result = storyService.getStoriesByAdmin(req);
-        return ApiResponse.<PageResponse<StoriesResponse>>builder().result(result).build();
-    }
+
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
