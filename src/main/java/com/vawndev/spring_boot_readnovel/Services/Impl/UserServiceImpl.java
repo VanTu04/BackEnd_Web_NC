@@ -67,8 +67,10 @@ public class UserServiceImpl implements UserService {
                 .dateOfBirth(user.getDateOfBirth())
                 .email(user.getEmail())
                 .fullName(user.getFullName())
-                .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()): null)
-                .updatedAt(user.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()):null)
+                .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt())
+                        : null)
+                .updatedAt(user.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt())
+                        : null)
                 .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt())
                         : null)
                 .isActive(user.isActive())
@@ -223,7 +225,6 @@ public class UserServiceImpl implements UserService {
     public void deactivateUser(String id) {
         User user = userRepository.findById(id)
                 .orElseThrow(() -> new AppException(ErrorCode.USER_NOT_EXISTED));
-        
         user.setActive(user.isActive() ? false : true);
         userRepository.save(user);
     }
