@@ -3,12 +3,14 @@ package com.vawndev.spring_boot_readnovel.Services.Impl;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.ConditionRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionCreatePlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionPlansRequest;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.RolePlanRespone;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Subscription;
 import com.vawndev.spring_boot_readnovel.Entities.SubscriptionPlans;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Exceptions.ErrorCode;
+import com.vawndev.spring_boot_readnovel.Repositories.RoleRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.SubscriptionPlansRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.SubscriptionRepository;
 import com.vawndev.spring_boot_readnovel.Services.SubscriptionPlansService;
@@ -20,6 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.server.ResponseStatusException;
 import org.springframework.http.HttpStatus;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.util.List;
 import java.util.Optional;
@@ -31,6 +34,7 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
     private final SubscriptionPlansRepository subscriptionPlansRepository;
     private final SubscriptionRepository subscriptionRepo;
     private final TokenHelper tokenHelper;
+    private final RoleRepository roleRepository;
 
     @Override
     public List<SubscriptionPlansResponse> getAllSubscriptionPlans() {
@@ -133,5 +137,14 @@ public class SubscriptionPlansServiceImpl implements SubscriptionPlansService {
                 .type(sub.getType())
                 .expired(sub.getExpired())
                 .build()).collect(Collectors.toList());
+    }
+
+    @Override
+    public RolePlanRespone getRoleToUpgrade() {
+        User user = tokenHelper.getUserO2Auth();
+        boolean isAuthor = user.getRoles().stream()
+                .anyMatch(role -> "AUTHOR".equals(role.getName()));
+        BigDecimal price = roleRepository.findByName("AUTHOR").get().getPrice();
+        return RolePlanRespone.builder().author_role(isAuthor).price(price).build();
     }
 }
