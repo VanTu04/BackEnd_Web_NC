@@ -98,13 +98,13 @@ public class AdminController {
         return ApiResponse.<PageResponse<UserDetailResponse>>builder().result(users).build();
     }
 
-    @PutMapping("/user/{id}/deactivate")
-    public ApiResponse<String> deactivateUser(@PathVariable String id) {
-        userService.deactivateUser(id);
-        return ApiResponse.<String>builder()
-                .message("User deactivated successfully")
-                .build();
-    }
+        @PutMapping("/user/{id}/deactivate")
+        public ApiResponse<String> deactivateUser(@PathVariable String id) {
+            userService.deactivateUser(id);
+            return ApiResponse.<String>builder()
+                    .message("User deactivated successfully")
+                    .build();
+        }
     // =================== SUBSCRIPTION PLANS MANAGEMENT ===================
     @GetMapping("/subscription")
     public ApiResponse<List<SubscriptionPlansResponse>> getAllSubscriptionPlans() {

@@ -252,6 +252,7 @@ public class ChapterServiceImpl implements ChapterService {
     }
 
     @Override
+    @Transactional
     public void buyChapter(ConditionRequest req) {
         User user = getAuthenticatedUser();
         Chapter chapter = chapterRepository.findById(req.getId())
@@ -259,15 +260,10 @@ public class ChapterServiceImpl implements ChapterService {
 
         Optional<PurchaseHistory> existingPurchase = purchaseHistoryRepository.findByChapterAndUser(chapter.getId(),
                 user.getId());
+
         if (existingPurchase.isPresent()) {
             throw new AppException(ErrorCode.CONFLICT, "You already buy this!!");
         }
-
-        // Tạo mới PurchaseHistory nếu chưa mua
-        PurchaseHistory purchaseHistory = PurchaseHistory.builder()
-                .chapter(chapter)
-                .user(user)
-                .build();
 
         if (user.getId().equals(chapter.getStory().getAuthor().getId())) {
             throw new AppException(ErrorCode.CONFLICT, "You are author!!");
@@ -277,10 +273,18 @@ public class ChapterServiceImpl implements ChapterService {
             throw new AppException(ErrorCode.FAILED_PAYMENT, "Your balance is not sufficient to use this method");
         }
 
+        // Tạo mới PurchaseHistory nếu chưa mua
+        PurchaseHistory purchaseHistory = PurchaseHistory.builder()
+                .chapter(chapter)
+                .user(user)
+                .build();
+
         BigDecimal result = user.getBalance().subtract(chapter.getPrice());
+        User author = chapter.getStory().getAuthor();
+        author.setBalance(author.getBalance().add(chapter.getPrice()));
         user.setBalance(result);
         userRepository.save(user);
-
+        userRepository.save(author);
         // Lưu PurchaseHistory
         purchaseHistoryRepository.save(purchaseHistory);
     }

@@ -63,14 +63,12 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         User user = getAuthenticatedUser();
         Subscription subscription = subscriptionRepository.findByUserId(user.getId()).orElse(null);
 
-        // ✅ Kiểm tra nếu user đã có subscription còn hạn
         if (subscription != null && subscription.getExpiredAt() != null
                 && subscription.getExpiredAt().isAfter(Instant.now())) {
             throw new AppException(ErrorCode.CONFLICT_SUBSCRIPTION,
                     TimeZoneConvert.convertUtcToUserTimezone(subscription.getExpiredAt()));
         }
 
-        // ✅ Kiểm tra số dư
         BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
         SubscriptionPlans subscriptionPlan = subscriptionPlansRepository.findById(req.getId_plan())
                 .orElseThrow(() -> new AppException(ErrorCode.FAILED_PAYMENT, "Your balance is insufficient"));
@@ -79,7 +77,6 @@ public class SubscriptionServiceImpl implements SubscriptionService {
             throw new AppException(ErrorCode.FAILED_PAYMENT);
         }
 
-        // ✅ Nếu chưa có subscription, tạo mới
         if (subscription == null) {
             subscription = new Subscription();
             subscription.setUser(user);
@@ -124,7 +121,10 @@ public class SubscriptionServiceImpl implements SubscriptionService {
     @PreAuthorize("hasAuthority('USER')")
     public void upgradeRole() {
         User user = getAuthenticatedUser();
+        if (user.getRoles().stream().anyMatch(role -> role.getName().equals("AUTHOR"))) {
+            throw new AppException(ErrorCode.CONFLICT, "You are author");
 
+        }
         user.getRoles().forEach(role -> {
             if (role.getName().equals("AUTHOR")) {
                 throw new AppException(ErrorCode.CONFLICT, "This role");

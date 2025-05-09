@@ -97,7 +97,6 @@ public class SearchServiceImpl implements SearchService {
     @Override
     public PageResponse<StoriesResponse> elasticSearchStory(String keyword, int page, int limit) {
             var criteria = QueryBuilders.bool(builder -> builder.should(
-                    // Tìm kiếm gần đúng (Fuzzy Search)
                     fuzzy(queryTitle -> queryTitle.field("title").value(keyword).fuzziness("AUTO")),
                     fuzzy(queryAuthor -> queryAuthor.field("authorName").value(keyword).fuzziness("AUTO")),
                     fuzzy(queryDesc -> queryDesc.field("description").value(keyword).fuzziness("AUTO")),
