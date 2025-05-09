@@ -8,6 +8,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionC
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionPlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
@@ -40,6 +41,7 @@ public class AdminController {
     private final SubscriptionPlansService subscriptionPlansService;
     private final WithdrawService withdrawService;
     private final CategoryRepository categoryRepository;
+    private final WalletTransactionService walletTransactionService;
 
     // =================== CATEGORY MANAGEMENT ===================
     @GetMapping("/category")
@@ -184,6 +186,23 @@ public class AdminController {
         return ApiResponse.<WithdrawResponse>builder()
                 .result(response)
                 .message("Successfully!")
+                .build();
+    }
+
+    // =================== TRANSACTION MANAGEMENT ===================
+    @GetMapping("/wallet")
+    public ApiResponse<?> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        return ApiResponse.<PageResponse<WalletTransactionResponse>>builder()
+                .message("Successfully")
+                .result(walletTransactionService.getAllWalletTransactions(page, size))
+                .build();
+    }
+
+    @GetMapping("/wallet/search")
+    public ApiResponse<?> findAllById(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        return ApiResponse.<PageResponse<WalletTransactionResponse>>builder()
+                .message("Successfully")
+                .result(walletTransactionService.getWalletTransactionsByUserId(page, size))
                 .build();
     }
 
