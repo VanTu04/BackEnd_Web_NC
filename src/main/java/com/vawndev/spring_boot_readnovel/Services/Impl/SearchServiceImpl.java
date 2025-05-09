@@ -40,7 +40,6 @@ public class SearchServiceImpl implements SearchService {
     private final SearchRepository searchRepository;
     private final StoryMapper storyMapper;
     private final StoryRepository storyRepository;
-    private final StoryDocumentRepository storyDocumentRepository;
     private final ElasticsearchTemplate elasticsearchTemplate;
 
     @Override

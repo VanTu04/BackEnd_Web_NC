@@ -1,7 +1,5 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
-import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
-import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import jakarta.persistence.Id;
 import lombok.*;

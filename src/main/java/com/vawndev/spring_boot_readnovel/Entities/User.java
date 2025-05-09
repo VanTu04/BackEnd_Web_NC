@@ -2,7 +2,6 @@ package com.vawndev.spring_boot_readnovel.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
