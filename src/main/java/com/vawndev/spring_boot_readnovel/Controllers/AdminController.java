@@ -17,15 +17,20 @@ import com.vawndev.spring_boot_readnovel.Entities.WithdrawTransaction;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
 import com.vawndev.spring_boot_readnovel.Services.*;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import com.vawndev.spring_boot_readnovel.Entities.Category;
+import com.vawndev.spring_boot_readnovel.Repositories.CategoryRepository;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,6 +41,7 @@ public class AdminController {
     private final UserService userService;
     private final SubscriptionPlansService subscriptionPlansService;
     private final WithdrawService withdrawService;
+    private final CategoryRepository categoryRepository;
 
     // =================== CATEGORY MANAGEMENT ===================
     @GetMapping("/category")
@@ -66,6 +72,22 @@ public class AdminController {
     public ApiResponse<String> deleteCategory(@RequestParam @NotBlank String id) {
         categoryService.DeleteCategory(id);
         return ApiResponse.<String>builder().message("Successfully!").build();
+    }
+
+    @GetMapping("/category/search")
+    public ApiResponse<List<Category>> searchCategories(@RequestParam(required = false) String q) {
+        List<Category> data;
+        if (q != null && !q.isEmpty()) {
+            data = categoryRepository.findByName(q)
+                    .map(List::of)
+                    .orElseGet(List::of);
+        } else {
+            data = categoryRepository.findAll();
+        }
+        return ApiResponse.<List<Category>>builder()
+                .result(data)
+                .message("Categories retrieved successfully!")
+                .build();
     }
 
     // =================== STORY MANAGEMENT ===================
