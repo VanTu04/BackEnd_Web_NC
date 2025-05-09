@@ -3,6 +3,7 @@ package com.vawndev.spring_boot_readnovel.Utils;
 import lombok.experimental.UtilityClass;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 @UtilityClass
 public class PaginationUtil {
@@ -12,5 +13,8 @@ public class PaginationUtil {
         return PageRequest.of(pageNumber, pageSize);
     }
 
+    public static Pageable createPageable(int page, int limit, Sort.Direction direction, String sort) {
+        return PageRequest.of(page, limit, Sort.by(direction, sort));
+    }
 
 }

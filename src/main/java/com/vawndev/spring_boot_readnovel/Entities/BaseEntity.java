@@ -12,6 +12,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
 import java.time.LocalDateTime;
 
@@ -39,6 +40,12 @@ public abstract class BaseEntity {
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
+
+        if (this instanceof User user) {
+            if (user.getBalance() == null) {
+                user.setBalance(BigDecimal.ZERO);
+            }
+        }
     }
 
     @PreUpdate

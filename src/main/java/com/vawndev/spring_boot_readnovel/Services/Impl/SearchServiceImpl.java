@@ -111,7 +111,8 @@ public class SearchServiceImpl implements SearchService {
                     wildcard(queryCategoryWildcard -> queryCategoryWildcard.field("categories").value("*" + keyword + "*"))
             ).filter(
                     term(queryAvailable -> queryAvailable.field("isAvailable").value(IS_AVAILBLE.ACCEPTED.name())),
-                    term(queryVisibility -> queryVisibility.field("isVisibility").value(true))
+                    term(queryVisibility -> queryVisibility.field("isVisibility").value(true)),
+                    term(queryIdBanned -> queryIdBanned.field("isBanned").value(false))
             ));
 
             // Tạo truy vấn tìm kiếm với phân trang
@@ -144,7 +145,7 @@ public class SearchServiceImpl implements SearchService {
                 .view(story.getViews())
                 .isVisibility(story.getIsVisibility())
                 .isBanned(story.getIsBanned())
-                .isAvailble(story.getIsAvailable())
+                .isAvailble(IS_AVAILBLE.valueOf(story.getIsAvailable()))
                 .categories(convertCategories(story.getCategories()))
                 .build()).collect(Collectors.toList());
     }

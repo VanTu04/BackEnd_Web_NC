@@ -52,11 +52,4 @@ public class User extends BaseEntity{
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Subscription subscription;
-
-    @PrePersist
-    public void prePersist() {
-        if (balance == null) {
-            balance = BigDecimal.ZERO;
-        }
-    }
 }

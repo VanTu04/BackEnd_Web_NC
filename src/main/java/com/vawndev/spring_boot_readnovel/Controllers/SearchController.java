@@ -30,8 +30,8 @@ public class SearchController {
 
     @GetMapping("/elastic")
     public ApiResponse<PageResponse<StoriesResponse>> searchStoryElastic(
-            @RequestParam int page,
-            @RequestParam int limit,
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "5") int limit,
             @RequestParam(required = false) String keyword
     ){
         PageResponse<StoriesResponse> result = searchService.elasticSearchStory(keyword, page, limit);
