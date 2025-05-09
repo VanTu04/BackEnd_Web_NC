@@ -2,7 +2,6 @@ package com.vawndev.spring_boot_readnovel.Entities;
 
 import jakarta.persistence.*;
 import lombok.*;
-import lombok.Builder;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -52,11 +51,4 @@ public class User extends BaseEntity{
 
     @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.REMOVE, orphanRemoval = true)
     private Subscription subscription;
-
-    @PrePersist
-    public void prePersist() {
-        if (balance == null) {
-            balance = BigDecimal.ZERO;
-        }
-    }
 }

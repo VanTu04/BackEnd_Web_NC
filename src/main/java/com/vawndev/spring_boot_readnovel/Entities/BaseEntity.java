@@ -7,13 +7,12 @@ import jakarta.persistence.MappedSuperclass;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.PreUpdate;
 import lombok.AllArgsConstructor;
-import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.math.BigDecimal;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 import lombok.experimental.SuperBuilder;
 
@@ -39,6 +38,12 @@ public abstract class BaseEntity {
         Instant now = Instant.now();
         this.createdAt = now;
         this.updatedAt = now;
+
+        if (this instanceof User user) {
+            if (user.getBalance() == null) {
+                user.setBalance(BigDecimal.ZERO);
+            }
+        }
     }
 
     @PreUpdate

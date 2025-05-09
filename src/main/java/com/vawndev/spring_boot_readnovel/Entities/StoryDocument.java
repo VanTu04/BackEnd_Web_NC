@@ -1,7 +1,5 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
-import com.vawndev.spring_boot_readnovel.Enum.IS_AVAILBLE;
-import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Enum.StoryType;
 import jakarta.persistence.Id;
 import lombok.*;
@@ -34,10 +32,10 @@ public class StoryDocument {
     private StoryType type;
 
     @Field(type = FieldType.Keyword)
-    private STORY_STATUS status;
+    private String status;
 
     @Field(type = FieldType.Keyword)
-    private IS_AVAILBLE isAvailable;
+    private String isAvailable;
 
     @Field(type = FieldType.Boolean)
     private Boolean isVisibility;

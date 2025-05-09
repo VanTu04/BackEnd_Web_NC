@@ -11,7 +11,6 @@ import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.SearchRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.StoryDocumentRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.SearchService;
 import com.vawndev.spring_boot_readnovel.Specification.StorySpecification;
@@ -40,7 +39,6 @@ public class SearchServiceImpl implements SearchService {
     private final SearchRepository searchRepository;
     private final StoryMapper storyMapper;
     private final StoryRepository storyRepository;
-    private final StoryDocumentRepository storyDocumentRepository;
     private final ElasticsearchTemplate elasticsearchTemplate;
 
     @Override
@@ -110,7 +108,8 @@ public class SearchServiceImpl implements SearchService {
                     wildcard(queryCategoryWildcard -> queryCategoryWildcard.field("categories").value("*" + keyword + "*"))
             ).filter(
                     term(queryAvailable -> queryAvailable.field("isAvailable").value(IS_AVAILBLE.ACCEPTED.name())),
-                    term(queryVisibility -> queryVisibility.field("isVisibility").value(true))
+                    term(queryVisibility -> queryVisibility.field("isVisibility").value(true)),
+                    term(queryIdBanned -> queryIdBanned.field("isBanned").value(false))
             ));
 
             // Tạo truy vấn tìm kiếm với phân trang
@@ -143,7 +142,7 @@ public class SearchServiceImpl implements SearchService {
                 .view(story.getViews())
                 .isVisibility(story.getIsVisibility())
                 .isBanned(story.getIsBanned())
-                .isAvailble(story.getIsAvailable())
+                .isAvailble(IS_AVAILBLE.valueOf(story.getIsAvailable()))
                 .categories(convertCategories(story.getCategories()))
                 .build()).collect(Collectors.toList());
     }
