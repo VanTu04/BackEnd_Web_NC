@@ -11,7 +11,6 @@ import com.vawndev.spring_boot_readnovel.Enum.STORY_STATUS;
 import com.vawndev.spring_boot_readnovel.Exceptions.AppException;
 import com.vawndev.spring_boot_readnovel.Mappers.StoryMapper;
 import com.vawndev.spring_boot_readnovel.Repositories.SearchRepository;
-import com.vawndev.spring_boot_readnovel.Repositories.StoryDocumentRepository;
 import com.vawndev.spring_boot_readnovel.Repositories.StoryRepository;
 import com.vawndev.spring_boot_readnovel.Services.SearchService;
 import com.vawndev.spring_boot_readnovel.Specification.StorySpecification;
