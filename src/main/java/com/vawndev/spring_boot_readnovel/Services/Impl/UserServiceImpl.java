@@ -1,6 +1,5 @@
 package com.vawndev.spring_boot_readnovel.Services.Impl;
 
-import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -19,12 +18,11 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.vawndev.spring_boot_readnovel.Constants.PredefinedRole;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.PageRequest;
-import com.vawndev.spring_boot_readnovel.Dto.Requests.FILE.ImageCoverRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Role;
 import com.vawndev.spring_boot_readnovel.Entities.User;
@@ -58,28 +56,33 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN')")
-    public PageResponse<UserDetailReponse> getAllUser(PageRequest req) {
+    public PageResponse<UserDetailResponse> getAllUser(PageRequest req) {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<User> users = userRepository.findAll(pageable);
-        List<UserDetailReponse> userDetailReponseList = users.getContent().stream().map(user -> UserDetailReponse
-                .builder()
-                .id(user.getId())
-                .dateOfBirth(user.getDateOfBirth())
-                .email(user.getEmail())
-                .fullName(user.getFullName())
-                .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()): null)
-                .updatedAt(user.getUpdatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()):null)
-                .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt())
-                        : null)
-                .isActive(user.isActive())
-                .isRequest(user.isRequest())
-                .build())
-                .sorted(Comparator.comparing(UserDetailReponse::isRequest).reversed())
-                .collect(Collectors.toList());
-        return PageResponse.<UserDetailReponse>builder().page(req.getPage()).limit(req.getLimit())
-                .data(userDetailReponseList).total(users.getTotalPages()).build();
 
+        List<UserDetailResponse> userDetailReponseList = users.getContent().stream()
+                .map(user -> UserDetailResponse.builder()
+                        .id(user.getId())
+                        .dateOfBirth(user.getDateOfBirth())
+                        .email(user.getEmail())
+                        .fullName(user.getFullName())
+                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
+                        .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
+                        .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt()) : null)
+                        .isActive(user.isActive())
+                        .isRequest(user.isRequest())
+                        .build())
+                .sorted(Comparator.comparing(UserDetailResponse::isRequest).reversed())
+                .collect(Collectors.toList());
+
+        return PageResponse.<UserDetailResponse>builder()
+                .page(req.getPage())
+                .limit(req.getLimit())
+                .data(userDetailReponseList)
+                .total((int)users.getTotalElements())
+                .build();
     }
+
 
     @Override
     public UserResponse createUser(UserCreationRequest userRequest) {

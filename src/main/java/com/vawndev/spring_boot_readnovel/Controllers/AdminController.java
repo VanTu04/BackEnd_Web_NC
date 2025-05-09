@@ -11,18 +11,15 @@ import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesRespon
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.WithdrawResponse;
-import com.vawndev.spring_boot_readnovel.Entities.WithdrawTransaction;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
 import com.vawndev.spring_boot_readnovel.Services.*;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -95,10 +92,10 @@ public class AdminController {
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
-    public ApiResponse<PageResponse<UserDetailReponse>> getUser(@ModelAttribute PageRequest req) {
+    public ApiResponse<PageResponse<UserDetailResponse>> getUser(@ModelAttribute PageRequest req) {
 
-        PageResponse<UserDetailReponse> users = userService.getAllUser(req);
-        return ApiResponse.<PageResponse<UserDetailReponse>>builder().result(users).build();
+        PageResponse<UserDetailResponse> users = userService.getAllUser(req);
+        return ApiResponse.<PageResponse<UserDetailResponse>>builder().result(users).build();
     }
 
     @PutMapping("/user/{id}/deactivate")
