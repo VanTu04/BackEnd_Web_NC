@@ -274,15 +274,17 @@ public class ChapterServiceImpl implements ChapterService {
         }
 
         // Tạo mới PurchaseHistory nếu chưa mua
-        PurchaseHistory purchaseHistory = PurchaseHistory.builder()
-                .chapter(chapter)
-                .user(user)
-                .build();
 
         BigDecimal result = user.getBalance().subtract(chapter.getPrice());
         User author = chapter.getStory().getAuthor();
         author.setBalance(author.getBalance().add(chapter.getPrice()));
         user.setBalance(result);
+
+        PurchaseHistory purchaseHistory = PurchaseHistory.builder()
+                .chapter(chapter)
+                .user(user)
+                .balance(result).price(chapter.getPrice())
+                .build();
         userRepository.save(user);
         userRepository.save(author);
         // Lưu PurchaseHistory

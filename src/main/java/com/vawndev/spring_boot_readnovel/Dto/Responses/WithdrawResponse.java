@@ -14,12 +14,12 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @Builder
 public class WithdrawResponse  {
-    private String content;
-    private BigDecimal AmountWithdrawn;
-    private BigDecimal RemainingAmount;
-    private String CommissionAmount;
-    private String Bankname;
-    private TransactionStatus status;
-    private TransactionType type;
-    private String createdAt;
+        private String content;
+        private BigDecimal AmountWithdrawn;
+        private BigDecimal RemainingAmount;
+        private String CommissionAmount;
+        private String Bankname;
+        private TransactionStatus status;
+        private TransactionType type;
+        private String createdAt;
 }

@@ -45,11 +45,11 @@ public class WithdrawServiceImpl implements WithdrawService {
     }
 
     @Override
-    public WithdrawResponse withdraw(WithdrawRequest withdrawRequest) {
+    public void withdraw(WithdrawRequest withdrawRequest) {
 
         User user = getAuthenticatedUser();
         ;
-        BigDecimal balance = Optional.ofNullable(user.getBalance()).orElse(BigDecimal.ZERO);
+        BigDecimal balance = user.getBalance();
 
         if (balance.compareTo(withdrawRequest.getAmountRequest()) < 0) {
             throw new AppException(ErrorCode.FAILED_PAYMENT, "You don't have enough money to withdraw");
@@ -80,17 +80,6 @@ public class WithdrawServiceImpl implements WithdrawService {
         withdrawTransactionRepository.save(withdrawTransaction);
         userRepository.save(user);
 
-        // Trả về phản hồi
-        return WithdrawResponse
-                .builder()
-                .type(withdrawTransaction.getTransactionType())
-                .AmountWithdrawn(withdrawTransaction.getAmountRequest())
-                .content(withdrawTransaction.getDescription())
-                .status(withdrawTransaction.getStatus())
-                .createdAt(TimeZoneConvert.convertUtcToUserTimezone(withdrawTransaction.getCreatedAt()))
-                .Bankname(withdrawTransaction.getBankName())
-                .RemainingAmount(newBalance)
-                .build();
     }
 
     @Override
@@ -180,7 +169,6 @@ public class WithdrawServiceImpl implements WithdrawService {
     @Override
     public PageResponse<WithdrawResponse> getWithdraws(TransactionStatus status, PageRequest req) {
         User user = getAuthenticatedUser();
-        ;
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<WithdrawTransaction> withdrawTransaction = withdrawTransactionRepository.findAllByUserAndStatus(user,
                 status, pageable);

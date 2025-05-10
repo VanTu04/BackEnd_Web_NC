@@ -1,5 +1,7 @@
 package com.vawndev.spring_boot_readnovel.Entities;
 
+import java.math.BigDecimal;
+
 import jakarta.persistence.Entity;
 import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
@@ -19,4 +21,7 @@ public class PurchaseHistory extends BaseEntity {
     private User user;
     @ManyToOne
     private Chapter chapter;
+    private BigDecimal balance;
+    private BigDecimal price;
+
 }

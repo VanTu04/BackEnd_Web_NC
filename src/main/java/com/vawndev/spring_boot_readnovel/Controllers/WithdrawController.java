@@ -15,39 +15,37 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/withdraw")
 @RequiredArgsConstructor
 public class WithdrawController {
-    private final WithdrawService withdrawService;
+        private final WithdrawService withdrawService;
 
-    @PostMapping
-    public ApiResponse<WithdrawResponse> withdraw(
-            @RequestBody @Valid WithdrawRequest withdrawRequest) {
-        WithdrawResponse response = withdrawService.withdraw( withdrawRequest);
-        return ApiResponse.<WithdrawResponse>builder()
-                .result(response)
-                .message("Successfully withdrawn")
-                .build();
-    }
+        @PostMapping("/post")
+        public ApiResponse<String> withdraw(
+                        @RequestBody WithdrawRequest withdrawRequest) {
+                withdrawService.withdraw(withdrawRequest);
+                return ApiResponse.<String>builder()
+                                .result("")
+                                .message("Successfully withdrawn")
+                                .build();
+        }
 
-    @PutMapping("/{id}")
-    public ApiResponse<WithdrawResponse> editWithdraw(
-            @PathVariable("id") String withdrawId,
-            @RequestParam TransactionStatus status) {
-        WithdrawResponse response = withdrawService.editWithdraw( withdrawId, status);
-        return ApiResponse.<WithdrawResponse>builder()
-                .result(response)
-                .message("Successfully withdrawn")
-                .build();
-    }
+        @PutMapping("/{id}")
+        public ApiResponse<WithdrawResponse> editWithdraw(
+                        @PathVariable("id") String withdrawId,
+                        @RequestParam TransactionStatus status) {
+                WithdrawResponse response = withdrawService.editWithdraw(withdrawId, status);
+                return ApiResponse.<WithdrawResponse>builder()
+                                .result(response)
+                                .message("Successfully withdrawn")
+                                .build();
+        }
 
-
-
-    @GetMapping
-    public ApiResponse<PageResponse<WithdrawResponse>> getWithdraws(
-            @RequestParam com.vawndev.spring_boot_readnovel.Enum.TransactionStatus status,
-            @RequestBody PageRequest req) {
-        PageResponse<WithdrawResponse> response = withdrawService.getWithdraws( status, req);
-        return ApiResponse.<PageResponse<WithdrawResponse>>builder()
-                .result(response)
-                .message("Successfully withdrawn")
-                .build();
-    }
+        @GetMapping
+        public ApiResponse<PageResponse<WithdrawResponse>> getWithdraws(
+                        @RequestParam(defaultValue = "PENDING") com.vawndev.spring_boot_readnovel.Enum.TransactionStatus status,
+                        @ModelAttribute PageRequest req) {
+                PageResponse<WithdrawResponse> response = withdrawService.getWithdraws(status, req);
+                return ApiResponse.<PageResponse<WithdrawResponse>>builder()
+                                .result(response)
+                                .message("Successfully withdrawn")
+                                .build();
+        }
 }

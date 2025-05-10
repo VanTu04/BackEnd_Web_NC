@@ -41,12 +41,11 @@ public class WithdrawTransaction extends BaseEntity {
                 TransactionStatus.PENDING, String.format(
                         "Request withdraw from %s with amount %.2f coin, conversion to %.2f VND, please wait until admin approved.",
                         user.getFullName(),
-                        Optional.ofNullable(amountRequest),
-                        Optional.ofNullable(conversionMoney)
+                        amountRequest != null ? amountRequest : BigDecimal.ZERO, // Kiểm tra null
+                        conversionMoney != null ? conversionMoney : BigDecimal.ZERO // Kiểm tra null
                 ),
                 TransactionStatus.COMPLETED, "Withdrawal request has been completed successfully.",
-                TransactionStatus.FAILED, "Withdrawal request failed due to insufficient funds or other issues."
-        );
+                TransactionStatus.FAILED, "Withdrawal request failed due to insufficient funds or other issues.");
 
         String content = contentMap.getOrDefault(status, "Unknown transaction status.");
 
@@ -57,4 +56,4 @@ public class WithdrawTransaction extends BaseEntity {
         return content;
     }
 
-   }
+}
