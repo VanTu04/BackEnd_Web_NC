@@ -142,6 +142,7 @@ public class SearchServiceImpl implements SearchService {
                 .view(story.getViews())
                 .isVisibility(story.getIsVisibility())
                 .isBanned(story.getIsBanned())
+                .coverImage(story.getCoverImage())
                 .isAvailble(IS_AVAILBLE.valueOf(story.getIsAvailable()))
                 .categories(convertCategories(story.getCategories()))
                 .build()).collect(Collectors.toList());
