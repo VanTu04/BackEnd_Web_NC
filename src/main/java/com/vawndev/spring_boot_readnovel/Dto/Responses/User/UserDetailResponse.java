@@ -1,19 +1,14 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.User;
 
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.*;
 import lombok.experimental.SuperBuilder;
 
-import java.time.LocalDateTime;
-
 @Getter
-@Data
-@AllArgsConstructor
+@Setter
 @NoArgsConstructor
+@AllArgsConstructor
 @SuperBuilder
-public class UserDetailReponse extends UserResponse{
+public class UserDetailResponse extends UserResponse {
     private String id ;
     private String fullName ;
     private String email ;
@@ -25,5 +20,4 @@ public class UserDetailReponse extends UserResponse{
 
     private boolean isActive;
     private boolean isRequest;
-
 }

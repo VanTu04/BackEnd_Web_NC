@@ -1,16 +1,4 @@
 services:
-  elasticsearch:
-    image: docker.elastic.co/elasticsearch/elasticsearch:8.11.3
-    container_name: elasticsearch
-    environment:
-      - discovery.type=single-node
-      - cluster.name=elasticsearch
-      - xpack.security.enabled=false
-    ports:
-      - "9200:9200"
-    volumes:
-      - esdata:/usr/share/elasticsearch/data
-
   app:
     build: .
     container_name: spring-boot-app

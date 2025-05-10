@@ -40,6 +40,7 @@ public class WalletTransactionServiceImpl implements WalletTransactionService {
 
     private WalletTransactionResponse toResponse(WalletTransaction e) {
         return WalletTransactionResponse.builder()
+                .id(e.getId())
                 .email(e.getUser().getEmail())
                 .fullName(e.getUser().getFullName())
                 .balance(e.getUser().getBalance())

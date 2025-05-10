@@ -6,7 +6,8 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.AdminUserDetailResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.User;
 import jakarta.validation.Valid;
@@ -14,7 +15,7 @@ import jakarta.validation.Valid;
 import java.util.List;
 
 public interface UserService {
-    PageResponse<UserDetailReponse> getAllUser(PageRequest req);
+    PageResponse<AdminUserDetailResponse> getAllUser(PageRequest req);
 
     UserResponse createUser(UserCreationRequest userRequest);
     // UserResponse getMyInfor();

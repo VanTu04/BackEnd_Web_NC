@@ -50,6 +50,9 @@ public class StoryDocument {
     private List<String> categories;
 
     @Field(type = FieldType.Text)
+    private String coverImage;
+
+    @Field(type = FieldType.Text)
     private String authorName;
 
     @Field(type = FieldType.Keyword)

@@ -8,24 +8,29 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionC
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionPlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
-import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailReponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.WithdrawResponse;
-import com.vawndev.spring_boot_readnovel.Entities.WithdrawTransaction;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
 import com.vawndev.spring_boot_readnovel.Services.*;
 import com.vawndev.spring_boot_readnovel.Utils.Help.JsonHelper;
+
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotBlank;
 import lombok.RequiredArgsConstructor;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.AdminUserDetailResponse;
+import com.vawndev.spring_boot_readnovel.Entities.Category;
+import com.vawndev.spring_boot_readnovel.Repositories.CategoryRepository;
 
 @RestController
 @RequiredArgsConstructor
@@ -36,6 +41,8 @@ public class AdminController {
     private final UserService userService;
     private final SubscriptionPlansService subscriptionPlansService;
     private final WithdrawService withdrawService;
+    private final CategoryRepository categoryRepository;
+    private final WalletTransactionService walletTransactionService;
 
     // =================== CATEGORY MANAGEMENT ===================
     @GetMapping("/category")
@@ -68,6 +75,22 @@ public class AdminController {
         return ApiResponse.<String>builder().message("Successfully!").build();
     }
 
+    @GetMapping("/category/search")
+    public ApiResponse<List<Category>> searchCategories(@RequestParam(required = false) String q) {
+        List<Category> data;
+        if (q != null && !q.isEmpty()) {
+            data = categoryRepository.findByName(q)
+                    .map(List::of)
+                    .orElseGet(List::of);
+        } else {
+            data = categoryRepository.findAll();
+        }
+        return ApiResponse.<List<Category>>builder()
+                .result(data)
+                .message("Categories retrieved successfully!")
+                .build();
+    }
+
     // =================== STORY MANAGEMENT ===================
     @GetMapping("/story")
     public ApiResponse<PageResponse<StoriesResponse>> getStory(
@@ -95,10 +118,10 @@ public class AdminController {
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
-    public ApiResponse<PageResponse<UserDetailReponse>> getUser(@ModelAttribute PageRequest req) {
+    public ApiResponse<PageResponse<AdminUserDetailResponse>> getUser(@ModelAttribute PageRequest req) {
 
-        PageResponse<UserDetailReponse> users = userService.getAllUser(req);
-        return ApiResponse.<PageResponse<UserDetailReponse>>builder().result(users).build();
+        PageResponse<AdminUserDetailResponse> users = userService.getAllUser(req);
+        return ApiResponse.<PageResponse<AdminUserDetailResponse>>builder().result(users).build();
     }
 
         @PutMapping("/user/{id}/deactivate")
@@ -164,6 +187,23 @@ public class AdminController {
         return ApiResponse.<WithdrawResponse>builder()
                 .result(response)
                 .message("Successfully!")
+                .build();
+    }
+
+    // =================== TRANSACTION MANAGEMENT ===================
+    @GetMapping("/wallet")
+    public ApiResponse<?> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        return ApiResponse.<PageResponse<WalletTransactionResponse>>builder()
+                .message("Successfully")
+                .result(walletTransactionService.getAllWalletTransactions(page, size))
+                .build();
+    }
+
+    @GetMapping("/wallet/search")
+    public ApiResponse<?> findAllById(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        return ApiResponse.<PageResponse<WalletTransactionResponse>>builder()
+                .message("Successfully")
+                .result(walletTransactionService.getWalletTransactionsByUserId(page, size))
                 .build();
     }
 

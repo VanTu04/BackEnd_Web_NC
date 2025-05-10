@@ -10,7 +10,7 @@ spring:
   jpa:
     show-sql: true
     hibernate:
-      ddl-auto: update
+      ddl-auto: none
     properties:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
@@ -34,7 +34,7 @@ spring:
         enabled: true
 
   elasticsearch:
-    uris: ${ES_URI:localhost:9200}
+    uris: ${ES_URI:14.225.205.171:9200}
 
   mail:
     host: smtp.gmail.com
@@ -49,7 +49,7 @@ spring:
             enable: true
 
 server:
-  port: 8080
+  port: 8081
 
 jwt:
   signer-key: ${SIGNER_KEY_JWT}

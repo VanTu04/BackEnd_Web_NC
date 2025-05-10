@@ -35,6 +35,7 @@ import java.util.List;
 public class SecurityConfig {
 
         private final String[] PUBLIC_ENDPOINTS = {
+<<<<<<< HEAD
                         "/users",
                         "/auth/token",
                         "/auth/introspect",
@@ -59,6 +60,32 @@ public class SecurityConfig {
                         "/users/forgot-password/reset",
                         "/users/forgot-password/validate",
                         "comment/**",
+=======
+                "/users",
+                "/auth/token",
+                "/auth/introspect",
+                "/auth/logout",
+                "/auth/refresh",
+                "/oauth2/authorization/google",
+                "/auth/google/callback",
+                "/payment/vn-pay-callback/**",
+                "auth/google",
+                "/story/author/**",
+                "/story",
+                "/homepage",
+                "/chapter/*",
+                "/chapter/*/proxy",
+                "/search/**",
+                "/category",
+                "/search",
+                "/search/elastic",
+                "/users/pre-register",
+                "/users/confirm-register",
+                "/users/forgot-password/request-otp",
+                "/users/forgot-password/reset",
+                "/users/forgot-password/validate",
+                "comment/**",
+>>>>>>> 8ee6cf3f30db3202f10dfdfd78b44522b6a90560
         };
 
         private final CustomOAuth2UserService customOAuth2UserService;
