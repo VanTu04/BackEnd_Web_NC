@@ -28,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.AdminUserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Repositories.CategoryRepository;
 
@@ -117,10 +118,10 @@ public class AdminController {
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
-    public ApiResponse<PageResponse<UserDetailResponse>> getUser(@ModelAttribute PageRequest req) {
+    public ApiResponse<PageResponse<AdminUserDetailResponse>> getUser(@ModelAttribute PageRequest req) {
 
-        PageResponse<UserDetailResponse> users = userService.getAllUser(req);
-        return ApiResponse.<PageResponse<UserDetailResponse>>builder().result(users).build();
+        PageResponse<AdminUserDetailResponse> users = userService.getAllUser(req);
+        return ApiResponse.<PageResponse<AdminUserDetailResponse>>builder().result(users).build();
     }
 
         @PutMapping("/user/{id}/deactivate")
