@@ -1,13 +1,9 @@
 package com.vawndev.spring_boot_readnovel.Dto.Responses.Payment;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.vawndev.spring_boot_readnovel.Entities.User;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionStatus;
 import com.vawndev.spring_boot_readnovel.Enum.TransactionType;
-import jakarta.persistence.Column;
-import jakarta.persistence.EnumType;
-import jakarta.persistence.Enumerated;
-import jakarta.persistence.ManyToOne;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,7 +18,7 @@ import java.math.BigDecimal;
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WalletTransactionResponse {
     private String id;
-    
+
     private String fullName;
 
     private String email;

@@ -4,7 +4,7 @@ services:
     container_name: spring-boot-app
     environment:
       SPRING_PROFILES_ACTIVE: dev
-      DBMS_CONNECTION: jdbc:postgresql://14.225.205.171:5432/Read
+      DBMS_CONNECTION: jdbc:postgresql://192.168.0.104:5432/Read
       DBMS_USERNAME: postgres
       DBMS_PASSWORD: 123456
       ID_GOOGLE: 369996143369-fut88d8pplces4bf4k3ekgmib491i7d1.apps.googleusercontent.com
