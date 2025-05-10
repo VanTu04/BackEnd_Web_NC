@@ -22,6 +22,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.User.ConfirmOtpRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserCreationRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Requests.User.UserUpdateRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.AdminUserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.User.UserResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Role;
@@ -56,26 +57,26 @@ public class UserServiceImpl implements UserService {
 
     @Override
     @PreAuthorize("hasAuthority('ADMIN')")
-    public PageResponse<UserDetailResponse> getAllUser(PageRequest req) {
+    public PageResponse<AdminUserDetailResponse> getAllUser(PageRequest req) {
         Pageable pageable = PaginationUtil.createPageable(req.getPage(), req.getLimit());
         Page<User> users = userRepository.findAll(pageable);
 
-        List<UserDetailResponse> userDetailReponseList = users.getContent().stream()
-                .map(user -> UserDetailResponse.builder()
+        List<AdminUserDetailResponse> userDetailReponseList = users.getContent().stream()
+                .map(user -> AdminUserDetailResponse.builder()
                         .id(user.getId())
                         .dateOfBirth(user.getDateOfBirth())
                         .email(user.getEmail())
                         .fullName(user.getFullName())
-                        .createdAt(TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()))
-                        .updatedAt(TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()))
+                        .createdAt(user.getCreatedAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getCreatedAt()) : null)
+                        .updatedAt(user.getUpdatedAt() != null ?  TimeZoneConvert.convertUtcToUserTimezone(user.getUpdatedAt()) : null)
                         .deleteAt(user.getDeleteAt() != null ? TimeZoneConvert.convertUtcToUserTimezone(user.getDeleteAt()) : null)
                         .isActive(user.isActive())
                         .isRequest(user.isRequest())
                         .build())
-                .sorted(Comparator.comparing(UserDetailResponse::isRequest).reversed())
+                .sorted(Comparator.comparing(AdminUserDetailResponse::isRequest).reversed())
                 .collect(Collectors.toList());
 
-        return PageResponse.<UserDetailResponse>builder()
+        return PageResponse.<AdminUserDetailResponse>builder()
                 .page(req.getPage())
                 .limit(req.getLimit())
                 .data(userDetailReponseList)

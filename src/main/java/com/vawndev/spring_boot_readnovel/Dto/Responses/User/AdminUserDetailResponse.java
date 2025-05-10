@@ -8,7 +8,7 @@ import lombok.experimental.SuperBuilder;
 @NoArgsConstructor
 @AllArgsConstructor
 @SuperBuilder
-public class UserDetailResponse extends UserResponse {
+public class AdminUserDetailResponse extends UserResponse {
     private String id ;
     private String fullName ;
     private String email ;

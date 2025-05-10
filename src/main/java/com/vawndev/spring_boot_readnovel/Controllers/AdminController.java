@@ -8,6 +8,7 @@ import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionC
 import com.vawndev.spring_boot_readnovel.Dto.Requests.Subscription.SubscriptionPlansRequest;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.ApiResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Category.CategoriesResponse;
+import com.vawndev.spring_boot_readnovel.Dto.Responses.Payment.WalletTransactionResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Story.StoriesResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.PageResponse;
 import com.vawndev.spring_boot_readnovel.Dto.Responses.Subscription.SubscriptionPlansResponse;
@@ -27,6 +28,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
+import com.vawndev.spring_boot_readnovel.Dto.Responses.User.AdminUserDetailResponse;
 import com.vawndev.spring_boot_readnovel.Entities.Category;
 import com.vawndev.spring_boot_readnovel.Repositories.CategoryRepository;
 
@@ -40,6 +42,7 @@ public class AdminController {
     private final SubscriptionPlansService subscriptionPlansService;
     private final WithdrawService withdrawService;
     private final CategoryRepository categoryRepository;
+    private final WalletTransactionService walletTransactionService;
 
     // =================== CATEGORY MANAGEMENT ===================
     @GetMapping("/category")
@@ -115,10 +118,10 @@ public class AdminController {
 
     // =================== USER MANAGEMENT ===================
     @GetMapping("/user")
-    public ApiResponse<PageResponse<UserDetailResponse>> getUser(@ModelAttribute PageRequest req) {
+    public ApiResponse<PageResponse<AdminUserDetailResponse>> getUser(@ModelAttribute PageRequest req) {
 
-        PageResponse<UserDetailResponse> users = userService.getAllUser(req);
-        return ApiResponse.<PageResponse<UserDetailResponse>>builder().result(users).build();
+        PageResponse<AdminUserDetailResponse> users = userService.getAllUser(req);
+        return ApiResponse.<PageResponse<AdminUserDetailResponse>>builder().result(users).build();
     }
 
         @PutMapping("/user/{id}/deactivate")
@@ -184,6 +187,23 @@ public class AdminController {
         return ApiResponse.<WithdrawResponse>builder()
                 .result(response)
                 .message("Successfully!")
+                .build();
+    }
+
+    // =================== TRANSACTION MANAGEMENT ===================
+    @GetMapping("/wallet")
+    public ApiResponse<?> findAll(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        return ApiResponse.<PageResponse<WalletTransactionResponse>>builder()
+                .message("Successfully")
+                .result(walletTransactionService.getAllWalletTransactions(page, size))
+                .build();
+    }
+
+    @GetMapping("/wallet/search")
+    public ApiResponse<?> findAllById(@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "5") int size) {
+        return ApiResponse.<PageResponse<WalletTransactionResponse>>builder()
+                .message("Successfully")
+                .result(walletTransactionService.getWalletTransactionsByUserId(page, size))
                 .build();
     }
 
