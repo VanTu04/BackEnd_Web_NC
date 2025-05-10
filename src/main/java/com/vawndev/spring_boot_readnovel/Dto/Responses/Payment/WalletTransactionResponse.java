@@ -21,6 +21,8 @@ import java.math.BigDecimal;
 @AllArgsConstructor
 @JsonInclude(JsonInclude.Include.NON_NULL)
 public class WalletTransactionResponse {
+    private String id;
+    
     private String fullName;
 
     private String email;
