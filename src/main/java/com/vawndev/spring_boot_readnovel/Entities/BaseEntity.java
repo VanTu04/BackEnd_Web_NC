@@ -51,5 +51,4 @@ public abstract class BaseEntity {
         this.updatedAt = Instant.now();
     }
 
-
 }

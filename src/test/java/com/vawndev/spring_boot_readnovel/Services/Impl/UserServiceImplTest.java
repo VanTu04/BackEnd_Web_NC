@@ -99,6 +99,7 @@ class UserServiceImplTest {
                     .id(user.getId())
                     .fullName(user.getFullName())
                     .dateOfBirth(user.getDateOfBirth())
+                    .balance(user.getBalance())
                     .build();
         });
 
@@ -230,7 +231,5 @@ class UserServiceImplTest {
     }
 
     private ChapterRepository chapterRepository;
-    
+
 }
-
-

@@ -37,15 +37,19 @@ import static org.mockito.Mockito.when;
 public class CommentServiceImplTest {
     private CommentServiceImpl commentService;
 
-    @Mock private UserRepository userRepository;
-    @Mock private StoryRepository storyRepository;
-    @Mock private ChapterRepository chapterRepository;
-    @Mock private CommentRepository commentRepository;
+    @Mock
+    private UserRepository userRepository;
+    @Mock
+    private StoryRepository storyRepository;
+    @Mock
+    private ChapterRepository chapterRepository;
+    @Mock
+    private CommentRepository commentRepository;
 
     @BeforeEach
     public void setup() {
         MockitoAnnotations.openMocks(this);
-        commentService = new CommentServiceImpl(commentRepository, userRepository,storyRepository, chapterRepository);
+        commentService = new CommentServiceImpl(commentRepository, userRepository, storyRepository, chapterRepository);
 
         // Mock Security Context
         Authentication authentication = mock(Authentication.class);
@@ -165,7 +169,6 @@ public class CommentServiceImplTest {
         assertEquals("StoryId or ChapterId must be a value", ex.getMessage());
     }
 
-
     @Test
     public void testAddComment_MissingStoryAndChapter_ShouldThrowException() {
         // Tạo request không có cả storyId và chapterId
@@ -187,7 +190,6 @@ public class CommentServiceImplTest {
         assertEquals("StoryId or ChapterId must be a value", ex.getMessage());
     }
 
-
     @Test
     public void testAddComment_ParentCommentNotFound_ShouldThrow() {
         CommentRequest request = CommentRequest.builder()
@@ -205,7 +207,6 @@ public class CommentServiceImplTest {
 
         assertEquals(ErrorCode.NOT_FOUND, ex.getErrorCode());
     }
-
 
     private User mockUser(String id, String name) {
         return User.builder().id(id).fullName(name).email("user@example.com").imageUrl("img.png").build();

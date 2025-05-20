@@ -25,7 +25,7 @@ public class StoryEventListener {
                 .type(story.getType())
                 .coverImage(story.getCoverImage())
                 .authorName(story.getAuthor() != null ? story.getAuthor().getFullName() : null)
-                .authorEmail(story.getAuthor() != null ? story.getAuthor().getEmail(): null)
+                .authorEmail(story.getAuthor() != null ? story.getAuthor().getEmail() : null)
                 .isAvailable(story.getIsAvailable().toString())
                 .status(story.getStatus().toString())
                 .isVisibility(story.isVisibility())

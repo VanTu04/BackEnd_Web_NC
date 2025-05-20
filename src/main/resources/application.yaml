@@ -34,7 +34,7 @@ spring:
         enabled: true
 
   elasticsearch:
-    uris: ${ES_URI:14.225.205.171:9200}
+    uris: ${ES_URI:localhost:9200}
 
   mail:
     host: smtp.gmail.com
