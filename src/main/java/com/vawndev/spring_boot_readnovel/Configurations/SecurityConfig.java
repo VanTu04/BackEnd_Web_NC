@@ -43,7 +43,7 @@ public class SecurityConfig {
                         "/oauth2/authorization/google",
                         "/auth/google/callback",
                         "/payment/vn-pay-callback/**",
-                        "auth/google",
+                        "/auth/google",
                         "/story/author/**",
                         "/story",
                         "/homepage",
